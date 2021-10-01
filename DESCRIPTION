@@ -8,7 +8,7 @@ Authors@R: c(person("David", "Champredon",
 		role = c("aut", "cre"),
 		email = "david.champredon@canada.ca"),
               person("Shokoofeh", "Nourbakhsh", 
-		role = c("aut", "cre"),
+		role =  "aut",
 		email = "shokoofeh.nourbakhsh@canada.ca"))
 RoxygenNote: 7.1.1
 Depends: tidyr, dplyr, stringr, lubridate, ggplot2, deSolve, patchwork, snowfall
