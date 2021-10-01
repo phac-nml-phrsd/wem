@@ -1,0 +1,274 @@
+---
+title: "Short-tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Short-tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r eval=FALSE, include=FALSE}
+# need to execute: devtools::build_vignettes()
+# Help on creating vignettes:
+# https://r-pkgs.org/vignettes.html
+```
+
+## Introduction
+
+The package `wem` stands for "Wastewater Epidemic Model". 
+It implements an epidemic model that can include pathogen concentration in wastewater as a source of data in addition to the more traditional case incidence and hospitalization data.  
+
+The epidemic model that represents pathogen transmission in the population is a deterministic SEIR-type compartmental model. 
+
+A simple advection-dispersion-decay model is used to simulate the fate of SARS-CoV-2
+along its journey in wastewater from the shedding points to the sampling site. 
+This model is a combination of an exponential viral decay and a dispersed plug-flow function representing all possible hydrodynamic processes (e.g., dilution, sedimentation and
+resuspension) that leads to RNA degradation as well as decrease and delay of signal at the time of sampling.
+
+For more details on the model, see [Nourbakhsh et al. (medRxiv 2021)](https://www.medrxiv.org/content/10.1101/2021.07.19.21260773v1).
+
+
+## A simple example
+
+This section provides a simple example of how key functions from the `wem` package can be used for real-life applications.
+
+
+### Simulating an epidemic
+
+The wastewater-epidemic model has many parameters and user will typically define them in a CSV file for convenience. See `?wem::load_prm()` for loading parameters from a csv file.  
+
+Here, we'll use a built-in function `model_prm_example()` that provides an example (inspired by SARS-CoV-2 epidemic parameters) of values for all the model parameters. 
+
+Once the model parameters are defined, the model can simulate epidemic trajectories (i.e., time series of  reported cases and pathogen concentration in wastewater).
+
+First, let's load all model parameters in a variable:
+
+```{r load parameters, message=FALSE, warning=FALSE}
+library(wem)
+
+# Load a pre-defined model parameters as an example:
+prm.model = model_prm_example()
+```
+
+Among all parameters defined here, we have (for example):
+``` {r show some parameters}
+# the basic reproduction number R0:
+print(prm.model$R0)
+
+# the time horizon of the simulation
+print(prm.model$horizon)
+
+# the time decay of the pathogen in the wastewater
+print(prm.model$decay.rate)
+```
+
+Given that there are many model parameters, it may be helpful to display them all in a synthetic "dashboard-like" way:
+```{r dashboard parameters, fig.height=5, fig.width=7}
+g.dash = plot_dashboard_prm(prm = prm.model, textsize = 7)
+plot(g.dash)
+```
+
+
+
+Now that all model parameters are defined, we can simulate an epidemic:
+```{r simulate}
+sim = simul(prm = prm.model)
+```
+
+The object returned by `simul()` is a list and the element named `ts` is a dataframe that records the time series of epidemiological variables, including prevalence of infection and pathogen concentration in wastewater.
+
+We can visualize the time series of selected epidemiological variables (susceptible population size `S`, incidence `inc`, hospital admissions `hosp.admission`, vaccinated individuals `V`, reported clinical cases `report`, viral concentration in wastewater `concen`) using the function `plot_epidemic()`:
+
+```{r plot all, fig.width=6}
+g.all = plot_epidemic(df = sim$ts)
+plot(g.all)
+```
+
+All the model variables can be plotted with the function `wem::plot_all()`. 
+
+Simulations of epidemics with known parameters are often used in theoretical studies or explorations ("what-if" scenarios).
+
+### Fitting to observed data
+
+
+#### Loading data 
+
+Another typical use of epidemic models is to fit them (i.e., their parameters) to observed data. 
+The package `wem` comes with example data sets of COVID reported cases and COVID-associated hospital admissions as well as SARS-CoV-2 concentration in wastewater. 
+
+Let's load those data sets to use them in the fitting example that follows:
+
+```{r load data from package}
+data(cases, package = 'wem')
+data(hosp, package = 'wem')
+data(wwviralconc, package = 'wem')
+```
+
+Now we use the datasets to build a data object properly formatted that will be read by the model
+
+```{r build data object}
+
+dat = build_data(cases     = cases, 
+                 hosp      = hosp, 
+                 ww        = wwviralconc, 
+                 hosp.type = 'hosp.adm')
+```
+
+The data object is simply a list storing all data in a single dataframe, either in the wide or long format, as well as other information (like the type of hospital data, if provided). The different data sources have been merged together, taking into account that they may not have the same time points (in that case, missing data for a given date is filled with `NA`)
+
+```{r show data}
+knitr::kable(head(dat$obs, n = 10))
+```
+
+Let's visualize the observed data (we use the "long" format object `obs.long`, as it it more convenient with `ggplot2`):
+
+```{r plot data, fig.width=7}
+g.data = dat$obs.long %>% 
+  ggplot(aes(x=date, y = value)) + 
+  geom_line()+facet_wrap(~name, nrow = 1, scales = 'free_y')
+plot(g.data)
+```
+
+
+#### Fitting with ABC
+
+Now that the observations are loaded, we are ready to fit the model. 
+The fitting algorithm is an "Approximate Bayesian Computation" (ABC). See, for example this [Wikipedia page](https://en.wikipedia.org/wiki/Approximate_Bayesian_computation) for more details. 
+We need to define the parameters for this algorithm and, being a Bayesian approach, define the prior distributions of the model parameters we want to fit.
+
+To have a short computation time, we use a low number of iterations. In practice, the number of iterations should be much larger. We are going to equally weight all three data sources. The weights can be any positive number and are used for the penalty calculation within the ABC algorithm. If the levels and number of data points are approximately of the same order, then equal weight really means all data sources will contribute equally in the fitting process. But if, say, one data source has fewer data points, then this is no longer the case. There is no general rule to set the weights, and users may want to explore different alternatives before a final analysis.
+
+```{r ABC parameters}
+prm.abc = define_abc_prms(iter        = 5e2,
+                          accept      = 3e-2,
+                          case.weight = 1.0,
+                          ww.weight   = 1.0,
+                          hosp.weight = 1.0)
+```
+
+Now, we define the priors for the model parameters to fit. 
+To do so, a dataframe must be created with a specific format, where a 
+column `name`  defines the name of the model parameter, 
+a column `distrib` specifies the prior distribution for that parameter (we use the same nomenclature as R, i.e., `rnorm` for a normal distribution, `rexp` for exponential, etc.) and 
+a column `prms` for the parameter associated with the prior distribution 
+(here again, we use the standard R nomenclature and order where `1;2` specifies `mean=1` and `sd=2` if the prior distribution was defined as `rnorm` ). Note that if more than one parameter is needed to define the prior distribution (for example `mean` and `sd` for `rnorm`), they are separated by a semi-colon.
+
+```{r define priors}
+priors = data.frame(
+  name = c('R0', 'transm.v_2', 'ww.scale'),
+  distrib = c('rnorm', 'runif',  'rnorm'),
+  prms = c('3;0.2', '0.1;0.4', '0.0002;0.0001')
+)
+knitr::kable(priors)
+```
+
+In the example above, the model parameter `R0` has a normal distribution with mean 3 and standard deviation 0.2 as a prior. 
+
+Defining the dataframe of prior distributions this way is tedious if there are multiple model parameters to fit, hence the user can call a function that reads the prior definitions directly from a CSV file: `define_fit_priors(path='priordef.csv')` (see its inlne documentation).
+
+We are now ready to fit the model to the data. Note that this step may require a significant computing power for some real-life applications (this example is simple enough that the computing time should be of the order of 1 minute). 
+
+```{r run fit, message=FALSE, warning=FALSE, cache=FALSE}
+
+fitobj = fit(data      = dat,
+             prm.abc   = prm.abc,
+             prm       = prm.model,
+             df.priors = priors,
+             n.cores   = 8, 
+             last.date = NULL)
+```
+
+The fit object can then be used to assess the quality of the fit. 
+The function `plot_fit_result()` plots simulated epidemics with parameters drawn from the posterior distributions and compare them with the data used to fit the model (a good fit should have the simulated epidemics close to the data):
+
+```{r show fit, message=FALSE, warning=FALSE, fig.width=6}
+g = plot_fit_result(fitobj = fitobj,ci = 0.95)
+plot(g$fitted.observation)
+```
+
+The figure above shows a relatively good fit (lines) compared to the observed data (points). Note that, for the sake of simplicity in this example, we used a simulated epidemic and only blinded three parameters to fit, which made the fitting task particularly fast and easy compared to real-world applications. 
+
+It is also possible to visualize the posterior distribution of the parameters fitted:
+```{r plot posterior, fig.width=6}
+plot(g$posterior.dist)
+```
+
+The prior distribution is shown with the light-grey histogram, the posterior with the red histogram. 
+
+For more details on the fitting process, the contributions to the ABC penalty from the posterior samples can also be visualized (typically used for fine-tuning the weight of each data source): 
+```{r plot ABC error, fig.width=7, warning=FALSE}
+plot(g$error)
+```
+
+#### Estimating the effective reproduction number ($R_t$)
+
+The fitting process shown in this simple example involves estimating the basic reproduction number $R_0$ and the transmission rate $v_2$ relative to its initial value after 55 days (see the model parameters where $b_2=55$).
+Those parameters, $R_0$ and the time-dependent transmission rate, are typically not known and hence estimated by fitting the model to data. Once they are estimated, it is possible to infer the effective reproduction number, usually noted $R_t$. The $R_t$ estimate is based on the posterior distribution of the fitted parameters associated with the transmission process.
+
+```{r Rt estimate, warning=FALSE, message=FALSE}
+Rt = estimate_Rt(fitobj=fitobj, ci=0.95, n.cores=4)
+
+# the object `Rt` is a dataframe, the function
+# `plot_Rt()` plots its mean and CI estimates:
+g.Rt = plot_Rt(Rdata = Rt,
+               min.date = '2021-01-01',
+               max.date = '2021-06-01')
+plot(g.Rt)
+```
+
+The figure above shows the mean estimate for $R_t$ (solid line) and its 95% credible interval (shaded area). In particular its initial value is 3.0, which is the mean posterior estimate for the basic reproduction number $R_0$. The horizontal dashed line indicates the threshold value 1.0.    
+
+#### Forecasting
+
+Once the model is fitted to data, we can easily forecast, or project, the future trajectory of the epidemic by simulating forward in time, beyond today, until the forecasting horizon. 
+
+Note that if the model has been fitted on wastewater data (in addition to traditional clinical reports), the forecasts/projections will be informed by the wastewater signal (unlike traditional epidemic models that rely exclusively on clinical surveillance data).
+
+First, let's pretend we have the data only to an earlier date and re-fit the model: 
+
+```{r fit for forecast, warning=FALSE, message=FALSE}
+# Create a data object censoring 
+# data beyond the `asof` date:
+asof = ymd('2021-03-01')
+dat2 = dat
+dat2$obs = filter(dat$obs, date < asof)
+
+# Fit on the censored data
+fitobj2 = fit(data     = dat2,
+              prm.abc   = prm.abc,
+              prm       = prm.model,
+              df.priors = priors,
+              n.cores   = 8, 
+              last.date = NULL)
+```
+
+The function `fcst()` simulates epidemic trajectories using the posterior distribution of the fitted model parameters at a time horizon beyond the last observation (typically "today"). 
+
+```{r, fig.width=7, warning=FALSE, message=FALSE}
+ff = fcst(fitobj = fitobj2, horizon.fcst = 60, dat = dat2)
+gf = plot_fcst(var = 'report', 
+               fcst.obj = ff, 
+               dat = dat2)
+
+# plot differently the "future" observations 
+# to assess the quality of the forecast:
+plot(gf + geom_point(data = filter(dat$obs, date > asof),
+                     aes(y=clin.obs), 
+                     color='red3', shape=4))
+```
+
+The figure above shows how the forecast (solid blue line and ribbon) compares with data after the forecast "as of date" (red cross). It also shows how the fit performed (dashed blue line) against the observed past data (black point).
+
+**End of the tutorial**
+
+
+
+
+

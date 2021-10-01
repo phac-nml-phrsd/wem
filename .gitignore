@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+inst/doc
+doc
+Meta
+
+# --- Vignettes 
+
+vignettes/*.RData
+vignettes/*cache/html/*.RData
+vignettes/*cache/html/*.rbd
+vignettes/*cache/html/*.rdx

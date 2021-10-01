@@ -1,0 +1,19 @@
+Package: wem
+Type: Package
+Title: Wastewater Epidemic Model
+Description: Epidemic model that includes both pathogen transmission at the population level and pathogen concentration in wastewater caused by fecal and urinary pathogen shedding.
+Version: 0.1.1
+License: MIT
+Authors@R: c(person("David", "Champredon", 
+		role = c("aut", "cre"),
+		email = "david.champredon@canada.ca"),
+              person("Shokoofeh", "Nourbakhsh", 
+		role = c("aut", "cre"),
+		email = "shokoofeh.nourbakhsh@canada.ca")
+RoxygenNote: 7.1.1
+Depends: tidyr, dplyr, stringr, lubridate, ggplot2, deSolve, patchwork, snowfall
+Imports: magrittr, snowfall
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
