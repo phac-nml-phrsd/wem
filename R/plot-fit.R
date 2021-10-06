@@ -192,6 +192,7 @@ plot_fit_abc_vs_obs <- function(prm,
     # Add dates
     df.post$date = ymd(min(obs.long$date) + df.post$time)
     
+    if(!is.null(hosp.var)){
     #---- Summary stats of posterior simulations:
     # Determine hospital type (new admissions or occupancy)
     if(hosp.var=='hosp.adm'){
@@ -202,7 +203,7 @@ plot_fit_abc_vs_obs <- function(prm,
         df.post = df.post %>%
             mutate(hospital = Hall)
     }
-    
+    }
     df.ss = df.post %>%
         group_by(date) %>%
         summarize(report.m = mean(report), 
