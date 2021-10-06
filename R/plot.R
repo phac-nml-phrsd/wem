@@ -308,8 +308,8 @@ plot_simobs_beta <- function(data,
   # Plot transmission rate (beta) 
   d0 = min(obs$date)
   g.beta.init = plot_multvec(prm, 
-                             xname = 'b',
-                             yname = 'v',
+                             xname = 'transm.t',
+                             yname = 'transm.v',
                              d0=d0)
   
   
@@ -319,7 +319,7 @@ plot_simobs_beta <- function(data,
   
   # plot single simulation with initial prms
   g.init = plot_obs_simulation(df.init, obs.long, 
-                               dates.break = prm$b,
+                               dates.break = prm$transm.t,
                                hosp.var  = hosp.var,
                                include.cases = include.cases,
                                include.ww    = include.ww,
@@ -363,8 +363,10 @@ plot_obs_simulation <- function(df.init,
   simplot = df.long %>%
     filter(name %in% c('report','WWreport'))
   
+  if(!is.null(hosp.var)){
   if(hosp.var == 'hosp.adm') simplot = filter(df.long,name %in% c('report','WWreport','hosp.admission'))
   if(hosp.var == 'hosp.occ') simplot = filter(df.long,name %in% c('report','WWreport','Hall')) 
+  }
   
   if(!include.cases){
     simplot = filter(simplot, !grepl('^report',name))
@@ -424,8 +426,8 @@ plot_obs_simulation <- function(df.init,
 plot_multvec <- function(prm, xname, yname, d0, xmax = NULL) {
   # DEBUG
   if(0){
-    xname = 'b'
-    yname = 'v'
+    xname = 'transm.t'
+    yname = 'transm.v'
   }
   
   dfplot = data.frame(
