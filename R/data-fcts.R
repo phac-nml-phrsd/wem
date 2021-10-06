@@ -41,7 +41,9 @@ build_data <- function(cases, hosp, ww, hosp.type){
     
     # Make sure dates are in the `Date` format
     cases$date = as.Date(cases$date)
+    if(!is.null(hosp)){
     hosp$date  = as.Date(hosp$date)
+    }
     ww$date    = as.Date(ww$date)
     
     # "origin" date to calculate simulation time:
