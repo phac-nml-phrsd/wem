@@ -203,7 +203,6 @@ plot_fit_abc_vs_obs <- function(prm,
         df.post = df.post %>%
             mutate(hospital = Hall)
     }
-    }
     df.ss = df.post %>%
         group_by(date) %>%
         summarize(report.m = mean(report), 
@@ -216,6 +215,19 @@ plot_fit_abc_vs_obs <- function(prm,
                   hosp.qhi = quantile(hospital, probs = 0.5 + ci/2),
                   hosp.qlo = quantile(hospital, probs = 0.5 - ci/2),
                   .groups = 'keep')
+    }
+    
+    if(is.null(hosp.var)){
+        df.ss = df.post %>%
+            group_by(date) %>%
+            summarize(report.m = mean(report), 
+                      report.qhi = quantile(report, probs = 0.5 + ci/2),
+                      report.qlo = quantile(report, probs = 0.5 - ci/2),
+                      ww.m = mean(WWreport), 
+                      ww.qhi = quantile(WWreport, probs = 0.5 + ci/2),
+                      ww.qlo = quantile(WWreport, probs = 0.5 - ci/2),
+                      .groups = 'keep')
+    }
     
     df.ss.long = df.ss %>% 
         pivot_longer(cols = -date) %>%
