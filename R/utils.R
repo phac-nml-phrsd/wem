@@ -178,6 +178,15 @@ overwrite_vectors <- function(prm, verbose = FALSE) {
             tmp = unlist(str_split(a[i],'_'))
             prm.name = tmp[1]
             prm.pos  = as.integer(tmp[2])
+            
+            # Check names are consistent
+            if(!prm.name %in% names(prm2)){
+              msg = paste0('ERROR: User defined the prior parameter name `',prm.name,
+                           '` but it is not found in the parameters defining the model')
+              stop(msg)
+            }
+            
+            # Replacing value
             prm2[[prm.name]][prm.pos] <- prm[[ii]]        
         }
     }
