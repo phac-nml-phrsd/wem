@@ -185,6 +185,10 @@ fit_abc_unit <- function(i,
     # Update parameter values and simulate:
     np = ncol(lhs)
     
+    # Check that the name of scalar parameter exist:
+    check_prior_name_scalar(lhs, prm)
+    
+    # Add vector elements and replace scalar elements:
     for(k in 1:np){
         prm[[ names(lhs)[k] ]] = lhs[i,k]
     }

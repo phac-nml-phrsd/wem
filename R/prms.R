@@ -11,6 +11,34 @@ prm_scalar_vec <- function(x) {
     return(res)
 }
 
+
+
+#' @title Check if prior's name exist
+#' @description Checks if the name of all prior parameters are consistent 
+#' with the model parameters already defined. 
+#' The model parameters and the priors parameters are separately defined by the user,
+#' hencethis function checks for typos and inconsistent naming.
+#'
+#' @param lhs Dataframe of prior samples.
+#' @param prm List of model parameters.
+#'
+#' @return Stop the program if at least one inconsistency in the prior parameter names is found.
+#'
+check_prior_name_scalar <- function(lhs, prm) {
+    idx.prm.scalar = which(!grepl('\\w+_\\d+', names(prm)))
+    idx.lhs.scalar = which(!grepl('\\w+_\\d+', names(lhs)))
+    chk.scalar.names = names(lhs)[idx.lhs.scalar] %in% names(prm)[idx.prm.scalar]
+    if(!all(chk.scalar.names)) {
+        ii = idx.lhs.scalar[!chk.scalar.names]
+        msg = paste0('ERROR: the name of the prior parameter `',
+                     names(lhs)[ii],
+                     '` is not found in model parameters.')
+        msg
+        stop(msg)
+    }   
+}
+
+
 #' Read parameters from a dataframe and convert into a list
 read_prm_list <- function(p) {
     x = list()
