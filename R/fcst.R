@@ -22,7 +22,7 @@ fcst <- function(fitobj,
     prm$horizon <- h + horizon.fcst
     
     ss = wem::simul_from_post(post.abc = fitobj$post.abc, 
-                              prm      = fitobj$prm, 
+                              prm      = prm, 
                               ci       = ci, 
                               n.cores  = n.cores)
     
