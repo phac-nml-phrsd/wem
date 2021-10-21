@@ -348,6 +348,12 @@ fit <- function(data,
     obs.long   = data[['obs.long']]
     hosp.var   = data[['hosp.var']]
     
+    
+    if(!is.null(last.date)){
+        obs = filter(obs, date <= last.date)
+        obs.long = filter(obs.long, date <= last.date)
+    }
+
     # --- Draw priors
     samp.priors = sample_priors(df.priors,prm.abc)
     
