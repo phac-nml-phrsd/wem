@@ -305,12 +305,20 @@ plot_simobs_beta <- function(data,
   obs.long = data[['obs.long']]
   hosp.var = data[['hosp.var']]
   
+  
+  # time range
+  xrng = range(prm[['transm.t']], obs.long$time)
+  xaxis = scale_x_continuous(limits = xrng)
+  
   # Plot transmission rate (beta) 
   d0 = min(obs$date)
   g.beta.init = plot_multvec(prm, 
                              xname = 'transm.t',
                              yname = 'transm.v',
-                             d0=d0)
+                             d0=d0) + 
+    xaxis + 
+    xlab('time') + 
+    theme(panel.grid.minor.y = element_blank())
   
   
   # -- Single inital simulation 
@@ -324,10 +332,12 @@ plot_simobs_beta <- function(data,
                                include.cases = include.cases,
                                include.ww    = include.ww,
                                include.hp    = include.hosp,
-                               logscale      = log.scale)
+                               logscale      = log.scale) + 
+    xaxis + 
+    xlab('') + 
+    theme(plot.margin = margin(b=0))
   
   return(g.init / g.beta.init)
-  
 }
 
 
