@@ -4,7 +4,7 @@
 \alias{fcst}
 \title{Forecast from a fit object.}
 \usage{
-fcst(fitobj, horizon.fcst, dat = NULL, ci = 0.95, n.cores = 1)
+fcst(fitobj, horizon.fcst, dat, ci = 0.95, n.cores = 1)
 }
 \arguments{
 \item{fitobj}{}

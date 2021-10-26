@@ -350,8 +350,11 @@ fit <- function(data,
     
     
     if(!is.null(last.date)){
-        obs = filter(obs, date <= last.date)
+        obs      = filter(obs, date <= last.date)
         obs.long = filter(obs.long, date <= last.date)
+    }
+    if(is.null(last.date)){
+        last.date = max(obs$date)
     }
 
     # --- Draw priors
