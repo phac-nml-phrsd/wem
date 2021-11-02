@@ -125,8 +125,8 @@ model_prm_example <- function() {
         vacc.eff.infection = 0.9, # vaccine effectiveness against infection given exposure 
         vacc.eff.symptomatic = 0.95, # vaccine effectiveness against symptomatic disease given exposure
         vacc.eff.hospitalization = 0.97, # vaccine effectiveness against hospitalization given exposure
-        vacc.eff.t = '30 ; 40', # break times for change in vacc. effectiveness values
-        vacc.eff.inf.v = NULL, # break values for change in vacc. effectiveness in infection given exposure 
+        vacc.eff.t      = NULL, # break times for change in vacc. effectiveness values
+        vacc.eff.inf.v  = NULL, # break values for change in vacc. effectiveness in infection given exposure 
         vacc.eff.symp.v = NULL, # break values for change in vacc. effectiveness in symptomatic given exposure 
         vacc.eff.hosp.v = NULL, # break values for change in vacc. effectiveness in hospitalization given exposure 
         dur.build.immun = 40, # days take to build immunity after receiving two-dose vaccine 
@@ -171,12 +171,12 @@ model_prm_example <- function() {
     q = data.frame(name = rep(NA,n), value = rep(NA,n))
     
     for(i in 1:n){ 
-        q[i,1] = names(x)[i]
+        q$name[i] = names(x)[i]
         if(is.null(x[[i]])){
-            q[i,2] = 'NULL'
+            q$value[i] = 'NULL'
         }
         else{
-            q[i,2] = x[[i]]
+            q$value[i] = x[[i]]
         }
     }
     

@@ -84,7 +84,6 @@ seir <- function(t, x, parms)
             rt = broken_line(x=t, b=vacc.rate.t, v=vacc.rate.v)
         }
             
-        
         # calculate incidence
         infrate  = beta_t * S * (rel.inf.a  *sum.A + sum.I + sum.IH) / popSize
         
@@ -132,7 +131,7 @@ seir <- function(t, x, parms)
             alpha.t    = min(1.0, mult.alpha * alpha)
         }
         
-        if(hosp.rate.vacc.v == 'NULL'){
+        if(is.null(hosp.rate.vacc.v)){
             h.vac_t = h.vac
         }else{
             # Vaccinated Time-dependent hospital rate
@@ -141,7 +140,7 @@ seir <- function(t, x, parms)
                                   v = hosp.rate.vacc.v)
         }
         
-        if(asymp.prop.vacc.v == 'NULL'){
+        if(is.null(asymp.prop.vacc.v)){
             alpha.vac.t    =  alpha.vac
         }else{
             # Vaccinated Time dependent asymptomatic proportion
