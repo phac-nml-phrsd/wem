@@ -179,7 +179,7 @@ simul <- function(prm){
     hosp.rate.v      <- prm[["hosp.rate.v"]]
     asymp.prop.t     <- prm[["asymp.prop.t"]]
     asymp.prop.v     <- prm[["asymp.prop.v"]]
-    eff.t            <- prm[["vacc.eff.time"]]
+    eff.t            <- prm[["vacc.eff.t"]]
     eff.inf.v        <- prm[["vacc.eff.inf.v"]]
     eff.symp.v       <- prm[["vacc.eff.symp.v"]]
     eff.hosp.v       <- prm[["vacc.eff.hosp.v"]]
@@ -216,6 +216,8 @@ simul <- function(prm){
     r <- vac.rate         
     d <- 1 / dur.build.immun 
     # constant vacc. variables
+    # even in case of using time-dependent h.vac and alpha.vac, 
+    # we still use const. alpha.vac and h.vac for R0 and beta 
     eff.symp.inf  = 1- (1-eff.symp)/(1-eff.inf)
     eff.hosp.symp = 1- (1-eff.hosp)/(1-eff.symp)
     alpha.vac     <- eff.symp.inf
