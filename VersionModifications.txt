@@ -1,0 +1,20 @@
+Main Modifications in v0.1.2
+
+Old inout parameters
+1- `hospital.prop.vac' 
+2- `hosp.rate.vacc.t'
+3- `hosp.rate.vacc.v`
+4- `asymp.prop.vacc' 
+5- `asymp.prop.vacc.t`
+6- `asymp.prop.vacc.v`
+
+replaced with new input parameters 
+1- `vacc.eff.infection`
+2- `vacc.eff.symptomatic`
+3- `vacc.eff.hospitalization`
+4- `vacc.eff.t`
+5- `vacc.eff.inf.v`
+6- `vacc.eff.symp.v`
+7- `vacc.eff.hosp.v`
+
+in function `model_prm_example()`.

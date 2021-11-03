@@ -120,8 +120,8 @@ model_prm_example <- function() {
         hosp.length.mean = 11,  # Length of hospital stay for AB (obtained from DAD by Health Canada)
         dur.immunity = 365, # duration of full immunity in days
         vacc.rate = 0.00001, # proportional rate of individuals get vaccinated every day (number/population)
-        vacc.rate.t = 1,  # break times for the time-dependent vaccination rate
-        vacc.rate.v = 0.5,   # break values for the time-dependent vaccination rate (number/population)
+        vacc.rate.t = NULL,  # break times for the time-dependent vaccination rate
+        vacc.rate.v = NULL,   # break values for the time-dependent vaccination rate (number/population)
         vacc.eff.infection = 0.9, # vaccine effectiveness against infection given exposure 
         vacc.eff.symptomatic = 0.95, # vaccine effectiveness against symptomatic disease given exposure
         vacc.eff.hospitalization = 0.97, # vaccine effectiveness against hospitalization given exposure
@@ -138,9 +138,9 @@ model_prm_example <- function() {
         asymp.prop = 0.316,    # asymptomatic proportion
         death.prop = 0.19,  # proportion of death from hospitalized (CIHI report https://www.cihi.ca/en/covid-19-hospitalization-and-emergency-department-statistics)
         hospital.prop = 0.02,  #proportion of hospitalized cases from symptomatic cases
-        hosp.rate.t = '30; 40',    # break times for change in hospitalization rate 
+        hosp.rate.t = NULL,    # break times for change in hospitalization rate 
         hosp.rate.v = NULL,  # break values for change in hospitalization rate (multiplier for hospital.prop)
-        asymp.prop.t = '30; 40',  # break times for change in asymptomatic proportion 
+        asymp.prop.t = NULL,  # break times for change in asymptomatic proportion 
         asymp.prop.v = NULL,  # break values for change in asymptomatic proportion (multiplier for asymp.prop)
         rel.inf.asymp = 0.8,  # relative infectiousness of asymptomatic compared to symptomatic states
         inf.A = '3;6;5;4;3;2' ,  # relative infectiousness during infectious period for asymptomatic infections (proportional to logVL)
