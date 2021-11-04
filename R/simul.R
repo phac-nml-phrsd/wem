@@ -243,7 +243,7 @@ simul <- function(prm){
     is.time.dep.vacc.eff = length(eff.t)>1
     
     if(!is.time.dep.vacc.eff){
-      message('Vacine effectiveness parameters are constant.')
+      #message('Vacine effectiveness parameters are constant.')
       
       eff.symp.inf  = 1 - (1-eff.symp)/(1-eff.inf)
       eff.hosp.symp = 1 - (1-eff.hosp)/(1-eff.symp)

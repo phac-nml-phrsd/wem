@@ -16,21 +16,27 @@ seir <- function(t, x, parms)
         {
         
         # define compartment parameters in vector x
+          
+          n_E_Ev_I = nEv+nE+nI
+          n_E_IH   = n_E_Ev_I+nIH
+          n_E_A    = n_E_IH+nA
+          n_E_Z    = n_E_A+nH+nZ
+          
         S  = x[1]
         Vw = x[2]
         V  = x[3]
         E  = x[4:(nE+3)]
         Ev = x[(nE+4):(nEv+nE+3)]
-        I  = x[(nEv+nE+4):(nEv+nE+nI+3)]
-        IH = x[(nEv+nE+nI+4):(nEv+nE+nI+nIH+3)]
-        A  = x[(nEv+nE+nI+nIH+4):(nEv+nE+nI+nIH+nA+3)]
-        H  = x[(nEv+nE+nI+nIH+nA+4):(nEv+nE+nI+nIH+nA+nH+3)]
-        Z  = x[(nEv+nE+nI+nIH+nA+nH+4):(nEv+nE+nI+nIH+nA+nH+nZ+3)]
-        R  = x[(nEv+nE+nI+nIH+nA+nH+nZ+4)] 
-        D  = x[(nEv+nE+nI+nIH+nA+nH+nZ+5)]
-        cuminc     = x[(nEv+nE+nI+nIH+nA+nH+nZ+6)]
-        cumincsymp = x[(nEv+nE+nI+nIH+nA+nH+nZ+7)]
-        cumHospAdm = x[(nEv+nE+nI+nIH+nA+nH+nZ+8)]
+        I  = x[(nEv+nE+4):(n_E_Ev_I+3)]
+        IH = x[(n_E_Ev_I+4):(n_E_IH+3)]
+        A  = x[(n_E_IH+4):(n_E_A+3)]
+        H  = x[(n_E_A+4):(n_E_A+nH+3)]
+        Z  = x[(n_E_A+nH+4):(n_E_Z+3)]
+        R  = x[n_E_Z+4] 
+        D  = x[n_E_Z+5]
+        cuminc     = x[n_E_Z+6]
+        cumincsymp = x[n_E_Z+7]
+        cumHospAdm = x[n_E_Z+8]
         
         # Run a few checks to catch obvious user entry errors
         docheck = TRUE
@@ -69,15 +75,16 @@ seir <- function(t, x, parms)
         sum.I  = sum(inf.I.norm * I)
         sum.IH = sum(inf.I.norm[1:nIH] * IH)
         
-        if(transm.v == 'NULL'){
+        if(!is.numeric(transm.v)){
             beta_t = beta
-        }else{
+        } 
+        else{
             # Apply time-dependent transmission rate
             mult   = broken_line(x=t, b = transm.t, v = transm.v)
             beta_t = beta * mult
         }
         
-        if(vacc.rate.v == 'NULL'){
+        if(!is.numeric(vacc.rate.v)){
             rt = r 
         }else{
             # Apply time-dependent vaccine rate
@@ -113,7 +120,7 @@ seir <- function(t, x, parms)
             dEv[1] = dEv[1] + vac.infrate
         }
         
-        if(hosp.rate.v == 'NULL'){
+        if(!is.numeric(hosp.rate.v)){
             h_t = h
         }else{
             # Time-dependent hospital rate
@@ -121,7 +128,7 @@ seir <- function(t, x, parms)
             h_t = h * mmult
         }
         
-        if(asymp.prop.v == 'NULL'){
+        if(!is.numeric(asymp.prop.v)){
             alpha.t = alpha 
         }else{
             # Time dependent asymptomatic proportion
