@@ -69,14 +69,21 @@ seir <- function(t, x, parms)
         sum.I  = sum(inf.I.norm * I)
         sum.IH = sum(inf.I.norm[1:nIH] * IH)
         
-        # Apply time-dependent transmission rate
-        mult   = broken_line(x=t, b = transm.t, v = transm.v)
-        beta_t = beta * mult
+        if(transm.v == 'NULL'){
+            beta_t = beta
+        }else{
+            # Apply time-dependent transmission rate
+            mult   = broken_line(x=t, b = transm.t, v = transm.v)
+            beta_t = beta * mult
+        }
         
-        # Apply time-dependent vaccine rate
-        mult.rt   = broken_line(x=t, b=vacc.rate.t, v=vacc.rate.v)
-        rt = r * mult.rt
-        
+        if(vacc.rate.v == 'NULL'){
+            rt = r 
+        }else{
+            # Apply time-dependent vaccine rate
+            rt = broken_line(x=t, b=vacc.rate.t, v=vacc.rate.v)
+        }
+            
         # calculate incidence
         infrate  = beta_t * S * (rel.inf.a  *sum.A + sum.I + sum.IH) / popSize
         
@@ -106,27 +113,41 @@ seir <- function(t, x, parms)
             dEv[1] = dEv[1] + vac.infrate
         }
         
-        # Time-dependent hospital rate
-        mmult = step_line(x=t, b = hosp.rate.t, v = hosp.rate.v)
-        h_t = h * mmult
+        if(hosp.rate.v == 'NULL'){
+            h_t = h
+        }else{
+            # Time-dependent hospital rate
+            mmult = step_line(x=t, b = hosp.rate.t, v = hosp.rate.v)
+            h_t = h * mmult
+        }
         
-        # Vaccinated Time-dependent hospital rate
-        mmult.vac = step_line(x = t, 
-                              b = hosp.rate.vacc.t, 
-                              v = hosp.rate.vacc.v)
-        h.vac_t = h.vac * mmult.vac
+        if(asymp.prop.v == 'NULL'){
+            alpha.t = alpha 
+        }else{
+            # Time dependent asymptomatic proportion
+            mult.alpha = broken_line(x=t, 
+                                     b = asymp.prop.t, 
+                                     v = asymp.prop.v)
+            alpha.t    = min(1.0, mult.alpha * alpha)
+        }
         
-        # Time dependent asymptomatic proportion
-        mult.alpha = broken_line(x=t, 
-                                 b = asymp.prop.t, 
-                                 v = asymp.prop.v)
-        alpha.t    = min(1.0, mult.alpha * alpha)
+        if(is.null(hosp.rate.vacc.v)){
+            h.vac_t = h.vac
+        }else{
+            # Vaccinated Time-dependent hospital rate
+            h.vac_t = broken_line(x = t, 
+                                  b = hosp.rate.vacc.t, 
+                                  v = hosp.rate.vacc.v)
+        }
         
-        # Vaccinated Time dependent asymptomatic proportion
-        mult.alpha.vac = broken_line(x = t, 
-                                     b = asymp.prop.vacc.t,
-                                     v = asymp.prop.vacc.v)
-        alpha.vac.t    = min(1.0, mult.alpha.vac * alpha.vac)
+        if(is.null(asymp.prop.vacc.v)){
+            alpha.vac.t    =  alpha.vac
+        }else{
+            # Vaccinated Time dependent asymptomatic proportion
+            alpha.vac.t = broken_line(x = t, 
+                                         b = asymp.prop.vacc.t,
+                                         v = asymp.prop.vacc.v)
+        }
         
         # print(paste('DEBUG alpha.t =', alpha.t, 't =',t))
         

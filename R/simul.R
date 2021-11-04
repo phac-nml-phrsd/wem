@@ -144,6 +144,8 @@ simul <- function(prm){
     vac.rate         <- prm[["vacc.rate"]] 
     dur.build.immun  <- prm[["dur.build.immun"]]
     eff.inf          <- prm[["vacc.eff.infection"]]
+    eff.symp         <- prm[["vacc.eff.symptomatic"]]
+    eff.hosp         <- prm[["vacc.eff.hospitalization"]]
     popSize          <- prm[["pop.size"]] 
     R0               <- prm[["R0"]]
     I.init           <- prm[["init.I1"]] 
@@ -161,8 +163,6 @@ simul <- function(prm){
     mult.shed.val    <- prm[["mult.shed.val"]]
     alpha            <- prm[["asymp.prop"]]
     h                <- prm[["hospital.prop"]]
-    alpha.vac        <- prm[["asymp.prop.vacc"]]
-    h.vac            <- prm[["hospital.prop.vacc"]]
     delta            <- prm[["death.prop"]]
     shedNotInf       <- prm[["dur.shed.recov"]]
     hosp.stay        <- prm[["hosp.length.mean"]]
@@ -177,21 +177,42 @@ simul <- function(prm){
     vacc.rate.v      <- prm[["vacc.rate.v"]]
     hosp.rate.t      <- prm[["hosp.rate.t"]]
     hosp.rate.v      <- prm[["hosp.rate.v"]]
-    hosp.rate.vacc.t <- prm[["hosp.rate.vacc.t"]]
-    hosp.rate.vacc.v <- prm[["hosp.rate.vacc.v"]]
     asymp.prop.t     <- prm[["asymp.prop.t"]]
     asymp.prop.v     <- prm[["asymp.prop.v"]]
-    asymp.prop.vacc.t <- prm[["asymp.prop.vacc.t"]]
-    asymp.prop.vacc.v <- prm[["asymp.prop.vacc.v"]]
+    
+    # the  time vector `eff.t` (below) applies to 
+    # all other time dependent parameters
+    # associated with vaccine effectiveness:
+    eff.t            <- prm[["vacc.eff.t"]]    
+    
+    eff.inf.v        <- prm[["vacc.eff.inf.v"]]
+    eff.symp.v       <- prm[["vacc.eff.symp.v"]]
+    eff.hosp.v       <- prm[["vacc.eff.hosp.v"]]
+    
     transit.time.mean <- prm[['transit.time.mean']] 
     transit.time.cv   <- prm[['transit.time.cv']] 
     
-    # Checks for inputs
+    # --- Checks for inputs
+    
     if(length(inf.I)!=length(vload_I)){
         stop('Inputs inconsistent: Length for `inf.I` must be the same as `shed.I`. Aborting.')
     }
     if(length(inf.A)!=length(vload_A)){
         stop('Inputs inconsistent: Length for `inf.A` must be the same as `shed.A`. Aborting.')
+    }
+    
+    # vaccine effectiveness inputs
+    if(length(eff.inf.v)!=length(eff.symp.v)){
+      stop('Inputs inconsistent: Length for `vacc.eff.inf.v` must be the same as `vacc.eff.symp.v`. Aborting.')
+    }
+    if(length(eff.hosp.v)!=length(eff.symp.v)){
+      stop('Inputs inconsistent: Length for `vacc.eff.hosp.v` must be the same as `vacc.eff.symp.v`. Aborting.')
+    }
+    if(length(eff.t)!=length(eff.symp.v)){
+      stop('Inputs inconsistent: Length for `vacc.eff.t` must be the same as `vacc.eff.symp.v`. Aborting.')
+    }
+    if(length(eff.t)==1 & eff.t!='NULL'){
+      stop('ERROR: Length for `eff.t` must be of size 2 or more. For a constant values for vaccine effectiveness, use those parameters instead: `vacc.eff.infection`, `vacc.eff.symptomatic`, `vacc.eff.hospitalization` . Aborting.')
     }
     
     # Define simulation parameters
@@ -212,12 +233,49 @@ simul <- function(prm){
     eta      <- 1/shedNotInf
     neta     <- eta * nZ
     
-    # define vaccine parameters 
+    #--- Define vaccine parameters before passing for simulation
+    
     r <- vac.rate         
     d <- 1 / dur.build.immun 
     
     
-    # RNA copies concentration
+    # Check if the input are time-dependent
+    is.time.dep.vacc.eff = length(eff.t)>1
+    
+    if(!is.time.dep.vacc.eff){
+      message('Vacine effectiveness parameters are constant.')
+      
+      eff.symp.inf  = 1 - (1-eff.symp)/(1-eff.inf)
+      eff.hosp.symp = 1 - (1-eff.hosp)/(1-eff.symp)
+      alpha.vac     = eff.symp.inf
+      h.vac         = 1 - eff.hosp.symp 
+      
+      asymp.prop.vacc.v = NULL
+      hosp.rate.vacc.v  = NULL
+      asymp.prop.vacc.t = NULL
+      hosp.rate.vacc.t  = NULL
+    }
+    
+    if(is.time.dep.vacc.eff){
+      
+      message('Vacine effectiveness parameters are time-dependent.')
+      
+      # constant vacc. variables
+      # even in case of using time-dependent h.vac and alpha.vac, 
+      # we still use const. alpha.vac and h.vac for R0 and beta 
+      eff.symp.inf  = 1 - (1 - eff.symp.v[1])/(1 - eff.inf.v[1])
+      eff.hosp.symp = 1 - (1 - eff.hosp.v[1])/(1 - eff.symp.v[1])
+      alpha.vac     = eff.symp.inf
+      h.vac         = 1 - eff.hosp.symp 
+      
+      # time-dependent vacc. variables
+      asymp.prop.vacc.v = 1 - (1-eff.symp.v)/(1-eff.inf.v)
+      hosp.rate.vacc.v  = 1 - (1-eff.hosp.v)/(1-eff.symp.v) 
+      asymp.prop.vacc.t = eff.t
+      hosp.rate.vacc.t  = eff.t
+    }
+    
+    #--- RNA copies concentration
     lambda_E  <- vload_E 
     lambda_I  <- vload_I
     lambda_IH <- vload_IH

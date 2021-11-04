@@ -116,20 +116,32 @@ model_prm_example <- function() {
         dur.inf.symp.mean = 12,  #Infectiousness duration for symptomatic individual in days
         dur.inf.sympHosp.mean = 8,  # Infectiousness duration for symptomatic individual before admission to hospital in days
         dur.inf.asymp.mean = 10,  # Infectiousness duration for asymptomatic individual in days
-        dur.shed.recov = 24,  # fecal sheding duration after infectious period in days
+        dur.shed.recov = 24,  # fecal shedding duration after infectious period in days
         hosp.length.mean = 11,  # Length of hospital stay for AB (obtained from DAD by Health Canada)
         dur.immunity = 365, # duration of full immunity in days
-        vacc.rate = 0.00001, # number of indiviudals get vaccinated every day
-        vacc.eff.infection = 0.9999, # vaccine effectiveness against infection
-        dur.build.immun = 40, # days take to build immunity after reciveing two-dose vaccine 
+        vacc.rate = 0.00001, # proportional rate of individuals get vaccinated every day (number/population)
+        vacc.rate.t = NULL,  # break times for the time-dependent vaccination rate
+        vacc.rate.v = NULL,   # break values for the time-dependent vaccination rate (number/population)
+        vacc.eff.infection = 0.9, # vaccine effectiveness against infection given exposure 
+        vacc.eff.symptomatic = 0.95, # vaccine effectiveness against symptomatic disease given exposure
+        vacc.eff.hospitalization = 0.97, # vaccine effectiveness against hospitalization given exposure
+        vacc.eff.t      = NULL, # break times for change in vacc. effectiveness values
+        vacc.eff.inf.v  = NULL, # break values for change in vacc. effectiveness in infection given exposure 
+        vacc.eff.symp.v = NULL, # break values for change in vacc. effectiveness in symptomatic given exposure 
+        vacc.eff.hosp.v = NULL, # break values for change in vacc. effectiveness in hospitalization given exposure 
+        dur.build.immun = 40, # days take to build immunity after receiving two-dose vaccine 
         R0 = 3.0,  # basic effective reproduction number
+        transm.t =  '45 ; 55',  # break times for change in contact rate
+        transm.v =  '1; 0.20' ,  # break values (multiplier for transmission rate estimated from R0) for change in contact rate
         init.I1 = 20,  # initial number of symptomatic infections introduced in the population
         init.V = 0, #initial number of vaccinated introduced in the population
         asymp.prop = 0.316,    # asymptomatic proportion
-        asymp.prop.vacc = 0.70, # asymptomatic proportion for vaccinated individuals
         death.prop = 0.19,  # proportion of death from hospitalized (CIHI report https://www.cihi.ca/en/covid-19-hospitalization-and-emergency-department-statistics)
         hospital.prop = 0.02,  #proportion of hospitalized cases from symptomatic cases
-        hospital.prop.vacc = 0.01, #proportion of hospitalized cases from symptomatic cases
+        hosp.rate.t = NULL,    # break times for change in hospitalization rate 
+        hosp.rate.v = NULL,  # break values for change in hospitalization rate (multiplier for hospital.prop)
+        asymp.prop.t = NULL,  # break times for change in asymptomatic proportion 
+        asymp.prop.v = NULL,  # break values for change in asymptomatic proportion (multiplier for asymp.prop)
         rel.inf.asymp = 0.8,  # relative infectiousness of asymptomatic compared to symptomatic states
         inf.A = '3;6;5;4;3;2' ,  # relative infectiousness during infectious period for asymptomatic infections (proportional to logVL)
         inf.I = '3;6;5;4;3;2' ,  # relative infectiousness during infectious period for symptomatic infections (proportional to logVL)
@@ -143,36 +155,29 @@ model_prm_example <- function() {
         shed.Z = '5.40103;4.60103;3.90103;3.10103;2.10103;1.2',  # log10 fecal shedding kinetics for shedding Not infectious 
         mult.shed.t= '1;50;100' ,  # time for the multiplicative factor of all fecal shedding
         mult.shed.val= '1;1;1' ,  # value for the multiplicative factor of all fecal shedding
-        transm.t =  '45 ; 55',  # break points dates for change in contact rate
-        transm.v =  '1; 0.20' ,  # break points values for change in contact rate
-        hosp.rate.t = '30; 40',    # break times for change in hospitalization rate 
-        hosp.rate.v = '1.0; 1.0',  # break values for change in hospitalization rate 
-        vacc.rate.t = '1 ; 10',  # break times for the time-dependent vaccination rate
-        vacc.rate.v = '0 ; 0',   # break values for the time-dependent vaccination rate
-        asymp.prop.t = '30; 40',  # break times for change in asymptomatic proportion
-        asymp.prop.v = '1.0; 1.0',  # break values for change in asymptomatic proportion
-        hosp.rate.vacc.t =  '30; 40',#break times for change in hospital rate (dates between waves) 
-        hosp.rate.vacc.v = '1; 1.001', #break values for change in hospital rate (value for each wave) 
-        asymp.prop.vacc.t = '30; 40', #break times for change in asymptomatic proportion
-        asymp.prop.vacc.v = '1.0; 1.0', #break values for change in asymptomatic proportion
-        horizon = 200,  #?horizon of the simulation
-        sim.steps = 1,  #?time steps per time unit
-        pop.size = 50000,  #?population size ofthe catchment area
-        report.prop = 0.45,  #?proportion of symptomatic reported cases (explained how drived from parameter excel sheet)
-        report.lag = 10,  #?lag between infection and report in days
-        report.lag.ww = 2,  #?reporting lag between sampling date and reporting date in days
-        decay.rate = 0.18,  #?decay rate of RNA in ww
-        transit.time.mean=1,  #?mean transit time between shedding and sampling sites (in days)
-        transit.time.cv=0.3,  #?std dev transit time between shedding and sampling sites (in days)
-        ww.scale=0.0003  #?scaling factor for viral concentration
+        horizon = 200,  #horizon of the simulation
+        sim.steps = 1,  #time steps per time unit
+        pop.size = 50000,  #population size of the catchment area
+        report.prop = 0.45,  #proportion of symptomatic reported cases (explained how drived from parameter excel sheet)
+        report.lag = 10,  #lag between infection and report in days
+        report.lag.ww = 2,  #reporting lag between sampling date and reporting date in days
+        decay.rate = 0.18,  #decay rate of RNA in ww
+        transit.time.mean=1,  #mean transit time between shedding and sampling sites (in days)
+        transit.time.cv=0.3,  #std dev transit time between shedding and sampling sites (in days)
+        ww.scale=0.0003  #scaling factor for viral concentration
     )
     
     n = length(x)
     q = data.frame(name = rep(NA,n), value = rep(NA,n))
     
     for(i in 1:n){ 
-        q[i,1] = names(x)[i]
-        q[i,2] = x[[i]]
+        q$name[i] = names(x)[i]
+        if(is.null(x[[i]])){
+            q$value[i] = 'NULL'
+        }
+        else{
+            q$value[i] = x[[i]]
+        }
     }
     
     p = prm_scalar_vec(q)
