@@ -154,7 +154,7 @@ model_prm_example <- function() {
         shed.IH = '5;7.30103;7.083333;6.677121',  # log10 fecal shedding kinetics for symptomatic before admission to hospital
         shed.Z = '5.40103;4.60103;3.90103;3.10103;2.10103;1.2',  # log10 fecal shedding kinetics for shedding Not infectious 
         mult.shed.t= '1;50;100' ,  # time for the multiplicative factor of all fecal shedding
-        mult.shed.val= '1;1;1' ,  # value for the multiplicative factor of all fecal shedding
+        mult.shed.v= '1;1;1' ,  # value for the multiplicative factor of all fecal shedding
         horizon = 200,  #horizon of the simulation
         sim.steps = 1,  #time steps per time unit
         pop.size = 50000,  #population size of the catchment area

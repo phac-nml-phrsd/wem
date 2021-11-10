@@ -24,7 +24,7 @@ calc_concen <- function(ts,
                         lambda_A,
                         lambda_Z,
                         mult.shed.t,
-                        mult.shed.val,
+                        mult.shed.v,
                         popSize)
 {
     # Identify the columns of the variables
@@ -35,7 +35,7 @@ calc_concen <- function(ts,
     indx.Z  <- find_col(ts,"Z")
     
     mult = sapply(ts$time, FUN = broken_line, 
-                  b = mult.shed.t, v = mult.shed.val)
+                  b = mult.shed.t, v = mult.shed.v)
     
     # Calculate the product element-wise
     lambda_Is  = mapply(`*`, ts[,indx.I], lambda_I)
@@ -160,7 +160,7 @@ simul <- function(prm){
     vload_H          <- prm[["shed.H"]]
     vload_Z          <- prm[["shed.Z"]] 
     mult.shed.t      <- prm[["mult.shed.t"]]
-    mult.shed.val    <- prm[["mult.shed.val"]]
+    mult.shed.v      <- prm[["mult.shed.v"]]
     alpha            <- prm[["asymp.prop"]]
     h                <- prm[["hospital.prop"]]
     delta            <- prm[["death.prop"]]
@@ -393,7 +393,7 @@ simul <- function(prm){
                               lambda_I,lambda_IH,
                               lambda_A,lambda_Z,
                               mult.shed.t,
-                              mult.shed.val,
+                              mult.shed.v,
                               popSize)
     
     # Calculate the concentration arriving 

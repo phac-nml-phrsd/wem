@@ -20,15 +20,17 @@ remove.fut.inference <- function(idx.t,
     idx.v = which(names(prm)==nm.v)
     
     prm[[idx.t]] <- prm[[idx.t]][-idx.future] # remove time
-    prm[[idx.v]] <- prm[[idx.v]][-idx.future] # remove value
     
-    # Remove associated columns (:fitted parameters) in `post.abc`:
-    nm.post = names(post.abc)
-    foo.t = paste(nm.t,idx.future,sep='_') #future index in time
-    foo.v = paste(nm.v,idx.future,sep='_') #future index in value
-    idx.rm = which(nm.post %in% c(foo.t,foo.v))
-    if(length(idx.rm)>0) post.abc = post.abc[, -idx.rm]
-    
+    if(length(idx.v)>0){
+        prm[[idx.v]] <- prm[[idx.v]][-idx.future] # remove value
+        
+        # Remove associated columns (:fitted parameters) in `post.abc`:
+        nm.post = names(post.abc)
+        foo.t = paste(nm.t,idx.future,sep='_') #future index in time
+        foo.v = paste(nm.v,idx.future,sep='_') #future index in value
+        idx.rm = which(nm.post %in% c(foo.t,foo.v))
+        if(length(idx.rm)>0) post.abc = post.abc[, -idx.rm]
+    }
     return(list(prm=prm,post.abc=post.abc))
 }
 
@@ -50,7 +52,6 @@ fcst <- function(fitobj,
                  ci = 0.95, 
                  n.cores = 1) {
     
-    
     last.date = fitobj$last.date
     
     #check if last.date of fitted object and data matches
@@ -58,8 +59,6 @@ fcst <- function(fitobj,
         msg = 'last.date of fitted object does not match last observed data point in dat'
         stop(msg)
     } 
-    
-    
     
     post.abc  = fitobj$post.abc
     prm       = fitobj$prm
@@ -71,9 +70,18 @@ fcst <- function(fitobj,
     prm$horizon <- last.time + horizon.fcst
     
     # Remove any inference done beyond last observed point:
-    idx.timedep = which(grepl('\\b+.t$', names(prm)))
+    idx.timedep = which(grepl('\\.t$', names(prm)))
+    
+    if(0){ # DEBUG
+        names(prm)[idx.timedep]
+        prm[idx.timedep]
+    }
+    
     for(idx.t in idx.timedep){
-        idx.future = which(prm[[idx.t]] > last.time)
+        #print(names(prm)[idx.t]) # DEBUG
+        idx.future = NULL
+        if(prm[[idx.t]][1] !='NULL')
+            idx.future = which(prm[[idx.t]] > last.time)
         
         if(length(idx.future) > 0){
             rem = remove.fut.inference(idx.t,
@@ -84,12 +92,11 @@ fcst <- function(fitobj,
         }
     }
     
-            
     # Run simulation
-    ss = wem::simul_from_post(post.abc = post.abc, 
-                              prm      = prm, 
-                              ci       = ci, 
-                              n.cores  = n.cores)
+    ss = simul_from_post(post.abc = post.abc, 
+                         prm      = prm, 
+                         ci       = ci, 
+                         n.cores  = n.cores)
     
     ss = ss %>% 
         mutate(date = d0 + time)
