@@ -7,7 +7,7 @@
 broken_line(x, b, v)
 }
 \description{
-For a given \code{x}, returns the value the value on a piecewise 
+For a given \code{x}, returns the value on a piecewise 
 linear function as defined by 
 vector \code{b} of its break points and associated 
 values \code{v}.

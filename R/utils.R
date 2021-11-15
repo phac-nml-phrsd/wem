@@ -88,7 +88,7 @@ calc.all <- function(ts,comp)
 
 
 #' @title Piecewise linear function
-#' @description For a given \code{x}, returns the value the value on a piecewise 
+#' @description For a given \code{x}, returns the value on a piecewise 
 #' linear function as defined by 
 #' vector \code{b} of its break points and associated 
 #' values \code{v}.
