@@ -1,6 +1,10 @@
-Main Modifications in v0.1.2
+Main Modifications between versions 
 
-Old inout parameters
+==== v0.1.2
+
+New vaccine effectiveness parameters. In particular, in function `model_prm_example()`:
+
+Old input parameters
 1- `hospital.prop.vac' 
 2- `hosp.rate.vacc.t'
 3- `hosp.rate.vacc.v`
@@ -17,4 +21,3 @@ replaced with new input parameters
 6- `vacc.eff.symp.v`
 7- `vacc.eff.hosp.v`
 
-in function `model_prm_example()`.
