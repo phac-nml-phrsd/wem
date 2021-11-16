@@ -4,7 +4,7 @@
 \alias{fit_abc_unit}
 \title{Perform fitting for one iteration}
 \usage{
-fit_abc_unit(i, prm.abc, prm, lhs, obs, hosp.var)
+fit_abc_unit(i, prm.abc, prm, lhs, obs, hosp.var, case.var)
 }
 \arguments{
 \item{i}{Numerical. The number of iterated simulation for fitting.}
@@ -18,6 +18,8 @@ fit_abc_unit(i, prm.abc, prm, lhs, obs, hosp.var)
 \item{obs}{Datafrmae. Paired clinical-ww data created by \code{build_data()}}
 
 \item{hosp.var}{String. Type of hospitalization data. Output of function \code{build_data()}.}
+
+\item{case.var}{String. Type of date which cases are reported. Output of function \code{build_data()}.}
 }
 \value{
 

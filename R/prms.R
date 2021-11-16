@@ -159,10 +159,11 @@ model_prm_example <- function() {
         sim.steps = 1,  #time steps per time unit
         pop.size = 50000,  #population size of the catchment area
         report.prop = 0.45,  #proportion of symptomatic reported cases (explained how drived from parameter excel sheet)
-        report.lag = 10,  #lag between infection and report in days
-        report.lag.ww = 2,  #reporting lag between sampling date and reporting date in days
-        decay.rate = 0.18,  #decay rate of RNA in ww
-        transit.time.mean=1,  #mean transit time between shedding and sampling sites (in days)
+        report.lag = 10,  #lag between incident date and reported date of clinical cases in days
+        episode.lag = 3,  #lag between incident date and symptom onset date for clinical cases in days
+        report.lag.ww = 2,  #reporting lag between sampling date and reporting date of viral concentration in ww (in days)
+        decay.rate = 0.18,  #decay rate of genetic materials of SARS-CoV-2 in ww
+        transit.time.mean=1,  #mean transit time between deposited viral concentration in the sewer system and sampling sites (in days)
         transit.time.cv=0.3,  #std dev transit time between shedding and sampling sites (in days)
         ww.scale=0.0003  #scaling factor for viral concentration
     )

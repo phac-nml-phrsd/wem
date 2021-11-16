@@ -82,12 +82,14 @@ run_from_posteriors <- function(fitobj,
   prm.abc = fitobj$prm.abc
   post.abc = fitobj$post.abc
   last.date = fitobj$last.date
+  hosp.var = fitobj$hosp.var
+  case.var = fitobj$case.var
   
   
   if(!is.null(time.horizon)) prm$horizon <- time.horizon
   
   # Run simulations
-  ss = simul_from_post(post.abc, prm, ci=ci, n.cores=n.cores)
+  ss = simul_from_post(post.abc, prm, hosp.var, case.var, ci=ci, n.cores=n.cores)
   d0 = min(obs$date)
   sim.post = ss %>% 
     mutate(date = d0 + time)
@@ -96,6 +98,8 @@ run_from_posteriors <- function(fitobj,
   return(list(
     sim.post = sim.post, 
     post.abc = post.abc,
+    hosp.var = hosp.var,
+    case.var = case.var,
     ci = ci,
     prm = prm, 
     prm.abc = prm.abc,

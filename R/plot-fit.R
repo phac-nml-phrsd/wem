@@ -42,6 +42,7 @@ plot_fit_result <- function(fitobj, ci=0.95) {
                                              fitobj$post.abc, 
                                              fitobj$obs.long, 
                                              fitobj$hosp.var,
+                                             fitobj$case.var,
                                              ci = ci)
     
     return(list(error              = error,
@@ -159,6 +160,7 @@ plot_post_distrib_abc <- function(post.abc,
 #' @param post.abc List. Contains posterior results. Output of function fit()
 #' @param obs.long Dataframe. Observational data
 #' @param hosp.var String. Type of hospital (e.g., \code{NULL}, \code{'hosp.adm'}, \code{'hosp.occ'})
+#' @param case.var String. Type of date for clinical cases (e.g., \code{'report'} and \code{'episode'})
 #' @param ci Numerical. Percentage of confidence interval.
 #'
 #' @return
@@ -168,6 +170,7 @@ plot_fit_abc_vs_obs <- function(prm,
                                 post.abc, 
                                 obs.long,
                                 hosp.var,
+                                case.var,
                                 ci = 0.95) {
     
     message('Plotting ABC fit vs. observations ...')
@@ -192,37 +195,49 @@ plot_fit_abc_vs_obs <- function(prm,
     # Add dates
     df.post$date = ymd(min(obs.long$date) + df.post$time)
     
+    # Determine type of date for clinical cases (reported date or episode date)
+    if(case.var=='report'){
+      df.post = df.post %>%
+        mutate(clin.case = report)
+    }
+    if(case.var=='episode'){
+      df.post = df.post %>%
+        mutate(clin.case = report.episode)
+    }
+    
+    
     if(!is.null(hosp.var)){
-    #---- Summary stats of posterior simulations:
-    # Determine hospital type (new admissions or occupancy)
-    if(hosp.var=='hosp.adm'){
-        df.post = df.post %>%
-            mutate(hospital = hosp.admission)
-    }
-    if(hosp.var=='hosp.occ'){
-        df.post = df.post %>%
-            mutate(hospital = Hall)
-    }
-    df.ss = df.post %>%
-        group_by(date) %>%
-        summarize(report.m = mean(report), 
-                  report.qhi = quantile(report, probs = 0.5 + ci/2),
-                  report.qlo = quantile(report, probs = 0.5 - ci/2),
-                  ww.m = mean(WWreport), 
-                  ww.qhi = quantile(WWreport, probs = 0.5 + ci/2),
-                  ww.qlo = quantile(WWreport, probs = 0.5 - ci/2),
-                  hosp.m = mean(hospital),
-                  hosp.qhi = quantile(hospital, probs = 0.5 + ci/2),
-                  hosp.qlo = quantile(hospital, probs = 0.5 - ci/2),
-                  .groups = 'keep')
+      #---- Summary stats of posterior simulations:
+      # Determine hospital type (new admissions or occupancy)
+      if(hosp.var=='hosp.adm'){
+          df.post = df.post %>%
+              mutate(hospital = hosp.admission)
+      }
+      if(hosp.var=='hosp.occ'){
+          df.post = df.post %>%
+              mutate(hospital = Hall)
+      }
+        
+      df.ss = df.post %>%
+          group_by(date) %>%
+          summarize(report.m = mean(clin.case), 
+                    report.qhi = quantile(clin.case, probs = 0.5 + ci/2),
+                    report.qlo = quantile(clin.case, probs = 0.5 - ci/2),
+                    ww.m = mean(WWreport), 
+                    ww.qhi = quantile(WWreport, probs = 0.5 + ci/2),
+                    ww.qlo = quantile(WWreport, probs = 0.5 - ci/2),
+                    hosp.m = mean(hospital),
+                    hosp.qhi = quantile(hospital, probs = 0.5 + ci/2),
+                    hosp.qlo = quantile(hospital, probs = 0.5 - ci/2),
+                    .groups = 'keep')
     }
     
     if(is.null(hosp.var)){
         df.ss = df.post %>%
             group_by(date) %>%
-            summarize(report.m = mean(report), 
-                      report.qhi = quantile(report, probs = 0.5 + ci/2),
-                      report.qlo = quantile(report, probs = 0.5 - ci/2),
+            summarize(report.m = mean(clin.case), 
+                      report.qhi = quantile(clin.case, probs = 0.5 + ci/2),
+                      report.qlo = quantile(clin.case, probs = 0.5 - ci/2),
                       ww.m = mean(WWreport), 
                       ww.qhi = quantile(WWreport, probs = 0.5 + ci/2),
                       ww.qlo = quantile(WWreport, probs = 0.5 - ci/2),

@@ -4,14 +4,14 @@
 \alias{report_cases}
 \title{Reporting of clinical cases}
 \usage{
-report_cases(ts, report.prop, report.lag, sim.steps)
+report_cases(ts, report.prop, lag, sim.steps)
 }
 \arguments{
 \item{ts}{Dataframe. Time series of the epidemiological variables.}
 
 \item{report.prop}{Numerical. Proportion of cases reported (between 0 and 1).}
 
-\item{report.lag}{Numerical. Lag (delay) of reporting in days.}
+\item{lag}{Numerical. Lag (delay) btw. incident date and reported date or episode date in days.}
 
 \item{sim.steps}{Numerical. simulation time steps between every day}
 }

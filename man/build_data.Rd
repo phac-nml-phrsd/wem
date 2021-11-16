@@ -4,7 +4,7 @@
 \alias{build_data}
 \title{Create a data object from dataframes.}
 \usage{
-build_data(cases, hosp, ww, hosp.type)
+build_data(cases, hosp, ww, hosp.type, case.date.type)
 }
 \arguments{
 \item{cases}{Dataframe with two columns named \code{date} and \code{value} 
@@ -17,6 +17,8 @@ that records the number of hospitalizations with respect to time.}
 that records the viral concentration in wastewater with respect to time.}
 
 \item{hosp.type}{String. Type of hospitalization provided in \code{path.hosp}: \code{NULL}, \code{'hosp.adm'} for hospital admissions, \code{'hosp.occ'} for hospital occupancy.}
+
+\item{case.date.type}{String. Type of date which cases are based on: \code{'report'} for reported date and \code{'episode'} for episode date}
 }
 \value{
 A list of dataframes.

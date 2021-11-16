@@ -9,6 +9,7 @@ plot_obs_simulation(
   obs.long,
   dates.break,
   hosp.var,
+  case.var,
   include.cases = TRUE,
   include.ww = TRUE,
   include.hp = TRUE,
@@ -23,6 +24,8 @@ plot_obs_simulation(
 \item{dates.break}{Logical. Default is \code{TRUE}. Display break dates when effective reproduction number changes}
 
 \item{hosp.var}{String. Type of hospitalization (e.g., \code{NULL}, \code{'hosp.adm'}, \code{'hos.occ'})}
+
+\item{case.var}{String. Type of date for clinical cases (e.g., \code{'report'} and \code{'episode'})}
 
 \item{include.cases}{Logical.Default is \code{TRUE}. Display simulated and observational reported cases}
 
