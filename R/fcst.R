@@ -60,6 +60,8 @@ fcst <- function(fitobj,
         stop(msg)
     } 
     
+    hosp.var  = fitobj$hosp.var 
+    case.var  = fitobj$case.var
     post.abc  = fitobj$post.abc
     prm       = fitobj$prm
     
@@ -94,7 +96,9 @@ fcst <- function(fitobj,
     
     # Run simulation
     ss = simul_from_post(post.abc = post.abc, 
-                         prm      = prm, 
+                         prm      = prm,
+                         hosp.var = hosp.var,
+                         case.var = case.var,
                          ci       = ci, 
                          n.cores  = n.cores)
     
@@ -106,6 +110,8 @@ fcst <- function(fitobj,
         post.abc = post.abc,
         prm = prm, 
         prm.abc = fitobj$prm.abc,
+        hosp.var = hosp.var,
+        case.var = case.var,
         ci = ci,
         date.first.obs = d0,
         date.last.obs  = last.date)

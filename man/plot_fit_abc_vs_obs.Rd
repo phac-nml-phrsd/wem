@@ -4,7 +4,7 @@
 \alias{plot_fit_abc_vs_obs}
 \title{Visualize fitting performance versus obsrvational data}
 \usage{
-plot_fit_abc_vs_obs(prm, post.abc, obs.long, hosp.var, ci = 0.95)
+plot_fit_abc_vs_obs(prm, post.abc, obs.long, hosp.var, case.var, ci = 0.95)
 }
 \arguments{
 \item{prm}{List. All parameters for model found in \code{wem-prm.csv}.}
@@ -14,6 +14,8 @@ plot_fit_abc_vs_obs(prm, post.abc, obs.long, hosp.var, ci = 0.95)
 \item{obs.long}{Dataframe. Observational data}
 
 \item{hosp.var}{String. Type of hospital (e.g., \code{NULL}, \code{'hosp.adm'}, \code{'hosp.occ'})}
+
+\item{case.var}{String. Type of date for clinical cases (e.g., \code{'report'} and \code{'episode'})}
 
 \item{ci}{Numerical. Percentage of confidence interval.}
 }

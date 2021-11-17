@@ -4,12 +4,16 @@
 \alias{simul_from_post}
 \title{Simulate epidemic from posterior distribution}
 \usage{
-simul_from_post(post.abc, prm, ci = 0.95, n.cores = 4)
+simul_from_post(post.abc, prm, hosp.var, case.var, ci = 0.95, n.cores = 4)
 }
 \arguments{
 \item{post.abc}{Dataframe of posterior values.}
 
 \item{prm}{List of (not fitted) model parameters.}
+
+\item{hosp.var}{String. Type of hospitalization; \code{NULL}, \code{'hosp.adm'} and \code{'hosp.occ'}}
+
+\item{case.var}{String. Type of date for clinical cases; \code{'report'} and \code{'episode'}}
 
 \item{ci}{Numeric. Credible interval.}
 

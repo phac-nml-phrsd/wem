@@ -304,6 +304,7 @@ plot_simobs_beta <- function(data,
   obs      = data[['obs']]
   obs.long = data[['obs.long']]
   hosp.var = data[['hosp.var']]
+  case.var = data[['case.var']]
   
   
   # time range
@@ -327,8 +328,9 @@ plot_simobs_beta <- function(data,
   
   # plot single simulation with initial prms
   g.init = plot_obs_simulation(df.init, obs.long, 
-                               dates.break = prm$transm.t,
-                               hosp.var  = hosp.var,
+                               dates.break   = prm$transm.t,
+                               hosp.var      = hosp.var,
+                               case.var      = case.var,
                                include.cases = include.cases,
                                include.ww    = include.ww,
                                include.hp    = include.hosp,
@@ -351,6 +353,7 @@ plot_simobs_beta <- function(data,
 #' @param obs.long Dataframe. Time-series observational data in a long format created by \code{build_obs()}
 #' @param dates.break Logical. Default is \code{TRUE}. Display break dates when effective reproduction number changes
 #' @param hosp.var String. Type of hospitalization (e.g., \code{NULL}, \code{'hosp.adm'}, \code{'hos.occ'})
+#' @param case.var String. Type of date for clinical cases (e.g., \code{'report'} and \code{'episode'})
 #' @param include.cases Logical.Default is \code{TRUE}. Display simulated and observational reported cases
 #' @param include.ww Logical. Default is \code{TRUE}. Display simulated and observational measured RNA concentration  
 #' @param include.hp Logical. Default is \code{TRUE}. Display simulated and observational hospitalization
@@ -363,6 +366,7 @@ plot_obs_simulation <- function(df.init,
                                 obs.long,
                                 dates.break,
                                 hosp.var,
+                                case.var,
                                 include.cases = TRUE,
                                 include.ww = TRUE,
                                 include.hp = TRUE,  
@@ -370,12 +374,14 @@ plot_obs_simulation <- function(df.init,
   
   df.long = pivot_longer(df.init, -time)
   
-  simplot = df.long %>%
-    filter(name %in% c('report','WWreport'))
+  if(case.var == 'report')simplot = filter(df.long,name %in% c('report','WWreport'))
+  if(case.var == 'episode')simplot = filter(df.long,name %in% c('report.episode','WWreport'))
   
   if(!is.null(hosp.var)){
-  if(hosp.var == 'hosp.adm') simplot = filter(df.long,name %in% c('report','WWreport','hosp.admission'))
-  if(hosp.var == 'hosp.occ') simplot = filter(df.long,name %in% c('report','WWreport','Hall')) 
+    if(hosp.var == 'hosp.adm' && case.var == 'report') simplot = filter(df.long,name %in% c('report','WWreport','hosp.admission'))
+    if(hosp.var == 'hosp.occ' && case.var == 'report') simplot = filter(df.long,name %in% c('report','WWreport','Hall')) 
+    if(hosp.var == 'hosp.adm' && case.var == 'episode') simplot = filter(df.long,name %in% c('report.episode','WWreport','hosp.admission'))
+    if(hosp.var == 'hosp.occ' && case.var == 'episode') simplot = filter(df.long,name %in% c('report.episode','WWreport','Hall')) 
   }
   
   if(!include.cases){

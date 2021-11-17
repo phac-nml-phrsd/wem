@@ -24,20 +24,22 @@ add_obs_string <- function(x) {
 #' 
 #' @param hosp.type String. Type of hospitalization provided in \code{path.hosp}: \code{NULL}, \code{'hosp.adm'} for hospital admissions, \code{'hosp.occ'} for hospital occupancy.
 #'
+#' @param case.date.type String. Type of date which cases are based on: \code{'report'} for reported date and \code{'episode'} for episode date 
+#' 
 #' @return A list of dataframes.
 #' @export
 #'
-build_data <- function(cases, hosp, ww, hosp.type){
+build_data <- function(cases, hosp, ww, hosp.type, case.date.type){
     
     # --- Checks
     check = vector()
     
     check[1] = TRUE  # if hosp.type=NULL
-    if(!is.null(hosp.type)) 
-        check[1] = hosp.type %in% c('hosp.adm', 'hosp.occ')
+    check[2] = TRUE  # if case.date.type=
+    if(!is.null(hosp.type)) check[1] = hosp.type %in% c('hosp.adm', 'hosp.occ')
+    check[2] = case.date.type %in% c('report', 'episode')
     
-    
-    stopifnot(all(check))
+    stopifnot(all(check))  
     
     # Make sure dates are in the `Date` format
     cases$date = as.Date(cases$date)
@@ -111,7 +113,8 @@ build_data <- function(cases, hosp, ww, hosp.type){
     
     return(list(obs = obs, 
                 obs.long = obs.long,
-                hosp.var = hosp.type))
+                hosp.var = hosp.type,
+                case.var = case.date.type))
 }
 
 

@@ -3,14 +3,14 @@
 #' Reporting of clinical cases
 #' @param ts Dataframe. Time series of the epidemiological variables. 
 #' @param report.prop Numerical. Proportion of cases reported (between 0 and 1).
-#' @param report.lag Numerical. Lag (delay) of reporting in days. 
+#' @param lag Numerical. Lag (delay) btw. incident date and reported date or episode date in days. 
 #' @param sim.steps Numerical. simulation time steps between every day
-report_cases <- function(ts, report.prop, report.lag, sim.steps) {
+report_cases <- function(ts, report.prop, lag, sim.steps) {
     if(0){ # DEBUG
         report.prop = 0.44
-        report.lag  = 3
+        lag  = 3
     }
-    sim.lag = sim.steps * report.lag # simulation lag for report cases 
+    sim.lag = sim.steps * lag # simulation lag for report cases 
     tmp = ts$sympinc * report.prop  
     res = c( rep(0, sim.lag-1), tmp[1:(length(tmp)-sim.lag+1)] )
     return(res)
@@ -169,6 +169,7 @@ simul <- function(prm){
     kappa            <- prm[["decay.rate"]]
     report.prop      <- prm[["report.prop"]]
     report.lag       <- prm[["report.lag"]]
+    episode.lag      <- prm[["episode.lag"]]
     WWreport.lag     <- prm[["report.lag.ww"]]
     ww.scale         <- prm[["ww.scale"]]
     transm.t         <- prm[["transm.t"]]
@@ -385,7 +386,8 @@ simul <- function(prm){
     ts$sympinc  = c(I.init, diff(ts$cumincsymp))         # <- symptomatic incidence
     ts$hosp.admission = c(0, diff(ts$cumHospAdm))        # <- hospital admissions
     
-    ts$report = report_cases(ts, report.prop, report.lag, sim.steps)
+    ts$report         = report_cases(ts, report.prop, lag = report.lag, sim.steps)
+    ts$report.episode = report_cases(ts, report.prop, lag = episode.lag, sim.steps)
     
     # Calculate the daily concentration 
     # deposited in the sewer system:
@@ -437,7 +439,9 @@ simul_post_unit <- function(i, post.abc, prm) {
 #' Simulate epidemic from posterior distribution
 #' 
 #' @param post.abc Dataframe of posterior values.
-#' @param prm List of (not fitted) model parameters. 
+#' @param prm List of (not fitted) model parameters.
+#' @param hosp.var String. Type of hospitalization; \code{NULL}, \code{'hosp.adm'} and \code{'hosp.occ'}
+#' @param case.var String. Type of date for clinical cases; \code{'report'} and \code{'episode'}
 #' @param ci Numeric. Credible interval.
 #' @param n.cores Integer. Number of cores for parallel computing
 #' 
@@ -445,7 +449,7 @@ simul_post_unit <- function(i, post.abc, prm) {
 #' 
 #' @export
 #' 
-simul_from_post <- function(post.abc, prm, ci=0.95, n.cores = 4) {
+simul_from_post <- function(post.abc, prm, hosp.var, case.var, ci=0.95, n.cores = 4) {
     
     n.abc.post = nrow(post.abc)
     message(paste('Starting simulation using',n.abc.post,'posterior values...'))
@@ -464,7 +468,30 @@ simul_from_post <- function(post.abc, prm, ci=0.95, n.cores = 4) {
     
     simp = do.call('rbind', tmp)
     
-    ss = simp %>%
+    
+    # Determine type of date for clinical cases (reported date or episode date)
+    if(case.var=='report'){
+      simp = simp %>%
+        mutate(clin.case = report)
+    }
+    if(case.var=='episode'){
+      simp = simp %>%
+        mutate(clin.case = report.episode)
+    }
+    
+    if(!is.null(hosp.var)){
+      #---- Summary stats of posterior simulations:
+      # Determine hospital type (new admissions or occupancy)
+      if(hosp.var=='hosp.adm'){
+        simp = simp %>%
+          mutate(hospital = hosp.admission)
+      }
+      if(hosp.var=='hosp.occ'){
+        simp = simp %>%
+          mutate(hospital = Hall)
+      }
+      
+      ss = simp %>%
         group_by(time) %>% 
         summarise(prev.m  = mean(prev),
                   prev.lo = quantile(prev, probs = 0.5 - ci/2),
@@ -472,12 +499,12 @@ simul_from_post <- function(post.abc, prm, ci=0.95, n.cores = 4) {
                   inc.m   = mean(inc),
                   inc.lo  = quantile(inc, probs = 0.5 - ci/2),
                   inc.hi  = quantile(inc, probs = 0.5 + ci/2),
-                  hosp.adm.m  = mean(hosp.admission),
-                  hosp.adm.lo = quantile(hosp.admission, probs = 0.5 - ci/2),
-                  hosp.adm.hi = quantile(hosp.admission, probs = 0.5 + ci/2),
-                  report.m  = mean(report),
-                  report.lo = quantile(report, probs = 0.5 - ci/2),
-                  report.hi = quantile(report, probs = 0.5 + ci/2),
+                  hosp.m  = mean(hosp.admission),
+                  hosp.lo = quantile(hospital, probs = 0.5 - ci/2),
+                  hosp.hi = quantile(hospital, probs = 0.5 + ci/2),
+                  report.m  = mean(clin.case),
+                  report.lo = quantile(clin.case, probs = 0.5 - ci/2),
+                  report.hi = quantile(clin.case, probs = 0.5 + ci/2),
                   ww.m  = mean(WWreport),
                   ww.lo = quantile(WWreport, probs = 0.5 - ci/2),
                   ww.hi = quantile(WWreport, probs = 0.5 + ci/2),
@@ -488,6 +515,34 @@ simul_from_post <- function(post.abc, prm, ci=0.95, n.cores = 4) {
         mutate(cuminc.m  = 1 - S.m/S.m[1],
                cuminc.lo = 1 - S.hi/S.hi[1],
                cuminc.hi = 1 - S.lo/S.lo[1])
+    }
+    
+    
+    if(is.null(hosp.var)){
+      #---- Summary stats of posterior simulations:
+      ss = simp %>%
+        group_by(time) %>% 
+        summarise(prev.m  = mean(prev),
+                  prev.lo = quantile(prev, probs = 0.5 - ci/2),
+                  prev.hi = quantile(prev, probs = 0.5 + ci/2),
+                  inc.m   = mean(inc),
+                  inc.lo  = quantile(inc, probs = 0.5 - ci/2),
+                  inc.hi  = quantile(inc, probs = 0.5 + ci/2),
+                  report.m  = mean(clin.case),
+                  report.lo = quantile(clin.case, probs = 0.5 - ci/2),
+                  report.hi = quantile(clin.case, probs = 0.5 + ci/2),
+                  ww.m  = mean(WWreport),
+                  ww.lo = quantile(WWreport, probs = 0.5 - ci/2),
+                  ww.hi = quantile(WWreport, probs = 0.5 + ci/2),
+                  S.m   = mean(S),
+                  S.lo  = quantile(S, probs = 0.5 - ci/2),
+                  S.hi  = quantile(S, probs = 0.5 + ci/2)) %>% 
+        # Calculate cumulative incidence
+        mutate(cuminc.m  = 1 - S.m/S.m[1],
+               cuminc.lo = 1 - S.hi/S.hi[1],
+               cuminc.hi = 1 - S.lo/S.lo[1])
+    }
+    
     
     return(ss)
 }

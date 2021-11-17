@@ -172,6 +172,7 @@ err_fct <- function(x,y) {
 #' @param lhs Dataframe. Sampled for priors.
 #' @param obs Datafrmae. Paired clinical-ww data created by \code{build_data()}
 #' @param hosp.var String. Type of hospitalization data. Output of function \code{build_data()}.   
+#' @param case.var String. Type of date which cases are reported. Output of function \code{build_data()}.   
 #'
 #' @return
 #'
@@ -180,7 +181,8 @@ fit_abc_unit <- function(i,
                          prm, 
                          lhs, 
                          obs,
-                         hosp.var) {
+                         hosp.var,
+                         case.var) {
     
     # Update parameter values and simulate:
     np = ncol(lhs)
@@ -200,11 +202,21 @@ fit_abc_unit <- function(i,
     mx.obs.ww = max(obs$ww.obs, na.rm = TRUE)
     mx.obs.cl = max(obs$clin.obs, na.rm = TRUE)
     
-    sim.norm = sim.i %>% 
-        mutate(time = round(time, 1)) %>%
-        mutate(norm.ww.sim = WWreport / mx.obs.ww,
-               norm.cl.sim = report / mx.obs.cl) %>% 
-        select(time, starts_with('norm'))
+    if(case.var == 'report'){
+        sim.norm = sim.i %>% 
+            mutate(time = round(time, 1)) %>%
+            mutate(norm.ww.sim = WWreport / mx.obs.ww,
+                   norm.cl.sim = report / mx.obs.cl) %>% 
+            select(time, starts_with('norm'))
+    }
+    
+    if(case.var == 'episode'){
+        sim.norm = sim.i %>% 
+            mutate(time = round(time, 1)) %>%
+            mutate(norm.ww.sim = WWreport / mx.obs.ww,
+                   norm.cl.sim = report.episode / mx.obs.cl) %>% 
+            select(time, starts_with('norm'))
+    }
     
     obs.norm = obs %>% 
         mutate(norm.ww = obs$ww.obs / mx.obs.ww,
@@ -270,6 +282,7 @@ fit_abc_unit <- function(i,
 #' @param obs Dataframe. Paired clinical and ww data. Output of function \code{build_data()}.
 #' @param priors Dataframe. Sampled priors for fitting. Output of function \code{sample_priors()}
 #' @param hosp.var String. Output of function \code{build_data()}.
+#' @param case.var String. Output of function \code{build_data()}.
 #' @param prm.abc List. Parameters for ABC fitting method. Output of function \code{define_abc_prms} 
 #' @param prm List. All parameters model requires. It has to be in the \code{wem-prm.csv} format.    
 #' @param n.cores Numerical. Number of cores for fitting compoutation. 
@@ -280,6 +293,7 @@ fit_abc_unit <- function(i,
 fit_abc <- function(obs,
                     priors,
                     hosp.var,
+                    case.var,
                     prm.abc, 
                     prm, 
                     n.cores=2) {
@@ -301,7 +315,8 @@ fit_abc <- function(obs,
                        prm = prm,
                        lhs = lhs, 
                        obs = obs,
-                       hosp.var = hosp.var)
+                       hosp.var = hosp.var,
+                       case.var = case.var)
     sfStop()
     
     # Sort the fitting errors
@@ -347,6 +362,7 @@ fit <- function(data,
     obs        = data[['obs']]
     obs.long   = data[['obs.long']]
     hosp.var   = data[['hosp.var']]
+    case.var   = data[['case.var']]
     
     
     if(!is.null(last.date)){
@@ -365,6 +381,7 @@ fit <- function(data,
         fit = fit_abc(obs = obs, 
                       priors = samp.priors,
                       hosp.var = hosp.var,
+                      case.var = case.var,
                       prm.abc = prm.abc,
                       prm = prm, 
                       n.cores = n.cores)
@@ -385,6 +402,7 @@ fit <- function(data,
         prm.abc = prm.abc,
         fit = fit,
         hosp.var = hosp.var,
+        case.var = case.var,
         post.abc = post.abc,
         post.ss = post.ss,
         df.prior = df.prior,

@@ -4,7 +4,7 @@
 \alias{fit_abc}
 \title{Fitting ABC function (internal use)}
 \usage{
-fit_abc(obs, priors, hosp.var, prm.abc, prm, n.cores = 2)
+fit_abc(obs, priors, hosp.var, case.var, prm.abc, prm, n.cores = 2)
 }
 \arguments{
 \item{obs}{Dataframe. Paired clinical and ww data. Output of function \code{build_data()}.}
@@ -12,6 +12,8 @@ fit_abc(obs, priors, hosp.var, prm.abc, prm, n.cores = 2)
 \item{priors}{Dataframe. Sampled priors for fitting. Output of function \code{sample_priors()}}
 
 \item{hosp.var}{String. Output of function \code{build_data()}.}
+
+\item{case.var}{String. Output of function \code{build_data()}.}
 
 \item{prm.abc}{List. Parameters for ABC fitting method. Output of function \code{define_abc_prms}}
 
