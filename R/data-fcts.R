@@ -24,7 +24,7 @@ add_obs_string <- function(x) {
 #' 
 #' @param hosp.type String. Type of hospitalization provided in \code{path.hosp}: \code{NULL}, \code{'hosp.adm'} for hospital admissions, \code{'hosp.occ'} for hospital occupancy.
 #'
-#' @param case.date.type String. Type of date which cases are based on: \code{'report'} for reported date and \code{'episode'} for episode date 
+#' @param case.date.type String. Type of date which cases are based on: \code{'report'} for reported date and \code{'episode'} for episode date (date of symptoms onset). 
 #' 
 #' @return A list of dataframes.
 #' @export
@@ -134,13 +134,16 @@ build_data <- function(cases, hosp, ww, hosp.type, case.date.type){
 #' 
 #' @param hosp.type String. Type of hospitalization provided in \code{path.hosp}: \code{NULL}, \code{'hosp.adm'} for hospital admissions, \code{'hosp.occ'} for hospital occupancy.
 #'
+#' @param case.date.type String. Type of date which cases are based on: \code{'report'} for reported date and \code{'episode'} for episode date (date of symptoms onset).
+#' 
 #' @return A list of dataframes.
 #' @export
 #'
 build_data_csv <- function(path.cases,
                            path.hosp,
                            path.ww,
-                           hosp.type) {
+                           hosp.type,
+                           case.date.type) {
     
     # load csv data files 
     cases = read.csv(path.cases)
@@ -150,6 +153,7 @@ build_data_csv <- function(path.cases,
     res = build_data(cases = cases, 
                      hosp = hosp, 
                      ww = ww, 
-                     hosp.type = hosp.type)
+                     hosp.type = hosp.type,
+                     case.date.type = case.date.type)
     return(res)
 }
