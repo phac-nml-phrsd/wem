@@ -1,7 +1,8 @@
 Main Modifications between versions 
 
 
-==== v0.1.3
+==== v0.3
+
 Enable function `build_data()` take clinical cases based on both report date and episode date.
 
 New input variable is defined for function `build_date()` which is called `case.date.type`.
@@ -9,7 +10,7 @@ New input variable is defined for function `build_date()` which is called `case.
 New input parameter is defined in `model_prm_example()` which is called 'episode.lag`.
 
 
-==== v0.1.2
+==== v0.2
 
 New vaccine effectiveness parameters. In particular, in function `model_prm_example()`:
 
