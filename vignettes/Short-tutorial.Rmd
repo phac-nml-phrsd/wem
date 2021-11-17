@@ -116,12 +116,13 @@ Now we use the datasets to build a data object properly formatted that will be r
 ```{r build data object}
 
 dat = build_data(cases     = cases, 
-                 hosp      = hosp, 
+                 hosp      = hosp,
                  ww        = wwviralconc, 
-                 hosp.type = 'hosp.adm')
+                 hosp.type = 'hosp.adm',
+                 case.date.type = 'report')
 ```
 
-The data object is simply a list storing all data in a single dataframe, either in the wide or long format, as well as other information (like the type of hospital data, if provided). The different data sources have been merged together, taking into account that they may not have the same time points (in that case, missing data for a given date is filled with `NA`)
+The data object is simply a list storing all data in a single dataframe, either in the wide or long format, as well as other information (like the type of hospital data, if provided). It is also necessary to identify the type of date for clinical cases in `case.date.type` - whether it is based on reported date or episode date. The different data sources have been merged together, taking into account that they may not have the same time points (in that case, missing data for a given date is filled with `NA`)
 
 ```{r show data}
 knitr::kable(head(dat$obs, n = 10))
