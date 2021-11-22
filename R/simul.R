@@ -508,6 +508,9 @@ simul_from_post <- function(post.abc, prm, hosp.var, case.var, ci=0.95, n.cores 
                   ww.m  = mean(WWreport),
                   ww.lo = quantile(WWreport, probs = 0.5 - ci/2),
                   ww.hi = quantile(WWreport, probs = 0.5 + ci/2),
+                  V.m   = mean(V),
+                  V.lo  = quantile(V, probs = 0.5 - ci/2),
+                  V.hi  = quantile(V, probs = 0.5 + ci/2),
                   S.m   = mean(S),
                   S.lo  = quantile(S, probs = 0.5 - ci/2),
                   S.hi  = quantile(S, probs = 0.5 + ci/2)) %>% 

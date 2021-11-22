@@ -159,9 +159,9 @@ calc_Reff_from_post <- function(runpost,
   res = data.frame(
     time    = sim.post$time,
     date    = d0 + sim.post$time,
-    Reff.m  = R0.m * y.m * sim.post$S.m / pop.size,
-    Reff.lo = R0.lo * y.lo * sim.post$S.lo / pop.size,
-    Reff.hi = R0.hi * y.hi * sim.post$S.hi / pop.size
+    Reff.m  = R0.m  * y.m  * (sim.post$S.m  + sim.post$V.m)  / pop.size,
+    Reff.lo = R0.lo * y.lo * (sim.post$S.lo + sim.post$V.lo) / pop.size,
+    Reff.hi = R0.hi * y.hi * (sim.post$S.hi + sim.post$V.hi) / pop.size
   )
   return(res)
 }
