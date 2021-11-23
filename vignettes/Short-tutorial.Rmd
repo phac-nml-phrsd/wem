@@ -151,7 +151,8 @@ prm.abc = define_abc_prms(iter        = 5e2,
                           accept      = 3e-2,
                           case.weight = 1.0,
                           ww.weight   = 1.0,
-                          hosp.weight = 1.0)
+                          hosp.weight = 1.0,
+                          hosp.type   = 'adm') # "adm" for hospital admission data. "occ" for occupancy.
 ```
 
 Now, we define the priors for the model parameters to fit. 

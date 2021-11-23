@@ -16,19 +16,37 @@
 #' @param case.weight Numeric, float. Relative weight for clinical cases 
 #' @param ww.weight Numeric, float. Relative weigth for viral concentration in wastewater. 
 #' @param hosp.weight Numeric, float. Relative weight for hospitalization.
+#' @param hosp.type String. Type of hospitalization data: 
+#' \code{"adm"} for hospital admissions, \code{"occ"} for hospital occupancy.
 #'
 #' @return Nested list of ABC parameters.
 #' @export
 #'
-define_abc_prms <- function(iter,accept,
-                                 case.weight,
-                                 ww.weight,
-                                 hosp.weight) {
+define_abc_prms <- function(iter,
+                            accept,
+                            case.weight,
+                            ww.weight,
+                            hosp.weight,
+                            hosp.type) {
+    
+    if(!hosp.type %in% c('adm','occ')){
+        stop(paste0('Hospital type `hosp.type=',hosp.type,'` unknown in function call `define_abc_prms()`. Aborting.'))
+    }
+    
+    if(hosp.type == 'adm'){
+        w = c(cl = case.weight,
+              ww = ww.weight,
+              hosp.adm = hosp.weight)
+    }
+    if(hosp.type == 'occ'){
+        w = c(cl = case.weight,
+              ww = ww.weight,
+              hosp.occ = hosp.weight)
+    }
+    
     res = list(n      = iter,
                accept = accept,
-               weight = c(cl = case.weight,
-                          ww = ww.weight,
-                          hosp.adm = hosp.weight))
+               weight = w)
     return(res)
 }
 
@@ -347,7 +365,7 @@ fit_abc <- function(obs,
 #' @param do.plot Logical. Plot the fitting results and initial parameters  
 #' @param save.rdata Logical. Saving the fitting objects in a .rds file.
 #'
-#' @return
+#' @return A list containing the fitted object and additional information.
 #' @export
 #'
 fit <- function(data,
