@@ -17,7 +17,8 @@
 #' @param ww.weight Numeric, float. Relative weigth for viral concentration in wastewater. 
 #' @param hosp.weight Numeric, float. Relative weight for hospitalization.
 #' @param hosp.type String. Type of hospitalization data: 
-#' \code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital occupancy.
+#' \code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital occupancy and
+#' \code{NULL} for no hospital data.
 #'
 #' @return Nested list of ABC parameters.
 #' @export
@@ -29,20 +30,38 @@ define_abc_prms <- function(iter,
                             hosp.weight,
                             hosp.type) {
     
-    if(!hosp.type %in% c('hosp.adm','hosp.occ')){
-        stop(paste0('Hospital type `hosp.type=',hosp.type,'` unknown in function call `define_abc_prms()`. Aborting.'))
+    
+    if(!is.null(hosp.type)){
+        if(!hosp.type %in% c('hosp.adm','hosp.occ')){
+            stop(paste0('Hospital type `hosp.type=',hosp.type,'` unknown in function call `define_abc_prms()`. Aborting.'))
+        }
+        
+        if(hosp.type == 'hosp.adm'){
+            w = c(cl = case.weight,
+                  ww = ww.weight,
+                  hosp.adm = hosp.weight)
+        }
+        if(hosp.type == 'hosp.occ'){
+            w = c(cl = case.weight,
+                  ww = ww.weight,
+                  hosp.occ = hosp.weight)
+        }
     }
     
-    if(hosp.type == 'hosp.adm'){
+    if(is.null(hosp.type)){
+        # hosp.type is NULL and hosp.weight must be zero
+        if(hosp.weight != 0){
+            msg = 'hosp.type is NULL. For fitting process, hosp.weight must be 0.0'
+            stop(msg)
+        }
         w = c(cl = case.weight,
               ww = ww.weight,
-              hosp.adm = hosp.weight)
-    }
-    if(hosp.type == 'hosp.occ'){
-        w = c(cl = case.weight,
-              ww = ww.weight,
+              hosp.adm = hosp.weight,
               hosp.occ = hosp.weight)
     }
+    
+    
+    
     
     res = list(n      = iter,
                accept = accept,

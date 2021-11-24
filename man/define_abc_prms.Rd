@@ -19,7 +19,8 @@ samples is \code{iter * accept}).}
 \item{hosp.weight}{Numeric, float. Relative weight for hospitalization.}
 
 \item{hosp.type}{String. Type of hospitalization data: 
-\code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital occupancy.}
+\code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital occupancy and
+\code{NULL} for no hospital data.}
 }
 \value{
 Nested list of ABC parameters.
