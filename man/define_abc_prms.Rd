@@ -4,7 +4,7 @@
 \alias{define_abc_prms}
 \title{Define parameters for Appoximate Bayesian Computation (ABC) fitting method.}
 \usage{
-define_abc_prms(iter, accept, case.weight, ww.weight, hosp.weight)
+define_abc_prms(iter, accept, case.weight, ww.weight, hosp.weight, hosp.type)
 }
 \arguments{
 \item{iter}{Numeric. Number of prior iterations for ABC fitting.}
@@ -17,6 +17,9 @@ samples is \code{iter * accept}).}
 \item{ww.weight}{Numeric, float. Relative weigth for viral concentration in wastewater.}
 
 \item{hosp.weight}{Numeric, float. Relative weight for hospitalization.}
+
+\item{hosp.type}{String. Type of hospitalization data: 
+\code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital occupancy.}
 }
 \value{
 Nested list of ABC parameters.

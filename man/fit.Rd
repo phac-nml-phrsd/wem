@@ -33,7 +33,7 @@ and range of values (\code{'prms'}) which to be fitted to the model. Output of f
 \item{do.plot}{Logical. Plot the fitting results and initial parameters}
 }
 \value{
-
+A list containing the fitted object and additional information.
 }
 \description{
 Fitting Data to Model

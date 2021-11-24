@@ -17,7 +17,7 @@
 #' @param ww.weight Numeric, float. Relative weigth for viral concentration in wastewater. 
 #' @param hosp.weight Numeric, float. Relative weight for hospitalization.
 #' @param hosp.type String. Type of hospitalization data: 
-#' \code{"adm"} for hospital admissions, \code{"occ"} for hospital occupancy.
+#' \code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital occupancy.
 #'
 #' @return Nested list of ABC parameters.
 #' @export
@@ -29,16 +29,16 @@ define_abc_prms <- function(iter,
                             hosp.weight,
                             hosp.type) {
     
-    if(!hosp.type %in% c('adm','occ')){
+    if(!hosp.type %in% c('hosp.adm','hosp.occ')){
         stop(paste0('Hospital type `hosp.type=',hosp.type,'` unknown in function call `define_abc_prms()`. Aborting.'))
     }
     
-    if(hosp.type == 'adm'){
+    if(hosp.type == 'hosp.adm'){
         w = c(cl = case.weight,
               ww = ww.weight,
               hosp.adm = hosp.weight)
     }
-    if(hosp.type == 'occ'){
+    if(hosp.type == 'hosp.occ'){
         w = c(cl = case.weight,
               ww = ww.weight,
               hosp.occ = hosp.weight)
