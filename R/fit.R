@@ -372,6 +372,33 @@ fit_abc <- function(obs,
 }
 
 
+#' @title Helper function
+#'
+#' @param data 
+#' @param last.date 
+#'
+unpack_data <- function(data, last.date) {
+    obs        = data[['obs']]
+    obs.long   = data[['obs.long']]
+    hosp.var   = data[['hosp.var']]
+    case.var   = data[['case.var']]
+    
+    if(!is.null(last.date)){
+        obs      = filter(obs, date <= last.date)
+        obs.long = filter(obs.long, date <= last.date)
+    }
+    if(is.null(last.date)){
+        last.date = max(obs$date)
+    }
+    return( list(
+        obs = obs,
+        obs.long = obs.long,
+        last.date = last.date,
+        hosp.var = hosp.var,
+        case.var = case.var
+    ))
+}
+
 #' @title Fitting Data to Model
 #'
 #' @param data List. Output of function build_data()
@@ -395,21 +422,13 @@ fit <- function(data,
                 last.date = NULL, 
                 save.rdata = FALSE) {
     
-    # Rename/separate observational dataframes
-    obs        = data[['obs']]
-    obs.long   = data[['obs.long']]
-    hosp.var   = data[['hosp.var']]
-    case.var   = data[['case.var']]
-    
-    
-    if(!is.null(last.date)){
-        obs      = filter(obs, date <= last.date)
-        obs.long = filter(obs.long, date <= last.date)
-    }
-    if(is.null(last.date)){
-        last.date = max(obs$date)
-    }
-
+    d = unpack_data(data, last.date)
+    obs        = d[['obs']]
+    obs.long   = d[['obs.long']]
+    hosp.var   = d[['hosp.var']]
+    case.var   = d[['case.var']]
+    last.date  = d[['last.date']]
+   
     # --- Draw priors
     samp.priors = sample_priors(df.priors,prm.abc)
     
@@ -456,3 +475,114 @@ fit <- function(data,
     }
     return(res)
 }
+
+
+#' @title Fitting model to recent data only, using existing fit on past data. 
+#'
+#' @param data List. Output of function build_data()
+#' @param prm.abc List. Variables for ABC fitting. Output of function define_abc_prms()
+#' @param fitobj.past List as returned by the function \code{fit()}. Fit object for past data. 
+#' @param df.priors Dataframe. Parameters (\code{'name'}), their distribution (\code{'distrib'})
+#' and range of values (\code{'prms'}) which to be fitted to the model. Output of function define_fit_priors(). 
+#' @param prm List. Initial parameters for fitting plot. Output of function load_prm().
+#' @param n.cores Numeric. number of cores used for fitting computation.
+#' @param last.date Date. Last date to stop fitting (e.g., ymd('2021-02-01') or NULL). NULL = latest date available.
+#' @param do.plot Logical. Plot the fitting results and initial parameters  
+#' @param save.rdata Logical. Saving the fitting objects in a .rds file.
+#'
+#' @return A list containing the fitted object and additional information.
+#' @export
+#'
+fit_recent <- function(data,
+                       prm.abc,
+                       fitobj.past,
+                       df.priors,
+                       prm,
+                       n.cores,
+                       last.date = NULL, 
+                       save.rdata = FALSE) {
+    
+    d = unpack_data(data, last.date)
+    obs        = d[['obs']]
+    obs.long   = d[['obs.long']]
+    hosp.var   = d[['hosp.var']]
+    case.var   = d[['case.var']]
+    last.date  = d[['last.date']]
+    
+    # --- Draw priors
+    
+    # Retrieve samples from posteriors 
+    # fitted on past data:
+    post.past = fitobj.past$post.abc
+    n.post.past = nrow(post.past)
+    
+    # make sure number of priors for recent 
+    # is multiple of past posteriors
+    q = round(prm.abc$n / n.post.past)
+    prm.abc$n <- n.post.past * q
+    
+    # Sample variables fitted to recent data
+    samples.recent = sample_priors(prior = df.priors, 
+                                   prm.abc = prm.abc)
+    
+    # Stitch samples from past posteriors
+    #  and priors for recent data.
+    # Note: the past posteriors are repeated several
+    # times, but the recent priors are unique. This is 
+    # to ensure consistency between past and recent.
+    
+    # First, check that the variable names for 
+    # "recent" and "past" or not the same:
+    if(any(names(samples.recent) %in% names(post.past))){
+        stop('In `fit_recent()`, the recent variables cannot be the same as the variables used to fit past data. Correct variable name in `df.priors`. Aborting.')
+    }
+    
+    # Stitch
+    samples.full = cbind(post.past, samples.recent)
+    
+    
+    # --- Run ABC
+    elapsed.time = system.time({
+        fit = fit_abc(obs = obs, 
+                      priors = samples.full,
+                      hosp.var = hosp.var,
+                      case.var = case.var,
+                      prm.abc = prm.abc,
+                      prm = prm, 
+                      n.cores = n.cores)
+    })
+    print(elapsed.time)
+    
+    # Retrieve the priors and 
+    # posterior distributions:
+    post.abc = fit$df.post 
+    df.prior = fit$priors %>%
+        pivot_longer(cols = 1:length(fit$priors))
+    post.ss  = post_ss_abc(post.abc)
+    
+    time.completed = now_string()
+    
+    res = list(
+        prm = prm,
+        prm.abc = prm.abc,
+        fit = fit,
+        hosp.var = hosp.var,
+        case.var = case.var,
+        post.abc = post.abc,
+        post.ss = post.ss,
+        df.prior = df.prior,
+        obs = obs, 
+        obs.long = obs.long,
+        last.date = last.date,
+        elapsed.time = elapsed.time,
+        time.completed = time.completed
+    )
+    
+    if(save.rdata){
+        save(list = names(res), 
+             file =  paste0('fitted-recent', time.completed, '.RData'))
+    }
+    
+    return(res)
+}
+

@@ -566,9 +566,9 @@ simul_from_post <- function(post.abc, prm, hosp.var, case.var, ci=0.95, n.cores 
 #' to inform the desired coefficient of variation of the added noise for clinical 
 #' reports and concentration in wastewater, respectively. 
 #'
-#' @return The input dataframe with two additional variables, 
-#' \code{report.obs} and \code{WWreport.obs}, representing the 
-#' simulated observations of the variables  \code{report} and \code{WWreport}.
+#' @return The input dataframe with three additional variables, 
+#' \code{report.obs}, \code{hosp.admission.obs} and \code{WWreport.obs}, representing the 
+#' simulated observations of the variables  \code{report}, \code{hosp.admission}  and \code{WWreport}.
 #' 
 #' @export
 #'
@@ -580,15 +580,25 @@ simul_from_post <- function(post.abc, prm, hosp.var, case.var, ci=0.95, n.cores 
 #' 
 generate_obs_noise <- function(df, prms = list(cv = 0.1, cv.ww = 0.1)) {
     
-    mu    = mean(df$report)    # for clinical cases
-    mu.ww = mean(df$WWreport)  # for ww concentration
+    mu    = sapply(df$report, mean)    # for clinical cases
+    mu.ww = sapply(df$WWreport, mean)  # for ww concentration
+    mu.ha = sapply(df$hosp.admission, mean)  # for hospital admissions
     
     # See `rbinom` documentation for the interpretation of the "variance" term.
     # Here we reparameterize with the coefficient of variation (=sd/mean)
     a    = mu / (mu * prms$cv -1) 
     a.ww = mu.ww / (mu.ww * prms$cv.ww -1)
+    a.ha = mu.ha / (mu.ha * prms$cv -1)
+    
+    # Avoid NaNs:
+    tiny = 1e-6
+    a[a <= 0]       <- tiny
+    a.ww[a.ww <= 0] <- tiny
+    a.ha[a.ha <= 0] <- tiny
     
     df$report.obs   = rnbinom(n=nrow(df), mu = df$report, size = a)
     df$WWreport.obs = rnbinom(n=nrow(df), mu = df$WWreport, size = a.ww)
+    df$hosp.admission.obs = rnbinom(n=nrow(df), 
+                                    mu = df$hosp.admission, size = a.ha)
     return(df)
 }
