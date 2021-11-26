@@ -288,7 +288,7 @@ simul <- function(prm){
     S0 = popSize - V.init - I.init
     V0 = V.init
         
-    # Unvaccinatd part
+    # Unvaccinated part
     adj.J  = sum(inf.I[1:nIH]) / sum(inf.I)
     
     sA  =  alpha / theta * rel.inf.a
@@ -369,10 +369,14 @@ simul <- function(prm){
     
     #### Simulation (i.e., solutions of the ODEs)
     ts <- as.data.frame(
-        lsoda(y      = inits.SEIR, 
-              times  = dt, 
-              func   = seir, 
-              parms  = params.SEIR))
+      lsode(y      = inits.SEIR,
+            times  = dt,
+            func   = seir,
+            parms  = params.SEIR,
+            mf     = 10,
+            rtol   = 1e-2,
+            atol   = 1e-2)
+      )
     
     ts$Eall   = calc.all(ts,"E")  # <- all exposed indiv.
     ts$Evall  = calc.all(ts,"Ev") # <- all vaccinated exposed indiv.
