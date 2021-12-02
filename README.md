@@ -16,7 +16,7 @@ along its journey in wastewater from the shedding points to the sampling site.
 This model is a combination of an exponential viral decay and a dispersed plug-flow function representing all possible hydrodynamic processes (e.g., dilution, sedimentation and
 resuspension) that leads to RNA degradation as well as decrease and delay of signal at the time of sampling.
 
-For more details on the model, see [Nourbakhsh et al. (medRxiv 2021)](https://www.medrxiv.org/content/10.1101/2021.07.19.21260773v1). Note that this R package implements additional features compared to the ones presented in that publication (for example, vaccination is a new addition).
+For more details on the mathematical model see the file `model.pdf` in the package Help, "other documentation" section. See also [Nourbakhsh et al. (medRxiv 2021)](https://www.medrxiv.org/content/10.1101/2021.07.19.21260773v1). Note that this R package implements additional features compared to the ones presented in that publication (for example, vaccination is a new addition).
 
 For practical examples, please check the vignettes.
 
