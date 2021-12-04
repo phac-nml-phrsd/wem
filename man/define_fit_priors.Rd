@@ -2,14 +2,17 @@
 % Please edit documentation in R/fit.R
 \name{define_fit_priors}
 \alias{define_fit_priors}
-\title{Define the prior distributions for fitting to data.}
+\title{Prior distributions for fitted model parameters.}
 \usage{
 define_fit_priors(path)
 }
 \arguments{
-\item{path}{String. Path to the CSV file. It need to has a specific format: 
+\item{path}{String. Path to the CSV file. 
+The CSV file must have a specific format: 
 \itemize{
-\item column \code{name}: the variable name must match the name of the model parameters that will be fitted. For example \code{R0} (and not, say, \code{Rzero}).
+\item column \code{name}: the variable name must match the name of the 
+model parameters that will be fitted. 
+For example, the basic reproduction number is \code{R0} (and not, say, \code{Rzero}).
 \item column \code{distrib}: the name of the distribution type for the prior variable. Use the standard nomenclature for probability distribution in R (e.g., \code{rnorm()}, \code{rexp()}, ...)
 \item column \code{prms}: the parameters for the distribution type for the prior variable. Use the standard nomenclature for probability distribution in R (e.g., \code{mean} and \code{sd} for \code{rnorm()}, etc.) separated by a semi-colon \code{;}. 
 }}
@@ -19,5 +22,25 @@ Dataframe with three columns: name, distrib,prms.
 }
 \description{
 Create a dataframe with the definition of the prior distribution 
-for all parameters that will be fitted to data. The definition are written in a CSV file.
+for all parameters that will be fitted to data. 
+The definition are written in a CSV file.
+}
+\examples{
+\dontrun{
+An example for the CSV file is:
+
+name,        distrib, prms
+R0,          rnorm,   3.0; 0.2
+transm.v_3,  rexp,    0.10 
+
+which translates into:
+ - The parameter R0 has a normal distribution 
+   with mean 3.0 and std dev 0.2 as a prior distribution. 
+ - The 3rd element of the vector that represents 
+   the time-dependent transmission rate `transm.v` 
+   (beta in the mathematical documentation) has an 
+   exponential prior distribution with mean 1/0.10.
+}
+
+
 }

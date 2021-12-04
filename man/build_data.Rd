@@ -27,3 +27,18 @@ A list of dataframes.
 User provides dataframes that records the number of cases, (optionally) hospital admissions and viral concentration in wastewater for a specific location.
 The various data source do \emph{not} have to have matching date.
 }
+\examples{
+
+# Load data sets examples from `wem` package:
+data('cases')
+data('hosp')
+data('wwviralconc')
+
+# Build the data object:
+dat = build_data(cases = cases, 
+                 hosp = hosp, 
+                 ww = wwviralconc, 
+                 hosp.type = 'hosp.adm', 
+                 case.date.type = 'report')
+
+}

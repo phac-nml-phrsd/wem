@@ -15,9 +15,9 @@ to inform the desired coefficient of variation of the added noise for clinical
 reports and concentration in wastewater, respectively.}
 }
 \value{
-The input dataframe with two additional variables, 
-\code{report.obs} and \code{WWreport.obs}, representing the 
-simulated observations of the variables  \code{report} and \code{WWreport}.
+The input dataframe with three additional variables, 
+\code{report.obs}, \code{hosp.admission.obs} and \code{WWreport.obs}, representing the 
+simulated observations of the variables  \code{report}, \code{hosp.admission}  and \code{WWreport}.
 }
 \description{
 Generate observation noise on the reported values for clinical cases

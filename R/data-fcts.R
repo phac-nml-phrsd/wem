@@ -29,6 +29,20 @@ add_obs_string <- function(x) {
 #' @return A list of dataframes.
 #' @export
 #'
+#' @examples
+#' 
+#' # Load data sets examples from `wem` package:
+#' data('cases')
+#' data('hosp')
+#' data('wwviralconc')
+#' 
+#' # Build the data object:
+#' dat = build_data(cases = cases, 
+#'                  hosp = hosp, 
+#'                  ww = wwviralconc, 
+#'                  hosp.type = 'hosp.adm', 
+#'                  case.date.type = 'report')
+#'
 build_data <- function(cases, hosp, ww, hosp.type, case.date.type){
     
     # --- Checks

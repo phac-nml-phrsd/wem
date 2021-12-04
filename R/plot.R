@@ -277,10 +277,11 @@ plot_fcst <- function(var, fcst.obj, dat,
 
 #' @title Visualize observational data, simulated epidemic and transmission rate.
 #' 
-#' @description Plot the observational data and the simulated epidemic generated 
+#' @description Plot the observed data and the simulated epidemic generated 
 #' from the initial parameter values. Also plot the time-varying transmission rate.
 #' This function is typically used to check an initial guess for priors 
 #' (e.g., transmission rate (\code{beta}), wastewater scaling factor (\code{ww.scale})) 
+#' before launching the procedure that fits selected model parameters to data.
 #'
 #' @param data Data object (list) as returned by \code{wem::build_data()}
 #' @param prm List of all parameter values.
@@ -292,6 +293,32 @@ plot_fcst <- function(var, fcst.obj, dat,
 #' @return A \code{ggplot2} object.
 #' 
 #' @export
+#'
+#' @examples
+#' # Load data sets examples from `wem` package:
+#' data('cases')
+#' data('hosp')
+#' data('wwviralconc')
+#' 
+#' # Build the data object:
+#' dat = build_data(cases = cases, 
+#'                  hosp = hosp, 
+#'                  ww = wwviralconc, 
+#'                  hosp.type = 'hosp.adm', 
+#'                  case.date.type = 'report')
+#'
+#' # Load example of mdoel parameters
+#' prm = model_prm_example()
+#' 
+#' # Plot data, simulation and 
+#' # time-dependent transmission rate (beta)
+#' g = plot_simobs_beta(data          = dat,
+#'                      prm           = prm,
+#'                      include.cases = TRUE,
+#'                      include.ww    = TRUE,
+#'                      include.hosp  = FALSE,
+#'                      log.scale     = FALSE)
+#' plot(g)
 #'
 plot_simobs_beta <- function(data,
                              prm,

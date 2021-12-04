@@ -5,8 +5,8 @@
 #' 
 #' @description Determine the required parameters (iteration, acceptance and weight)
 #' for the ABC fitting process. 
-#' The weights specifie the importance of different data sources utilized
-#'  in the fitting process simultaneously. There are three data sources 
+#' The weights specify the importance of different data sources utilized simultaneously 
+#'  in the fitting process.  There are three data sources 
 #' for simultaneous fitting: reported cases, viral concentration in wastewater 
 #' and hospitalization (admission or occupancy).  
 #'
@@ -22,6 +22,18 @@
 #'
 #' @return Nested list of ABC parameters.
 #' @export
+#' 
+#' @seealso \code{define_fit_priors()}, \code{fit()}
+#'
+#' @examples 
+#' 
+#' prm.abc = define_abc_prms(
+#' iter        = 1e4,
+#' accept      = 1e-2,
+#' case.weight = 1.0,
+#' ww.weight   = 2.5,
+#' hosp.weight = 1.0)
+#'
 #'
 define_abc_prms <- function(iter,
                             accept,
@@ -107,20 +119,42 @@ sample_priors <- function(prior, prm.abc, all.positive = TRUE) {
 }
 
 
-#' @title  Define the prior distributions for fitting to data.
+#' @title  Prior distributions for fitted model parameters.
 #'
 #' @description Create a dataframe with the definition of the prior distribution 
-#' for all parameters that will be fitted to data. The definition are written in a CSV file.
+#' for all parameters that will be fitted to data. 
+#' The definition are written in a CSV file.
 #'
-#' @param path String. Path to the CSV file. It need to has a specific format: 
+#' @param path String. Path to the CSV file. 
+#' The CSV file must have a specific format: 
 #' \itemize{
-#' \item column \code{name}: the variable name must match the name of the model parameters that will be fitted. For example \code{R0} (and not, say, \code{Rzero}).
+#' \item column \code{name}: the variable name must match the name of the 
+#' model parameters that will be fitted. 
+#' For example, the basic reproduction number is \code{R0} (and not, say, \code{Rzero}).
 #' \item column \code{distrib}: the name of the distribution type for the prior variable. Use the standard nomenclature for probability distribution in R (e.g., \code{rnorm()}, \code{rexp()}, ...)
 #' \item column \code{prms}: the parameters for the distribution type for the prior variable. Use the standard nomenclature for probability distribution in R (e.g., \code{mean} and \code{sd} for \code{rnorm()}, etc.) separated by a semi-colon \code{;}. 
 #' }
 #' 
 #' @return Dataframe with three columns: name, distrib,prms.  
 #' @export
+#' 
+#' @examples 
+#' \dontrun{
+#' An example for the CSV file is:
+#' 
+#' name,        distrib, prms
+#' R0,          rnorm,   3.0; 0.2
+#' transm.v_3,  rexp,    0.10 
+#' 
+#' which translates into:
+#'  - The parameter R0 has a normal distribution 
+#'    with mean 3.0 and std dev 0.2 as a prior distribution. 
+#'  - The 3rd element of the vector that represents 
+#'    the time-dependent transmission rate `transm.v` 
+#'    (beta in the mathematical documentation) has an 
+#'    exponential prior distribution with mean 1/0.10.
+#' }
+#' 
 #' 
 define_fit_priors <- function(path) {
     

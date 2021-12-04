@@ -30,8 +30,36 @@ plot_simobs_beta(
 A \code{ggplot2} object.
 }
 \description{
-Plot the observational data and the simulated epidemic generated 
+Plot the observed data and the simulated epidemic generated 
 from the initial parameter values. Also plot the time-varying transmission rate.
 This function is typically used to check an initial guess for priors 
-(e.g., transmission rate (\code{beta}), wastewater scaling factor (\code{ww.scale}))
+(e.g., transmission rate (\code{beta}), wastewater scaling factor (\code{ww.scale})) 
+before launching the procedure that fits selected model parameters to data.
+}
+\examples{
+# Load data sets examples from `wem` package:
+data('cases')
+data('hosp')
+data('wwviralconc')
+
+# Build the data object:
+dat = build_data(cases = cases, 
+                 hosp = hosp, 
+                 ww = wwviralconc, 
+                 hosp.type = 'hosp.adm', 
+                 case.date.type = 'report')
+
+# Load example of mdoel parameters
+prm = model_prm_example()
+
+# Plot data, simulation and 
+# time-dependent transmission rate (beta)
+g = plot_simobs_beta(data          = dat,
+                     prm           = prm,
+                     include.cases = TRUE,
+                     include.ww    = TRUE,
+                     include.hosp  = FALSE,
+                     log.scale     = FALSE)
+plot(g)
+
 }

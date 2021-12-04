@@ -2,7 +2,7 @@
 % Please edit documentation in R/prms.R
 \name{load_prm}
 \alias{load_prm}
-\title{Load all baseline parameters for the wastewater epidemic model.}
+\title{Load all baseline model parameters}
 \usage{
 load_prm(path)
 }
@@ -10,13 +10,20 @@ load_prm(path)
 \item{path}{String. Path to the model parameters.}
 }
 \value{
-A list of all parameters.
+A list of all model parameters.
 }
 \description{
-Load all model parameters defined in a CSV file.
+Load all model parameters defined in a CSV file. 
+This is an alternative (that may be more practical) to defining the 
+full list of parameters in a R script. 
 Parameters are related to the simulation (population size, time horizon, etc.),
  the epidemic (reproduction number, etc.) and wastewater (decay, delay, etc.) 
 The expected format of the CSV file consists of three columns named 
 \code{name} for the parameter name, \code{value} for the corresponding value
  and \code{comment} for a brief explanation of the parameter.
+}
+\seealso{
+The function \code{model_prm_example()} provides a set of 
+parameters ready to use. It is a helpful template from which to start
+customizing parameter values.
 }

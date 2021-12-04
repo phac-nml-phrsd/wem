@@ -28,8 +28,22 @@ Nested list of ABC parameters.
 \description{
 Determine the required parameters (iteration, acceptance and weight)
 for the ABC fitting process. 
-The weights specifie the importance of different data sources utilized
- in the fitting process simultaneously. There are three data sources 
+The weights specify the importance of different data sources utilized simultaneously 
+ in the fitting process.  There are three data sources 
 for simultaneous fitting: reported cases, viral concentration in wastewater 
 and hospitalization (admission or occupancy).
+}
+\examples{
+
+prm.abc = define_abc_prms(
+iter        = 1e4,
+accept      = 1e-2,
+case.weight = 1.0,
+ww.weight   = 2.5,
+hosp.weight = 1.0)
+
+
+}
+\seealso{
+\code{define_fit_priors()}, \code{fit()}
 }
