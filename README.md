@@ -1,7 +1,11 @@
 # wem
 Wastewater Epidemic Model
 
-**WARNING: this is an early release version** (as indicated by the version number starting with 0)
+
+
+[![Lifecycle:
+development](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental-1)
+
 
 ## Introduction 
 
