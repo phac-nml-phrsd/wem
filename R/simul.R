@@ -517,7 +517,10 @@ simul_from_post <- function(post.abc, prm, hosp.var, case.var, ci=0.95, n.cores 
                   V.hi  = quantile(V, probs = 0.5 + ci/2),
                   S.m   = mean(S),
                   S.lo  = quantile(S, probs = 0.5 - ci/2),
-                  S.hi  = quantile(S, probs = 0.5 + ci/2)) %>% 
+                  S.hi  = quantile(S, probs = 0.5 + ci/2),
+                  asymp.m   = mean(Aall),
+                  asymp.lo  = quantile(Aall, probs = 0.5 - ci/2),
+                  asymp.hi  = quantile(Aall, probs = 0.5 + ci/2)) %>% 
         # Calculate cumulative incidence
         mutate(cuminc.m  = 1 - S.m/S.m[1],
                cuminc.lo = 1 - S.hi/S.hi[1],
@@ -543,7 +546,10 @@ simul_from_post <- function(post.abc, prm, hosp.var, case.var, ci=0.95, n.cores 
                   ww.hi = quantile(WWreport, probs = 0.5 + ci/2),
                   S.m   = mean(S),
                   S.lo  = quantile(S, probs = 0.5 - ci/2),
-                  S.hi  = quantile(S, probs = 0.5 + ci/2)) %>% 
+                  S.hi  = quantile(S, probs = 0.5 + ci/2),
+                  asymp.m   = mean(Aall),
+                  asymp.lo  = quantile(Aall, probs = 0.5 - ci/2),
+                  asymp.hi  = quantile(Aall, probs = 0.5 + ci/2)) %>% 
         # Calculate cumulative incidence
         mutate(cuminc.m  = 1 - S.m/S.m[1],
                cuminc.lo = 1 - S.hi/S.hi[1],
