@@ -30,7 +30,12 @@ The example set of model parameters defined in the function `model_prm_example()
 First, let's load this eample set of model parameters:
 
 ```{r load model prm, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
 library(wem)
+
 prm = wem::model_prm_example()
 ```
 

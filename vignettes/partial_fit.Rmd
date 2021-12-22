@@ -30,7 +30,10 @@ This vignette shows how to use the function `fit_recent()` for this purpose.
 First, let's simulate data to generate an epidemic that will be convenient to fit. 
 
 ```{r data setup, message=FALSE, fig.width=6 }
-
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
 library(wem)
 packageVersion('wem')
 set.seed(1234)

@@ -51,6 +51,10 @@ Once the model parameters are defined, the model can simulate epidemic trajector
 First, let's load all model parameters in a variable:
 
 ```{r load parameters, message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
 library(wem)
 
 # Load a pre-defined model parameters as an example:
