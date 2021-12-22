@@ -10,7 +10,7 @@ report_cases <- function(ts, report.prop, lag, sim.steps) {
         report.prop = 0.44
         lag  = 3
     }
-    sim.lag = sim.steps * lag # simulation lag for report cases 
+    sim.lag = round(sim.steps * lag) # simulation lag for report cases 
     tmp = ts$sympinc * report.prop  
     res = c( rep(0, sim.lag-1), tmp[1:(length(tmp)-sim.lag+1)] )
     return(res)
@@ -63,7 +63,7 @@ calc_concen <- function(ts,
 #' @param kappa Numeric. Daily decay rate.
 #' @param sim.steps Integer. Number of time steps per unit of time.
 #' @param transit.time.mean Numeric. Mean transit time of RNA particles in wastewater from shedding to sampling sites.
-#' @param transit.time.cv Numeric. Coeeficient ot variation for the transit time of RNA particles in wastewater from shedding to sampling sites.
+#' @param transit.time.cv Numeric. Coefficient ot variation for the transit time of RNA particles in wastewater from shedding to sampling sites.
 calc_delayed_concen <- function(ts, 
                                 kappa, 
                                 sim.steps, 
@@ -87,9 +87,12 @@ calc_delayed_concen <- function(ts,
         
         # apply lag in receiving m at the site
         # 'i-1' shows the lagging day
-        sim.lag = (i-1) * sim.steps
+        sim.lag = round((i-1) * sim.steps)
         if(i==1) mat[,i] = m
-        if(i>1)  mat[,i] = c(rep(0,sim.lag), m[1:(length(m)-sim.lag)])
+        if(i>1)  {
+          foo = c(rep(0,sim.lag), m[1:(length(m)-sim.lag)])
+          mat[,i] = foo
+        }
     }
     return(mat)
 }
