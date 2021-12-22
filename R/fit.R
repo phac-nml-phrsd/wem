@@ -96,8 +96,6 @@ define_abc_prms <- function(iter,
 
 #' @export
 #'
-#' @examples
-#' sample_priors(df.priors, prm.abc)
 #' 
 sample_priors <- function(prior, prm.abc, all.positive = TRUE) {
     

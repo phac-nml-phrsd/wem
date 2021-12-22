@@ -515,7 +515,6 @@ plot_multvec <- function(prm, xname, yname, d0, xmax = NULL) {
 #' @param d 
 #'
 #' @return
-#' @export
 #'
 .plottype <- function(d) {
   res = d %>%  

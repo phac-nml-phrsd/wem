@@ -19,7 +19,3 @@ Long dataframe. All the prior sampled values for the parameters to be fitted.
 \description{
 This function uses the dataframe output of \code{define_priors()} that defines the prior distributions for all parameter that must be fitted.
 }
-\examples{
-sample_priors(df.priors, prm.abc)
-
-}
