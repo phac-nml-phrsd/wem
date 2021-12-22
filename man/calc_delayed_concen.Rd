@@ -16,7 +16,7 @@ calc_delayed_concen(ts, kappa, sim.steps, transit.time.mean, transit.time.cv)
 
 \item{transit.time.mean}{Numeric. Mean transit time of RNA particles in wastewater from shedding to sampling sites.}
 
-\item{transit.time.cv}{Numeric. Coeeficient ot variation for the transit time of RNA particles in wastewater from shedding to sampling sites.}
+\item{transit.time.cv}{Numeric. Coefficient ot variation for the transit time of RNA particles in wastewater from shedding to sampling sites.}
 }
 \description{
 Estimate RNA/day received at sampling site after decay and delay. 
