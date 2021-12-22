@@ -372,14 +372,15 @@ simul <- function(prm){
     
     #### Simulation (i.e., solutions of the ODEs)
     ts <- as.data.frame(
-      lsode(y      = inits.SEIR,
-            times  = dt,
-            func   = seir,
-            parms  = params.SEIR,
-            mf     = 10,
-            rtol   = 1e-2,
-            atol   = 1e-2)
-      )
+      deSolve::lsode(
+        y      = inits.SEIR,
+        times  = dt,
+        func   = seir,
+        parms  = params.SEIR,
+        mf     = 10,
+        rtol   = 1e-2,
+        atol   = 1e-2)
+    )
     
     ts$Eall   = calc.all(ts,"E")  # <- all exposed indiv.
     ts$Evall  = calc.all(ts,"Ev") # <- all vaccinated exposed indiv.

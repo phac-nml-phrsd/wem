@@ -29,6 +29,9 @@ add_obs_string <- function(x) {
 #' @return A list of dataframes.
 #' @export
 #'
+#' @import dplyr
+#' @import tidyr
+#'
 #' @examples
 #' 
 #' # Load data sets examples from `wem` package:

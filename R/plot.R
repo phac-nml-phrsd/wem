@@ -15,6 +15,8 @@
 #' @return A \code{ggplot2} object.
 #' @export
 #'
+#' @import ggplot2
+#'
 plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
 
   .mkdf <- function(prm, regex) {
@@ -57,8 +59,8 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
 
   # --- Infectiousness
   g.inf =  .mkdf(prm, '^inf') %>%
-    mutate(v = str_extract(var, 'inf\\.[A-Z]+'),
-           x = as.numeric(str_extract(var, '\\d+$'))) %>%
+    mutate(v = stringr::str_extract(var, 'inf\\.[A-Z]+'),
+           x = as.numeric(stringr::str_extract(var, '\\d+$'))) %>%
     ggplot(aes(x=x, y=value)) +
     geom_point(color = 'tomato3', alpha=0.5)+
     geom_area(fill = 'tomato3', alpha=0.5)+
@@ -68,10 +70,10 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
 
   # --- Fecal shedding
   g.shed =  .mkdf(prm, '^shed') %>%
-    mutate(v = str_extract(var, 'shed\\.[A-Z]+'),
-           x = str_extract(var, '\\d*$')) %>%
+    mutate(v = stringr::str_extract(var, 'shed\\.[A-Z]+'),
+           x = stringr::str_extract(var, '\\d*$')) %>%
     mutate(x = as.numeric(ifelse(x=='', 1,x)),
-           v = str_remove(v,'^shed.')) %>%
+           v = stringr::str_remove(v,'^shed.')) %>%
     ggplot(aes(x=x, y=value)) +
     geom_point(color = 'orange3', alpha=0.5)+
     geom_area(fill = 'orange3', alpha=0.5)+
@@ -83,8 +85,8 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
 
   # --- Time-dependent interventions
   tmp = .mkdf(prm, '^transm.[tv]') %>%
-    mutate(v = str_extract(var, '^transm.[tv]'),
-           x = as.numeric(str_extract(var, '\\d*$')))
+    mutate(v = stringr::str_extract(var, '^transm.[tv]'),
+           x = as.numeric(stringr::str_extract(var, '\\d*$')))
   b = filter(tmp, v=='transm.t')
   v = filter(tmp, v=='transm.v')
   dj = left_join(b,v,by='x')
@@ -98,8 +100,8 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
 
   # --- Time-dependent hospitalization rate
   tmp = .mkdf(prm, '^hosp.rate.[tv]') %>%
-    mutate(v = str_extract(var, '^hosp.rate.[tv]$'),
-           x = as.numeric(str_extract(var, '\\d*$')))
+    mutate(v = stringr::str_extract(var, '^hosp.rate.[tv]$'),
+           x = as.numeric(stringr::str_extract(var, '\\d*$')))
   b = filter(tmp, v=='hosp.rate.t')
   v = filter(tmp, v=='hosp.rate.v')
   dj = left_join(b,v,by='x')
@@ -113,8 +115,8 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
 
   # --- Time-dependent asymptomatic fraction
   tmp = .mkdf(prm, '^asymp.prop.[tv]$') %>%
-    mutate(v = str_extract(var, '^asymp.prop.[tv]$'),
-           x = as.numeric(str_extract(var, '\\d*$')))
+    mutate(v = stringr::str_extract(var, '^asymp.prop.[tv]$'),
+           x = as.numeric(stringr::str_extract(var, '\\d*$')))
   b = filter(tmp, v=='asymp.prop.t')
   v = filter(tmp, v=='asymp.prop.v')
   dj = left_join(b,v,by='x')
@@ -127,16 +129,17 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
     ggtitle('Multiplier on Asymp. fraction')
 
   # --- Dashboard
-  wrap_plots(g.dur,
-             g.prop,
-             g.lag,
-             g.n,
-             g.inf,
-             g.shed,
-             g.int,
-             g.hosp,
-             g.asymp,
-             nrow = nrow)
+  patchwork::wrap_plots(
+    g.dur,
+    g.prop,
+    g.lag,
+    g.n,
+    g.inf,
+    g.shed,
+    g.int,
+    g.hosp,
+    g.asymp,
+    nrow = nrow)
 }
 
 #' @title Plot all compartments of the model
@@ -366,7 +369,9 @@ plot_simobs_beta <- function(data,
     xlab('') + 
     theme(plot.margin = margin(b=0))
   
-  return(g.init / g.beta.init)
+  g.final = patchwork::wrap_plots(g.init, g.beta.init, ncol = 1)
+  
+  return(g.final)
 }
 
 

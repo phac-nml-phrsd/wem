@@ -1,7 +1,9 @@
-# Remove elements beyond last date of observed data 
-# in the vector of time-dependent prms ('varibale.t' and 'variable.v') or
-# in a column priors ('variable_t', 'variable_v')
-#' Title
+# 
+#' @title Remove future reference im parameters.
+#'
+#' @description Remove elements beyond last date of observed data 
+#' in the vector of time-dependent prms ('variable.t' and 'variable.v') or
+#' in a column priors ('variable_t', 'variable_v')
 #'
 #' @param idx.t 
 #' @param idx.future 
@@ -9,14 +11,12 @@
 #' @param post.abc 
 #'
 #' @return 
-#' @export
 #'
-#' @examples
 remove.fut.inference <- function(idx.t,
                                  idx.future,
                                  prm,post.abc){
     nm.t = names(prm[idx.t])
-    nm.v = paste0(str_remove(nm.t,'.t$'),'.v')
+    nm.v = paste0(stringr::str_remove(nm.t,'.t$'),'.v')
     idx.v = which(names(prm)==nm.v)
     
     prm[[idx.t]] <- prm[[idx.t]][-idx.future] # remove time

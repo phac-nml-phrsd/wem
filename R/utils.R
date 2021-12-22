@@ -175,7 +175,7 @@ overwrite_vectors <- function(prm, verbose = FALSE) {
         a = names(prm2)[idx]
         for(i in seq_along(idx)){
             ii = idx[i]
-            tmp = unlist(str_split(a[i],'_'))
+            tmp = unlist(stringr::str_split(a[i],'_'))
             prm.name = tmp[1]
             prm.pos  = as.integer(tmp[2])
             

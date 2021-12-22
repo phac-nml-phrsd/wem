@@ -193,7 +193,7 @@ plot_fit_abc_vs_obs <- function(prm,
     df.post = do.call('rbind',tmp)
     
     # Add dates
-    df.post$date = ymd(min(obs.long$date) + df.post$time)
+    df.post$date = lubridate::ymd(min(obs.long$date) + df.post$time)
     
     # Determine type of date for clinical cases (reported date or episode date)
     if(case.var=='report'){
@@ -253,7 +253,7 @@ plot_fit_abc_vs_obs <- function(prm,
         select(-name) %>%
         pivot_wider(names_from = 'stat')
     
-    obs.long$type = str_remove(obs.long$name,'\\.obs')
+    obs.long$type = stringr::str_remove(obs.long$name,'\\.obs')
     
     
     # --- Plots ---
