@@ -32,7 +32,8 @@
 #' accept      = 1e-2,
 #' case.weight = 1.0,
 #' ww.weight   = 2.5,
-#' hosp.weight = 1.0)
+#' hosp.weight = 1.0,
+#' hosp.type   = 'hosp.adm')
 #'
 #'
 define_abc_prms <- function(iter,
