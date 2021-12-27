@@ -2,7 +2,7 @@
 % Please edit documentation in R/simul.R
 \name{simul_from_post}
 \alias{simul_from_post}
-\title{Simulate epidemic from posterior distribution}
+\title{Simulate epidemic from posterior distributions.}
 \usage{
 simul_from_post(post.abc, prm, hosp.var, case.var, ci = 0.95, n.cores = 4)
 }
@@ -15,13 +15,13 @@ simul_from_post(post.abc, prm, hosp.var, case.var, ci = 0.95, n.cores = 4)
 
 \item{case.var}{String. Type of date for clinical cases; \code{'report'} and \code{'episode'}}
 
-\item{ci}{Numeric. Credible interval.}
+\item{ci}{Numeric. Credible interval level. Default = 0.95.}
 
-\item{n.cores}{Integer. Number of cores for parallel computing}
+\item{n.cores}{Integer. Number of cores used for parallel computing.}
 }
 \value{
 Dataframe of summary statistics time series.
 }
 \description{
-Simulate epidemic from posterior distribution
+Use posterior distributions of a fitted object to simulate an epidemic.
 }

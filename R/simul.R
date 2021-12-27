@@ -444,124 +444,110 @@ simul_post_unit <- function(i, post.abc, prm) {
 }
 
 
-#' Simulate epidemic from posterior distribution
+#' @title Simulate epidemic from posterior distributions.
+#' 
+#' @description Use posterior distributions of a fitted object to simulate an epidemic.
 #' 
 #' @param post.abc Dataframe of posterior values.
 #' @param prm List of (not fitted) model parameters.
 #' @param hosp.var String. Type of hospitalization; \code{NULL}, \code{'hosp.adm'} and \code{'hosp.occ'}
 #' @param case.var String. Type of date for clinical cases; \code{'report'} and \code{'episode'}
-#' @param ci Numeric. Credible interval.
-#' @param n.cores Integer. Number of cores for parallel computing
+#' @param ci Numeric. Credible interval level. Default = 0.95.
+#' @param n.cores Integer. Number of cores used for parallel computing.
 #' 
 #' @return Dataframe of summary statistics time series.
 #' 
 #' @export
 #' 
-simul_from_post <- function(post.abc, prm, hosp.var, case.var, ci=0.95, n.cores = 4) {
+simul_from_post <- function(post.abc, prm, 
+                            hosp.var, case.var, 
+                            ci = 0.95, n.cores = 4) {
+  
+  n.abc.post = nrow(post.abc)
+  message(paste('Starting simulation using',n.abc.post,'posterior values...'))
+  
+  sfInit(parallel = n.cores > 1, cpus = n.cores)
+  sfExportAll()
+  suppressMessages({
+    sfLibrary(deSolve)
+    sfLibrary(stringr)
+    sfLibrary(dplyr)
+  })
+  tmp = sfLapply(x   = 1:n.abc.post, 
+                 fun = simul_post_unit, 
+                 post.abc = post.abc, prm = prm)
+  sfStop()
+  
+  simp = do.call('rbind', tmp)
+  
+  # Determine type of date for clinical cases (reported date or episode date)
+  if(case.var=='report'){
+    simp = simp %>%
+      mutate(clin.case = report)
+  }
+  if(case.var=='episode'){
+    simp = simp %>%
+      mutate(clin.case = report.episode)
+  }
+  
+  if(!is.null(hosp.var)){
     
-    n.abc.post = nrow(post.abc)
-    message(paste('Starting simulation using',n.abc.post,'posterior values...'))
-    
-    sfInit(parallel = n.cores > 1, cpus = n.cores)
-    sfExportAll()
-    suppressMessages({
-        sfLibrary(deSolve)
-        sfLibrary(stringr)
-        sfLibrary(dplyr)
-    })
-    tmp = sfLapply(x   = 1:n.abc.post, 
-                   fun = simul_post_unit, 
-                   post.abc = post.abc, prm = prm)
-    sfStop()
-    
-    simp = do.call('rbind', tmp)
-    
-    
-    # Determine type of date for clinical cases (reported date or episode date)
-    if(case.var=='report'){
+    # Determine hospital type (new admissions or occupancy)
+    if(hosp.var=='hosp.adm'){
       simp = simp %>%
-        mutate(clin.case = report)
+        mutate(hospital = hosp.admission)
     }
-    if(case.var=='episode'){
+    if(hosp.var=='hosp.occ'){
       simp = simp %>%
-        mutate(clin.case = report.episode)
+        mutate(hospital = Hall)
     }
-    
-    if(!is.null(hosp.var)){
-      #---- Summary stats of posterior simulations:
-      # Determine hospital type (new admissions or occupancy)
-      if(hosp.var=='hosp.adm'){
-        simp = simp %>%
-          mutate(hospital = hosp.admission)
-      }
-      if(hosp.var=='hosp.occ'){
-        simp = simp %>%
-          mutate(hospital = Hall)
-      }
-      
-      ss = simp %>%
-        group_by(time) %>% 
-        summarise(prev.m  = mean(prev),
-                  prev.lo = quantile(prev, probs = 0.5 - ci/2),
-                  prev.hi = quantile(prev, probs = 0.5 + ci/2),
-                  inc.m   = mean(inc),
-                  inc.lo  = quantile(inc, probs = 0.5 - ci/2),
-                  inc.hi  = quantile(inc, probs = 0.5 + ci/2),
-                  hosp.m  = mean(hosp.admission),
-                  hosp.lo = quantile(hospital, probs = 0.5 - ci/2),
-                  hosp.hi = quantile(hospital, probs = 0.5 + ci/2),
-                  report.m  = mean(clin.case),
-                  report.lo = quantile(clin.case, probs = 0.5 - ci/2),
-                  report.hi = quantile(clin.case, probs = 0.5 + ci/2),
-                  ww.m  = mean(WWreport),
-                  ww.lo = quantile(WWreport, probs = 0.5 - ci/2),
-                  ww.hi = quantile(WWreport, probs = 0.5 + ci/2),
-                  V.m   = mean(V),
-                  V.lo  = quantile(V, probs = 0.5 - ci/2),
-                  V.hi  = quantile(V, probs = 0.5 + ci/2),
-                  S.m   = mean(S),
-                  S.lo  = quantile(S, probs = 0.5 - ci/2),
-                  S.hi  = quantile(S, probs = 0.5 + ci/2),
-                  asymp.m   = mean(Aall),
-                  asymp.lo  = quantile(Aall, probs = 0.5 - ci/2),
-                  asymp.hi  = quantile(Aall, probs = 0.5 + ci/2)) %>% 
-        # Calculate cumulative incidence
-        mutate(cuminc.m  = 1 - S.m/S.m[1],
-               cuminc.lo = 1 - S.hi/S.hi[1],
-               cuminc.hi = 1 - S.lo/S.lo[1])
-    }
-    
-    
-    if(is.null(hosp.var)){
-      #---- Summary stats of posterior simulations:
-      ss = simp %>%
-        group_by(time) %>% 
-        summarise(prev.m  = mean(prev),
-                  prev.lo = quantile(prev, probs = 0.5 - ci/2),
-                  prev.hi = quantile(prev, probs = 0.5 + ci/2),
-                  inc.m   = mean(inc),
-                  inc.lo  = quantile(inc, probs = 0.5 - ci/2),
-                  inc.hi  = quantile(inc, probs = 0.5 + ci/2),
-                  report.m  = mean(clin.case),
-                  report.lo = quantile(clin.case, probs = 0.5 - ci/2),
-                  report.hi = quantile(clin.case, probs = 0.5 + ci/2),
-                  ww.m  = mean(WWreport),
-                  ww.lo = quantile(WWreport, probs = 0.5 - ci/2),
-                  ww.hi = quantile(WWreport, probs = 0.5 + ci/2),
-                  S.m   = mean(S),
-                  S.lo  = quantile(S, probs = 0.5 - ci/2),
-                  S.hi  = quantile(S, probs = 0.5 + ci/2),
-                  asymp.m   = mean(Aall),
-                  asymp.lo  = quantile(Aall, probs = 0.5 - ci/2),
-                  asymp.hi  = quantile(Aall, probs = 0.5 + ci/2)) %>% 
-        # Calculate cumulative incidence
-        mutate(cuminc.m  = 1 - S.m/S.m[1],
-               cuminc.lo = 1 - S.hi/S.hi[1],
-               cuminc.hi = 1 - S.lo/S.lo[1])
-    }
-    
-    
-    return(ss)
+  }  
+  #---- Summary stats of posterior simulations:
+  
+  varnames = c('prev', 'inc',  'clin.case', 
+               'WWreport', 'S', 'Aall', 'V')
+  
+  if(!is.null(hosp.var)) varnames = c(varnames, 'hospital') 
+  
+  ss = simp %>% 
+    group_by(time) %>%
+    # Calculate mean and quantiles for 
+    # each variables defined in `vv` :
+    summarise(
+      across(.cols = varnames, 
+             .fns = list(m  = mean, 
+                         lo = ~quantile(.x, probs= 0.5 - ci/2),
+                         hi = ~quantile(.x, probs= 0.5 + ci/2)), 
+             .names = "{.col}.{.fn}")) %>% 
+    #
+    # Calculate cumulative incidence
+    mutate(cuminc.m  = 1 - S.m/S.m[1],
+           cuminc.lo = 1 - S.hi/S.hi[1],
+           cuminc.hi = 1 - S.lo/S.lo[1]) %>%
+    #
+    # Rename variables.  
+    # TODO: do something smarter! 
+    # Maybe do not rename and use original var names, 
+    # as this would be more informative and consistent (?)
+    #
+    rename(ww.lo = WWreport.lo, 
+           ww.m  = WWreport.m, 
+           ww.hi = WWreport.hi,
+           report.lo = clin.case.lo,
+           report.m  = clin.case.m,
+           report.hi = clin.case.hi,
+           asymp.lo = Aall.lo, 
+           asymp.m  = Aall.m, 
+           asymp.hi = Aall.hi)
+  
+  if(!is.null(hosp.var)){
+    ss = rename(ss, 
+                hosp.lo = hospital.lo, 
+                hosp.m  = hospital.m, 
+                hosp.hi = hospital.hi)
+  }
+  
+  return(ss)
 }
 
 

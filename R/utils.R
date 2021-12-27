@@ -261,7 +261,7 @@ fcst_from_post <- function(path.fitted.object,
     if(!is.null(time.horizon)) prm$horizon <- time.horizon
     
     # Run simulations
-    ss = simul_from_post(post.abc, prm, ci, n.cores)
+    ss = simul_from_post(post.abc, prm, ci, n.cores) #TODO: This should crash, input prm missing!
     
     sim.post = ss %>% 
         mutate(date = d0 + time,
