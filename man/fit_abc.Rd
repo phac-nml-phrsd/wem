@@ -22,7 +22,11 @@ fit_abc(obs, priors, hosp.var, case.var, prm.abc, prm, n.cores = 2)
 \item{n.cores}{Numerical. Number of cores for fitting compoutation.}
 }
 \value{
-A list of 1-post fitting variables in a dataframe, 2-priors used for fitting, 3-error of fitting.
+A list of 
+1) a dataframe of variables post fitting, 
+2) a dataframe of priors used for fitting,
+3) a dataframe of fitting errors,
+4) a dataframe of the final states of the system for the posterior trajectories only.
 }
 \description{
 Fitting ABC function (internal use)

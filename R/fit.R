@@ -265,10 +265,10 @@ fit_abc_unit <- function(i,
         prm[[ names(lhs)[k] ]] = lhs[i,k]
     }
     
+    # Simulate with updated parameters:
     sim.i = simul(prm)$ts 
     
     # Normalize by max value of observations:
-    
     mx.obs.ww = max(obs$ww.obs, na.rm = TRUE)
     mx.obs.cl = max(obs$clin.obs, na.rm = TRUE)
     
@@ -312,9 +312,8 @@ fit_abc_unit <- function(i,
     dj = left_join(obs.norm, sim.norm, by='time') %>% 
         filter(!is.na(norm.ww) | !is.na(norm.cl))
     
-    # Distance from observations:
+    # Calculate error between simulations and observations:
     err <- vector()
-    
     err['ww'] = err_fct(dj$norm.ww, dj$norm.ww.sim)
     err['cl'] = err_fct(dj$norm.cl, dj$norm.cl.sim)
     
@@ -337,13 +336,19 @@ fit_abc_unit <- function(i,
         err.total = err.total + weightfit[q] * err[q]
     }
     
-    res = c(err.total     = unname(err.total),
-            err.ww        = unname(weightfit['ww'] * err['ww']), 
-            err.clin      = unname(weightfit['cl'] * err['cl']),
-            err.hosp.adm  = unname(weightfit['hosp.adm'] * err['hosp.adm']),
-            err.hosp.occ  = unname(weightfit['hosp.occ'] * err['hosp.occ']))
+    abcerr =  c(
+        err.total     = unname(err.total),
+        err.ww        = unname(weightfit['ww'] * err['ww']), 
+        err.clin      = unname(weightfit['cl'] * err['cl']),
+        err.hosp.adm  = unname(weightfit['hosp.adm'] * err['hosp.adm']),
+        err.hosp.occ  = unname(weightfit['hosp.occ'] * err['hosp.occ']))
+    
+    res = list(errors = abcerr, 
+               ts = sim.i)
     return(res)
 }
+
+
 
 
 
@@ -357,7 +362,11 @@ fit_abc_unit <- function(i,
 #' @param prm List. All parameters model requires. It has to be in the \code{wem-prm.csv} format.    
 #' @param n.cores Numerical. Number of cores for fitting compoutation. 
 #'
-#' @return A list of 1-post fitting variables in a dataframe, 2-priors used for fitting, 3-error of fitting.
+#' @return A list of 
+#' 1) a dataframe of variables post fitting, 
+#' 2) a dataframe of priors used for fitting,
+#' 3) a dataframe of fitting errors,
+#' 4) a dataframe of the final states of the system for the posterior trajectories only.
 #'
 #' 
 fit_abc <- function(obs,
@@ -379,29 +388,40 @@ fit_abc <- function(obs,
         sfLibrary(stringr)
         sfLibrary(dplyr)
     })
-    err.abc = sfSapply(x   = 1:prm.abc$n, 
-                       fun = fit_abc_unit, 
-                       prm.abc = prm.abc, 
-                       prm = prm,
-                       lhs = lhs, 
-                       obs = obs,
-                       hosp.var = hosp.var,
-                       case.var = case.var)
+    
+    tmp = sfLapply(x   = 1:prm.abc$n,
+                   fun = fit_abc_unit,
+                   prm.abc = prm.abc,
+                   prm = prm,
+                   lhs = lhs,
+                   obs = obs,
+                   hosp.var = hosp.var,
+                   case.var = case.var)
     sfStop()
     
-    # Sort the fitting errors
-    df.err = cbind(i = 1:prm.abc$n, t(err.abc)) %>%
+    # Sort the fitting errors after retrieving them:
+    df.err = lapply(tmp, '[[', 'errors') %>%
+        bind_rows() %>%
+        mutate(i = 1:prm.abc$n) %>%
         as.data.frame() %>%
         arrange(err.total)
     
     # Keep only the smallest errors:
     n.accept = round(prm.abc$accept * prm.abc$n)
-    idx.keep = df.err[1:n.accept,1]
-    df.post = lhs[idx.keep,]
+    idx.keep = df.err$i[1:n.accept]
+    df.post  = lhs[idx.keep,]
     
+    # Record the final states:
+    fs = lapply(tmp, '[[', 'ts') %>%
+        bind_rows() %>%
+        filter(time == max(time)) %>%
+        mutate(i = 1:prm.abc$n) %>%
+        filter(i %in% idx.keep)
+
     return(list(df.post = df.post, 
                 priors  = lhs,
-                err     = df.err))
+                err     = df.err,
+                finalstates = fs))
 }
 
 
@@ -578,6 +598,117 @@ fit_recent <- function(data,
     elapsed.time = system.time({
         fit = fit_abc(obs = obs, 
                       priors = samples.full,
+                      hosp.var = hosp.var,
+                      case.var = case.var,
+                      prm.abc = prm.abc,
+                      prm = prm, 
+                      n.cores = n.cores)
+    })
+    print(elapsed.time)
+    
+    # Retrieve the priors and 
+    # posterior distributions:
+    post.abc = fit$df.post 
+    df.prior = fit$priors %>%
+        pivot_longer(cols = 1:length(fit$priors))
+    post.ss  = post_ss_abc(post.abc)
+    
+    time.completed = now_string()
+    
+    res = list(
+        prm = prm,
+        prm.abc = prm.abc,
+        fit = fit,
+        hosp.var = hosp.var,
+        case.var = case.var,
+        post.abc = post.abc,
+        post.ss = post.ss,
+        df.prior = df.prior,
+        obs = obs, 
+        obs.long = obs.long,
+        last.date = last.date,
+        elapsed.time = elapsed.time,
+        time.completed = time.completed
+    )
+    
+    if(save.rdata){
+        save(list = names(res), 
+             file =  paste0('fitted-recent', time.completed, '.RData'))
+    }
+    
+    return(res)
+}
+
+
+#' @title Fitting model to recent data only, using existing fit on past data. 
+#' @return A list containing the fitted object and additional information.
+#' @export
+#'
+fit_recent_NEW <- function(
+    data,
+    prm.abc,
+    fitobj.past,
+    df.priors,
+    prm,
+    n.cores,
+    last.date = NULL, 
+    save.rdata = FALSE) {
+    
+    d = unpack_data(data, last.date)
+    obs        = d[['obs']]
+    obs.long   = d[['obs.long']]
+    hosp.var   = d[['hosp.var']]
+    case.var   = d[['case.var']]
+    last.date  = d[['last.date']]
+    
+    # --- Draw priors
+    
+    # Retrieve samples from posteriors 
+    # fitted on past data:
+    post.past = fitobj.past$post.abc
+    n.post.past = nrow(post.past)
+    
+    # make sure number of priors for recent 
+    # is multiple of past posteriors
+    q = round(prm.abc$n / n.post.past)
+    prm.abc$n <- n.post.past * q
+    
+    # Sample variables fitted to recent data
+    priors.recent = sample_priors(prior = df.priors, 
+                                   prm.abc = prm.abc)
+    
+    # Stitch samples from past posteriors
+    #  and priors for recent data.
+    # Note: the past posteriors are repeated several
+    # times, but the recent priors are unique. This is 
+    # to ensure consistency between past and recent.
+    
+    # First, check that the variable names for 
+    # "recent" and "past" or not the same:
+    if(any(names(priors.recent) %in% names(post.past))){
+        stop('In `fit_recent()`, the recent variables cannot be the same as the variables used to fit past data. Correct variable name in `df.priors`. Aborting.')
+    }
+    
+    # Stitch
+    # samples.full = cbind(post.past, samples.recent)
+    
+    
+    # Wed Dec 29 15:34:47 2021 ------------------------------
+    # STOPPED HERE
+    #
+    # problem to solve: 
+    # must rebase time 0 to `last.date`
+    # and also make sense of the name of 
+    # the prior variable.
+    # For example  `transm.v_4` must be "translated" 
+    # into something like `transm.v_1` once time
+    # is rebased at `last.date` . 
+    # 
+    
+    # --- Run ABC
+    elapsed.time = system.time({
+        fit = fit_abc(obs = obs, 
+                      priors = priors.recent,
                       hosp.var = hosp.var,
                       case.var = case.var,
                       prm.abc = prm.abc,
