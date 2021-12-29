@@ -108,327 +108,6 @@ calc_WWreport <- function(ts, WWreport.lag, sim.steps)
     return(res)
 }
 
-#' @title Simulate an epidemic
-#' 
-#' @description Simulate an epidemic by solving the system of
-#' ordinary differential equations that define the SEIR-like 
-#' compartmental model.
-#' 
-#' @param prm List of all model parameters.
-#' 
-#' @return A dataframe of the time series of all epidemiological variables.
-#' 
-#' @export
-#' 
-#' @examples
-#' prm = model_prm_example() ; sim = simul(prm)
-#' 
-simul <- function(prm){
-    
-    # Overwrite vector elements, if specified:
-    prm <- overwrite_vectors(prm, verbose = FALSE)
-    
-    # Ingest all model parameters:
-    horizon          <- prm[["horizon"]]
-    sim.steps        <- prm[["sim.steps"]]
-    nE               <- prm[["nE"]]
-    nEv              <- prm[["nEv"]]
-    nA               <- prm[["nA"]]
-    nI               <- prm[["nI"]]
-    nIH              <- prm[["nIH"]]
-    nZ               <- prm[["nZ"]]
-    nH               <- prm[["nH"]]
-    rel.inf.a        <- prm[["rel.inf.asymp"]]
-    latent_mean      <- prm[["dur.latent.mean"]]
-    inf_symp_mean    <- prm[["dur.inf.symp.mean"]]
-    inf_sympH_mean   <- prm[["dur.inf.sympHosp.mean"]]
-    inf_asymp_mean   <- prm[["dur.inf.asymp.mean"]]
-    immunity         <- prm[["dur.immunity"]]
-    vac.rate         <- prm[["vacc.rate"]] 
-    dur.build.immun  <- prm[["dur.build.immun"]]
-    eff.inf          <- prm[["vacc.eff.infection"]]
-    eff.symp         <- prm[["vacc.eff.symptomatic"]]
-    eff.hosp         <- prm[["vacc.eff.hospitalization"]]
-    popSize          <- prm[["pop.size"]] 
-    R0               <- prm[["R0"]]
-    I.init           <- prm[["init.I1"]] 
-    V.init           <- prm[["init.V"]] 
-    inf.A            <- prm[["inf.A"]]
-    inf.I            <- prm[["inf.I"]]
-    inf.IH           <- prm[["inf.IH"]]
-    vload_E          <- prm[["shed.E"]]
-    vload_I          <- prm[["shed.I"]]
-    vload_IH         <- prm[["shed.IH"]]
-    vload_A          <- prm[["shed.A"]]
-    vload_H          <- prm[["shed.H"]]
-    vload_Z          <- prm[["shed.Z"]] 
-    mult.shed.t      <- prm[["mult.shed.t"]]
-    mult.shed.v      <- prm[["mult.shed.v"]]
-    alpha            <- prm[["asymp.prop"]]
-    h                <- prm[["hospital.prop"]]
-    delta            <- prm[["death.prop"]]
-    shedNotInf       <- prm[["dur.shed.recov"]]
-    hosp.stay        <- prm[["hosp.length.mean"]]
-    kappa            <- prm[["decay.rate"]]
-    report.prop      <- prm[["report.prop"]]
-    report.lag       <- prm[["report.lag"]]
-    episode.lag      <- prm[["episode.lag"]]
-    WWreport.lag     <- prm[["report.lag.ww"]]
-    ww.scale         <- prm[["ww.scale"]]
-    transm.t         <- prm[["transm.t"]]
-    transm.v         <- prm[["transm.v"]]
-    vacc.rate.t      <- prm[["vacc.rate.t"]]
-    vacc.rate.v      <- prm[["vacc.rate.v"]]
-    hosp.rate.t      <- prm[["hosp.rate.t"]]
-    hosp.rate.v      <- prm[["hosp.rate.v"]]
-    asymp.prop.t     <- prm[["asymp.prop.t"]]
-    asymp.prop.v     <- prm[["asymp.prop.v"]]
-    
-    # the  time vector `eff.t` (below) applies to 
-    # all other time dependent parameters
-    # associated with vaccine effectiveness:
-    eff.t            <- prm[["vacc.eff.t"]]    
-    
-    eff.inf.v        <- prm[["vacc.eff.inf.v"]]
-    eff.symp.v       <- prm[["vacc.eff.symp.v"]]
-    eff.hosp.v       <- prm[["vacc.eff.hosp.v"]]
-    
-    transit.time.mean <- prm[['transit.time.mean']] 
-    transit.time.cv   <- prm[['transit.time.cv']] 
-    
-    # --- Checks for inputs
-    
-    if(length(inf.I)!=length(vload_I)){
-        stop('Inputs inconsistent: Length for `inf.I` must be the same as `shed.I`. Aborting.')
-    }
-    if(length(inf.A)!=length(vload_A)){
-        stop('Inputs inconsistent: Length for `inf.A` must be the same as `shed.A`. Aborting.')
-    }
-    
-    # vaccine effectiveness inputs
-    if(length(eff.inf.v)!=length(eff.symp.v)){
-      stop('Inputs inconsistent: Length for `vacc.eff.inf.v` must be the same as `vacc.eff.symp.v`. Aborting.')
-    }
-    if(length(eff.hosp.v)!=length(eff.symp.v)){
-      stop('Inputs inconsistent: Length for `vacc.eff.hosp.v` must be the same as `vacc.eff.symp.v`. Aborting.')
-    }
-    if(length(eff.t)!=length(eff.symp.v)){
-      stop('Inputs inconsistent: Length for `vacc.eff.t` must be the same as `vacc.eff.symp.v`. Aborting.')
-    }
-    if(length(eff.t)==1 & eff.t!='NULL'){
-      stop('ERROR: Length for `eff.t` must be of size 2 or more. For a constant values for vaccine effectiveness, use those parameters instead: `vacc.eff.infection`, `vacc.eff.symptomatic`, `vacc.eff.hospitalization` . Aborting.')
-    }
-    
-    # Define simulation parameters
-    n.time.steps <- horizon * sim.steps
-    dt       <- seq(0, horizon, length.out = n.time.steps+1)
-    epsilon  <- 1 / latent_mean
-    nepsilon <- epsilon * nE
-    nepsilon.vac <- epsilon * nEv
-    tau      <- 1 / inf_symp_mean
-    ntau     <- tau * nI
-    tau.immu <- 1 / immunity
-    mu       <- 1 / inf_sympH_mean
-    nmu      <- mu * nIH
-    theta    <- 1/inf_asymp_mean
-    ntheta   <- theta * nA
-    ell      <- 1/ hosp.stay
-    nell     <- ell * nH
-    eta      <- 1/shedNotInf
-    neta     <- eta * nZ
-    
-    #--- Define vaccine parameters before passing for simulation
-    
-    r <- vac.rate         
-    d <- 1 / dur.build.immun 
-    
-    
-    # Check if the input are time-dependent
-    is.time.dep.vacc.eff = length(eff.t)>1
-    
-    if(!is.time.dep.vacc.eff){
-      #message('Vacine effectiveness parameters are constant.')
-      
-      eff.symp.inf  = 1 - (1-eff.symp)/(1-eff.inf)
-      eff.hosp.symp = 1 - (1-eff.hosp)/(1-eff.symp)
-      alpha.vac     = eff.symp.inf
-      h.vac         = 1 - eff.hosp.symp 
-      
-      asymp.prop.vacc.v = NULL
-      hosp.rate.vacc.v  = NULL
-      asymp.prop.vacc.t = NULL
-      hosp.rate.vacc.t  = NULL
-    }
-    
-    if(is.time.dep.vacc.eff){
-      
-      message('Vacine effectiveness parameters are time-dependent.')
-      
-      # constant vacc. variables
-      # even in case of using time-dependent h.vac and alpha.vac, 
-      # we still use const. alpha.vac and h.vac for R0 and beta 
-      eff.symp.inf  = 1 - (1 - eff.symp.v[1])/(1 - eff.inf.v[1])
-      eff.hosp.symp = 1 - (1 - eff.hosp.v[1])/(1 - eff.symp.v[1])
-      alpha.vac     = eff.symp.inf
-      h.vac         = 1 - eff.hosp.symp 
-      
-      # time-dependent vacc. variables
-      asymp.prop.vacc.v = 1 - (1-eff.symp.v)/(1-eff.inf.v)
-      hosp.rate.vacc.v  = 1 - (1-eff.hosp.v)/(1-eff.symp.v) 
-      asymp.prop.vacc.t = eff.t
-      hosp.rate.vacc.t  = eff.t
-    }
-    
-    #--- RNA copies concentration
-    lambda_E  <- vload_E 
-    lambda_I  <- vload_I
-    lambda_IH <- vload_IH
-    lambda_A  <- rel.inf.a * vload_A
-    lambda_H  <- vload_H
-    lambda_Z  <- vload_Z
-    
-    #----- beta from R0
-    S0 = popSize - V.init - I.init
-    V0 = V.init
-        
-    # Unvaccinated part
-    adj.J  = sum(inf.I[1:nIH]) / sum(inf.I)
-    
-    sA  =  alpha / theta * rel.inf.a
-    sI  =  (1-h) * (1 - alpha) / tau
-    sJ  =      h * (1 - alpha) / mu
-    s.S   = (sA + sI + sJ * adj.J)*S0/popSize  
-    
-    # Vaccinated part 
-    sA.V  =  alpha.vac / theta * rel.inf.a
-    sI.V  =  (1-h.vac) * (1 - alpha.vac) / tau
-    sJ.V  =      h.vac * (1 - alpha.vac) / mu
-    s.V   = (sA.V + sI.V + sJ.V * adj.J) * (1 - eff.inf)*V0/popSize
-    
-    # Overall R0
-    s = s.S +s.V
-    beta = R0 / s
-    
-    params.SEIR <- list(  
-        h = h,
-        alpha = alpha,
-        h.vac = h.vac,
-        alpha.vac = alpha.vac,
-        delta = delta,
-        beta = beta,
-        nepsilon = nepsilon,
-        nepsilon.vac = nepsilon.vac,
-        ntau = ntau,
-        nmu = nmu,
-        ntheta = ntheta,
-        neta = neta,
-        nell = nell,
-        nE=nE, nEv=nEv, nI=nI, nIH=nIH, 
-        nA=nA, nH=nH, nZ=nZ,
-        popSize = popSize,
-        transm.t = transm.t, 
-        transm.v = transm.v,
-        vacc.rate.t = vacc.rate.t, 
-        vacc.rate.v = vacc.rate.v,
-        hosp.rate.t = hosp.rate.t, 
-        hosp.rate.v = hosp.rate.v,
-        asymp.prop.t = asymp.prop.t, 
-        asymp.prop.v = asymp.prop.v,
-        hosp.rate.vacc.t = hosp.rate.vacc.t, 
-        hosp.rate.vacc.v = hosp.rate.vacc.v,
-        asymp.prop.vacc.t = asymp.prop.vacc.t, 
-        asymp.prop.vacc.v = asymp.prop.vacc.v,
-        inf.A = inf.A, 
-        inf.I = inf.I,
-        inf.IH = inf.IH,
-        rel.inf.a = rel.inf.a,
-        eff.inf = eff.inf,
-        r=r, d=d, tau.immu=tau.immu)
-    
-    ### Initial conditions
-    ###
-    ### * * * WARNING * * *
-    ### MUST BE IN THE SAME ORDER AS 
-    ### THE VARIABLES IN THE ODE DEFINED 
-    ### BY THE `seir` FUNCTION
-    
-    EEvIAHZ_vec <- c(
-        E  = rep(0, ifelse(nE==Inf,0,nE)),
-        Ev = rep(0, ifelse(nEv==Inf,0,nEv)),
-        I  = c(I.init, rep(0, ifelse(nI==Inf, 0, nI-1))),
-        IH = rep(0, ifelse(nIH==Inf,0,nIH)),
-        A  = rep(0, ifelse(nA==Inf,0,nA)),
-        H  = rep(0, ifelse(nH==Inf,0,nH)),
-        Z  = rep(0, ifelse(nZ==Inf,0,nZ)))
-    
-    inits.SEIR <- c(S = popSize -V.init -I.init,
-                    Vw = 0,
-                    V  = V.init,
-                    EEvIAHZ_vec,
-                    R=0, D=0, 
-                    cuminc = I.init, 
-                    cumincsymp = I.init, 
-                    cumHospAdm = 0)
-    
-    #### Simulation (i.e., solutions of the ODEs)
-    ts <- as.data.frame(
-      deSolve::lsode(
-        y      = inits.SEIR,
-        times  = dt,
-        func   = seir,
-        parms  = params.SEIR,
-        mf     = 10,
-        rtol   = 1e-2,
-        atol   = 1e-2)
-    )
-    
-    ts$Eall   = calc.all(ts,"E")  # <- all exposed indiv.
-    ts$Evall  = calc.all(ts,"Ev") # <- all vaccinated exposed indiv.
-    ts$Iall   = calc.all(ts,"I")  # <- all symptomatic indiv.
-    ts$IHall  = calc.all(ts,"IH") # <- all symptomatic goes to hospital 
-    ts$Aall   = calc.all(ts,"A")  # <- all asymptomatic indiv.
-    ts$Hall   = calc.all(ts,"H")  # <- all hospital occupancy
-    ts$Zall   = calc.all(ts,"Z")  # <- all recovered yet shedding indiv.
-    ts$prev   = ts$Aall + ts$Iall + ts$IHall + ts$Hall   # <- global prevalence
-    ts$inc    = c(I.init, diff(ts$cuminc))               # <- global incidence
-    ts$sympinc  = c(I.init, diff(ts$cumincsymp))         # <- symptomatic incidence
-    ts$hosp.admission = c(0, diff(ts$cumHospAdm))        # <- hospital admissions
-    
-    ts$report         = report_cases(ts, report.prop, lag = report.lag, sim.steps)
-    ts$report.episode = report_cases(ts, report.prop, lag = episode.lag, sim.steps)
-    
-    # Calculate the daily concentration 
-    # deposited in the sewer system:
-    ts$concen   = calc_concen(ts,
-                              lambda_I,lambda_IH,
-                              lambda_A,lambda_Z,
-                              mult.shed.t,
-                              mult.shed.v,
-                              popSize)
-    
-    # Calculate the concentration arriving 
-    # at the sampling site after decay and delay:
-    samp.concen = calc_delayed_concen(ts,
-                                      kappa,
-                                      sim.steps,
-                                      transit.time.mean, 
-                                      transit.time.cv)
-    
-    # ww.scale is a constant for uncertainties 
-    # involves in RNA transfer, dilution, hydraulic degradation
-    # and experimental extraction/quantification 
-    samp.concen.daily = rowSums(samp.concen) * ww.scale
-    
-    # Add wastewater sampling variables to the human epi dataframe:
-    ts = data.frame(ts, samp.concen.daily)
-    
-    # Wastewater concentration reported (ie, including reporting delay):
-    ts$WWreport = calc_WWreport(ts, WWreport.lag, sim.steps)
-    
-    return(list(ts=ts, R0=R0))
-}
-
-
 
 
 simul_post_unit <- function(i, post.abc, prm) {
@@ -602,3 +281,361 @@ generate_obs_noise <- function(df, prms = list(cv = 0.1, cv.ww = 0.1)) {
                                     mu = df$hosp.admission, size = a.ha)
     return(df)
 }
+
+
+
+  
+
+#' @title Simulate an epidemic
+#' 
+#' @description Simulate an epidemic by solving the system of
+#' ordinary differential equations that define the SEIR-like 
+#' compartmental model.
+#' 
+#' @param prm List of all model parameters.
+#' @param initvar Named numerical vector of initial values for model variables.
+#' The names of the vector must match the names of the model variables. 
+#' If \code{initvar = NULL} (default), the initial values are set as if 
+#' the epidemic was starting in an entirely naive population.
+#' 
+#' @return A dataframe of the time series of all epidemiological variables.
+#' 
+#' @export
+#' 
+#' @examples
+#' prm = model_prm_example() ; sim = simul(prm)
+#' 
+simul <- function(prm, initvar=NULL) {
+  
+  # Overwrite vector elements, if specified:
+  prm <- overwrite_vectors(prm, verbose = FALSE)
+  
+  # Ingest all model parameters:
+  horizon          <- prm[["horizon"]]
+  sim.steps        <- prm[["sim.steps"]]
+  nE               <- prm[["nE"]]
+  nEv              <- prm[["nEv"]]
+  nA               <- prm[["nA"]]
+  nI               <- prm[["nI"]]
+  nIH              <- prm[["nIH"]]
+  nZ               <- prm[["nZ"]]
+  nH               <- prm[["nH"]]
+  rel.inf.a        <- prm[["rel.inf.asymp"]]
+  latent_mean      <- prm[["dur.latent.mean"]]
+  inf_symp_mean    <- prm[["dur.inf.symp.mean"]]
+  inf_sympH_mean   <- prm[["dur.inf.sympHosp.mean"]]
+  inf_asymp_mean   <- prm[["dur.inf.asymp.mean"]]
+  immunity         <- prm[["dur.immunity"]]
+  vac.rate         <- prm[["vacc.rate"]] 
+  dur.build.immun  <- prm[["dur.build.immun"]]
+  eff.inf          <- prm[["vacc.eff.infection"]]
+  eff.symp         <- prm[["vacc.eff.symptomatic"]]
+  eff.hosp         <- prm[["vacc.eff.hospitalization"]]
+  popSize          <- prm[["pop.size"]] 
+  R0               <- prm[["R0"]]
+  I.init           <- prm[["init.I1"]] 
+  V.init           <- prm[["init.V"]] 
+  inf.A            <- prm[["inf.A"]]
+  inf.I            <- prm[["inf.I"]]
+  inf.IH           <- prm[["inf.IH"]]
+  vload_E          <- prm[["shed.E"]]
+  vload_I          <- prm[["shed.I"]]
+  vload_IH         <- prm[["shed.IH"]]
+  vload_A          <- prm[["shed.A"]]
+  vload_H          <- prm[["shed.H"]]
+  vload_Z          <- prm[["shed.Z"]] 
+  mult.shed.t      <- prm[["mult.shed.t"]]
+  mult.shed.v      <- prm[["mult.shed.v"]]
+  alpha            <- prm[["asymp.prop"]]
+  h                <- prm[["hospital.prop"]]
+  delta            <- prm[["death.prop"]]
+  shedNotInf       <- prm[["dur.shed.recov"]]
+  hosp.stay        <- prm[["hosp.length.mean"]]
+  kappa            <- prm[["decay.rate"]]
+  report.prop      <- prm[["report.prop"]]
+  report.lag       <- prm[["report.lag"]]
+  episode.lag      <- prm[["episode.lag"]]
+  WWreport.lag     <- prm[["report.lag.ww"]]
+  ww.scale         <- prm[["ww.scale"]]
+  transm.t         <- prm[["transm.t"]]
+  transm.v         <- prm[["transm.v"]]
+  vacc.rate.t      <- prm[["vacc.rate.t"]]
+  vacc.rate.v      <- prm[["vacc.rate.v"]]
+  hosp.rate.t      <- prm[["hosp.rate.t"]]
+  hosp.rate.v      <- prm[["hosp.rate.v"]]
+  asymp.prop.t     <- prm[["asymp.prop.t"]]
+  asymp.prop.v     <- prm[["asymp.prop.v"]]
+  
+  # the  time vector `eff.t` (below) applies to 
+  # all other time dependent parameters
+  # associated with vaccine effectiveness:
+  eff.t            <- prm[["vacc.eff.t"]]    
+  
+  eff.inf.v        <- prm[["vacc.eff.inf.v"]]
+  eff.symp.v       <- prm[["vacc.eff.symp.v"]]
+  eff.hosp.v       <- prm[["vacc.eff.hosp.v"]]
+  
+  transit.time.mean <- prm[['transit.time.mean']] 
+  transit.time.cv   <- prm[['transit.time.cv']] 
+  
+  # --- Checks for inputs
+  
+  if(length(inf.I)!=length(vload_I)){
+    stop('Inputs inconsistent: Length for `inf.I` must be the same as `shed.I`. Aborting.')
+  }
+  if(length(inf.A)!=length(vload_A)){
+    stop('Inputs inconsistent: Length for `inf.A` must be the same as `shed.A`. Aborting.')
+  }
+  
+  # vaccine effectiveness inputs
+  if(length(eff.inf.v)!=length(eff.symp.v)){
+    stop('Inputs inconsistent: Length for `vacc.eff.inf.v` must be the same as `vacc.eff.symp.v`. Aborting.')
+  }
+  if(length(eff.hosp.v)!=length(eff.symp.v)){
+    stop('Inputs inconsistent: Length for `vacc.eff.hosp.v` must be the same as `vacc.eff.symp.v`. Aborting.')
+  }
+  if(length(eff.t)!=length(eff.symp.v)){
+    stop('Inputs inconsistent: Length for `vacc.eff.t` must be the same as `vacc.eff.symp.v`. Aborting.')
+  }
+  if(length(eff.t)==1 & eff.t!='NULL'){
+    stop('ERROR: Length for `eff.t` must be of size 2 or more. For a constant values for vaccine effectiveness, use those parameters instead: `vacc.eff.infection`, `vacc.eff.symptomatic`, `vacc.eff.hospitalization` . Aborting.')
+  }
+  
+  # Define simulation parameters
+  n.time.steps <- horizon * sim.steps
+  dt       <- seq(0, horizon, length.out = n.time.steps+1)
+  epsilon  <- 1 / latent_mean
+  nepsilon <- epsilon * nE
+  nepsilon.vac <- epsilon * nEv
+  tau      <- 1 / inf_symp_mean
+  ntau     <- tau * nI
+  tau.immu <- 1 / immunity
+  mu       <- 1 / inf_sympH_mean
+  nmu      <- mu * nIH
+  theta    <- 1/inf_asymp_mean
+  ntheta   <- theta * nA
+  ell      <- 1/ hosp.stay
+  nell     <- ell * nH
+  eta      <- 1/shedNotInf
+  neta     <- eta * nZ
+  
+  #--- Define vaccine parameters before passing for simulation
+  
+  r <- vac.rate         
+  d <- 1 / dur.build.immun 
+  
+  # Check if the input are time-dependent
+  is.time.dep.vacc.eff = length(eff.t)>1
+  
+  if(!is.time.dep.vacc.eff){
+    #message('Vacine effectiveness parameters are constant.')
+    
+    eff.symp.inf  = 1 - (1-eff.symp)/(1-eff.inf)
+    eff.hosp.symp = 1 - (1-eff.hosp)/(1-eff.symp)
+    alpha.vac     = eff.symp.inf
+    h.vac         = 1 - eff.hosp.symp 
+    
+    asymp.prop.vacc.v = NULL
+    hosp.rate.vacc.v  = NULL
+    asymp.prop.vacc.t = NULL
+    hosp.rate.vacc.t  = NULL
+  }
+  
+  if(is.time.dep.vacc.eff){
+    
+    message('Vacine effectiveness parameters are time-dependent.')
+    
+    # constant vacc. variables
+    # even in case of using time-dependent h.vac and alpha.vac, 
+    # we still use const. alpha.vac and h.vac for R0 and beta 
+    eff.symp.inf  = 1 - (1 - eff.symp.v[1])/(1 - eff.inf.v[1])
+    eff.hosp.symp = 1 - (1 - eff.hosp.v[1])/(1 - eff.symp.v[1])
+    alpha.vac     = eff.symp.inf
+    h.vac         = 1 - eff.hosp.symp 
+    
+    # time-dependent vacc. variables
+    asymp.prop.vacc.v = 1 - (1-eff.symp.v)/(1-eff.inf.v)
+    hosp.rate.vacc.v  = 1 - (1-eff.hosp.v)/(1-eff.symp.v) 
+    asymp.prop.vacc.t = eff.t
+    hosp.rate.vacc.t  = eff.t
+  }
+  
+  # --- RNA copies concentration
+  lambda_E  <- vload_E 
+  lambda_I  <- vload_I
+  lambda_IH <- vload_IH
+  lambda_A  <- rel.inf.a * vload_A
+  lambda_H  <- vload_H
+  lambda_Z  <- vload_Z
+  
+  # --- beta from R0
+  S0 = popSize - V.init - I.init
+  V0 = V.init
+  
+  # Unvaccinated part
+  adj.J  = sum(inf.I[1:nIH]) / sum(inf.I)
+  
+  sA  =  alpha / theta * rel.inf.a
+  sI  =  (1-h) * (1 - alpha) / tau
+  sJ  =      h * (1 - alpha) / mu
+  s.S = (sA + sI + sJ * adj.J) * S0 / popSize  
+  
+  # Vaccinated part 
+  sA.V  =  alpha.vac / theta * rel.inf.a
+  sI.V  =  (1-h.vac) * (1 - alpha.vac) / tau
+  sJ.V  =      h.vac * (1 - alpha.vac) / mu
+  s.V   = (sA.V + sI.V + sJ.V * adj.J) * (1 - eff.inf)*V0/popSize
+  
+  # Overall R0
+  s = s.S + s.V
+  beta = R0 / s
+  
+  params.SEIR <- list(  
+    h = h,
+    alpha = alpha,
+    h.vac = h.vac,
+    alpha.vac = alpha.vac,
+    delta = delta,
+    beta = beta,
+    nepsilon = nepsilon,
+    nepsilon.vac = nepsilon.vac,
+    ntau = ntau,
+    nmu = nmu,
+    ntheta = ntheta,
+    neta = neta,
+    nell = nell,
+    nE=nE, nEv=nEv, nI=nI, nIH=nIH, 
+    nA=nA, nH=nH, nZ=nZ,
+    popSize = popSize,
+    transm.t = transm.t, 
+    transm.v = transm.v,
+    vacc.rate.t = vacc.rate.t, 
+    vacc.rate.v = vacc.rate.v,
+    hosp.rate.t = hosp.rate.t, 
+    hosp.rate.v = hosp.rate.v,
+    asymp.prop.t = asymp.prop.t, 
+    asymp.prop.v = asymp.prop.v,
+    hosp.rate.vacc.t = hosp.rate.vacc.t, 
+    hosp.rate.vacc.v = hosp.rate.vacc.v,
+    asymp.prop.vacc.t = asymp.prop.vacc.t, 
+    asymp.prop.vacc.v = asymp.prop.vacc.v,
+    inf.A = inf.A, 
+    inf.I = inf.I,
+    inf.IH = inf.IH,
+    rel.inf.a = rel.inf.a,
+    eff.inf = eff.inf,
+    r=r, d=d, tau.immu=tau.immu)
+  
+  ### === Initial conditions ===
+  ###
+  ### * * * WARNING * * *
+  ### MUST BE IN THE SAME ORDER AS 
+  ### THE VARIABLES IN THE ODE DEFINED 
+  ### BY THE `seir` FUNCTION
+  
+  if(is.null(initvar)){
+    EEvIAHZ_vec <- c(
+      E  = rep(0, ifelse(nE==Inf,0,nE)),
+      Ev = rep(0, ifelse(nEv==Inf,0,nEv)),
+      I  = c(I.init, rep(0, ifelse(nI==Inf, 0, nI-1))),
+      IH = rep(0, ifelse(nIH==Inf,0,nIH)),
+      A  = rep(0, ifelse(nA==Inf,0,nA)),
+      H  = rep(0, ifelse(nH==Inf,0,nH)),
+      Z  = rep(0, ifelse(nZ==Inf,0,nZ)))
+    
+    inits.SEIR <- c(S = popSize - V.init - I.init,
+                    Vw = 0,
+                    V  = V.init,
+                    EEvIAHZ_vec,
+                    R = 0,
+                    D = 0,
+                    cuminc = I.init,
+                    cumincsymp = I.init,
+                    cumHospAdm = 0)
+  }
+  
+  if(!is.null(initvar)){
+    inits.SEIR = c(
+      initvar[grepl('^S$', names(initvar))],
+      initvar[grepl('^Vw$', names(initvar))],
+      initvar[grepl('^V$', names(initvar))],
+      initvar[grepl('^E$', names(initvar))],
+      initvar[grepl('^Ev$', names(initvar))],
+      initvar[grepl('^I\\d*$', names(initvar))],
+      initvar[grepl('^IH\\d*$', names(initvar))],
+      initvar[grepl('^A\\d*$', names(initvar))],
+      initvar[grepl('^H\\d*$', names(initvar))],
+      initvar[grepl('^Z\\d*$', names(initvar))],
+      initvar[grepl('^R$', names(initvar))],
+      initvar[grepl('^D$', names(initvar))],
+      initvar[grepl('^cuminc$', names(initvar))],
+      initvar[grepl('^cumincsymp$', names(initvar))],
+      initvar[grepl('^cumHospAdm$', names(initvar))]
+    ) 
+    
+    message('initial values:')
+    message(paste(names(inits.SEIR),inits.SEIR,'\n'))
+  }
+  
+  #### Simulation (i.e., solutions of the ODEs)
+  ts <- as.data.frame(
+    deSolve::lsode(
+      y      = inits.SEIR,
+      times  = dt,
+      func   = seir,
+      parms  = params.SEIR,
+      mf     = 10,
+      rtol   = 1e-2,
+      atol   = 1e-2)
+  )
+  
+  ts$Eall   = calc.all(ts,"E")  # <- all exposed indiv.
+  ts$Evall  = calc.all(ts,"Ev") # <- all vaccinated exposed indiv.
+  ts$Iall   = calc.all(ts,"I")  # <- all symptomatic indiv.
+  ts$IHall  = calc.all(ts,"IH") # <- all symptomatic goes to hospital 
+  ts$Aall   = calc.all(ts,"A")  # <- all asymptomatic indiv.
+  ts$Hall   = calc.all(ts,"H")  # <- all hospital occupancy
+  ts$Zall   = calc.all(ts,"Z")  # <- all recovered yet shedding indiv.
+  ts$prev   = ts$Aall + ts$Iall + ts$IHall + ts$Hall  # <- global prevalence
+  ts$inc     = c(I.init, diff(ts$cuminc))             # <- global incidence
+  ts$sympinc = c(I.init, diff(ts$cumincsymp))         # <- symptomatic incidence
+  ts$hosp.admission = c(0, diff(ts$cumHospAdm))       # <- hospital admissions
+  
+  ts$report         = report_cases(ts, report.prop, lag = report.lag, sim.steps)
+  ts$report.episode = report_cases(ts, report.prop, lag = episode.lag, sim.steps)
+  
+  # Calculate the daily concentration 
+  # deposited in the sewer system:
+  ts$concen   = calc_concen(ts,
+                            lambda_I,lambda_IH,
+                            lambda_A,lambda_Z,
+                            mult.shed.t,
+                            mult.shed.v,
+                            popSize)
+  
+  # Calculate the concentration arriving 
+  # at the sampling site after decay and delay:
+  samp.concen = calc_delayed_concen(ts,
+                                    kappa,
+                                    sim.steps,
+                                    transit.time.mean, 
+                                    transit.time.cv)
+  
+  # ww.scale is a constant for uncertainties 
+  # involves in RNA transfer, dilution, hydraulic degradation
+  # and experimental extraction/quantification 
+  samp.concen.daily = rowSums(samp.concen) * ww.scale
+  
+  # Add wastewater sampling variables to the human epi dataframe:
+  ts = data.frame(ts, samp.concen.daily)
+  
+  # Wastewater concentration reported (ie, including reporting delay):
+  ts$WWreport = calc_WWreport(ts, WWreport.lag, sim.steps)
+  
+  return(list(ts=ts, R0=R0))
+}
+
+
+
+
+

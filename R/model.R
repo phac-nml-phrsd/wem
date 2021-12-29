@@ -247,12 +247,14 @@ seir <- function(t, x, parms)
     
     ## IMPORTANT: all the derivatives must be 
     ## saved into a big list which is as long as "x"
-    res=c(dS, 
-          dVw, dV, 
-          dE, dEv, 
-          dI, dIH, dA, dH, 
-          dZ, dR, dD, 
-          dcuminc, dcumincsymp, dcumHospAdm)
+    res = c(
+        dS, 
+        dVw, dV, 
+        dE, dEv, 
+        dI, dIH, dA, dH, 
+        dZ, dR, dD, 
+        dcuminc, dcumincsymp, dcumHospAdm
+    )
     
     return(list(res))
 }

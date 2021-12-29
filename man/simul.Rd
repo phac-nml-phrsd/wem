@@ -4,10 +4,15 @@
 \alias{simul}
 \title{Simulate an epidemic}
 \usage{
-simul(prm)
+simul(prm, initvar = NULL)
 }
 \arguments{
 \item{prm}{List of all model parameters.}
+
+\item{initvar}{Named numerical vector of initial values for model variables.
+The names of the vector must match the names of the model variables. 
+If \code{initvar = NULL} (default), the initial values are set as if 
+the epidemic was starting in an entirely naive population.}
 }
 \value{
 A dataframe of the time series of all epidemiological variables.

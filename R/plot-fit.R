@@ -38,12 +38,13 @@ plot_fit_result <- function(fitobj, ci=0.95) {
     
     
     # Check the fit against the data
-    fitted.observation = plot_fit_abc_vs_obs(fitobj$prm, 
-                                             fitobj$post.abc, 
-                                             fitobj$obs.long, 
-                                             fitobj$hosp.var,
-                                             fitobj$case.var,
-                                             ci = ci)
+    fitted.observation = plot_fit_abc_vs_obs(
+      prm      = fitobj$prm, 
+      post.abc = fitobj$post.abc, 
+      obs.long = fitobj$obs.long, 
+      hosp.var = fitobj$hosp.var,
+      case.var = fitobj$case.var,
+      ci       = ci)
     
     return(list(error              = error,
                 statistic.summary  = statistic.summary,
@@ -154,7 +155,7 @@ plot_post_distrib_abc <- function(post.abc,
 }
 
 
-#' @title Visualize fitting performance versus obsrvational data
+#' @title Visualize fitting performance versus observational data
 #'
 #' @param prm List. All parameters for model found in \code{wem-prm.csv}.
 #' @param post.abc List. Contains posterior results. Output of function fit()
@@ -190,7 +191,7 @@ plot_fit_abc_vs_obs <- function(prm,
         tmp[[i]]$iter = i
     }
     # Dataframe of simulation
-    df.post = do.call('rbind',tmp)
+    df.post = bind_rows(tmp)
     
     # Add dates
     df.post$date = lubridate::ymd(min(obs.long$date) + df.post$time)

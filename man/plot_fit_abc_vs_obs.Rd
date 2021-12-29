@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-fit.R
 \name{plot_fit_abc_vs_obs}
 \alias{plot_fit_abc_vs_obs}
-\title{Visualize fitting performance versus obsrvational data}
+\title{Visualize fitting performance versus observational data}
 \usage{
 plot_fit_abc_vs_obs(prm, post.abc, obs.long, hosp.var, case.var, ci = 0.95)
 }
@@ -23,5 +23,5 @@ plot_fit_abc_vs_obs(prm, post.abc, obs.long, hosp.var, case.var, ci = 0.95)
 
 }
 \description{
-Visualize fitting performance versus obsrvational data
+Visualize fitting performance versus observational data
 }
