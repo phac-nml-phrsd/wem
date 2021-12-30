@@ -452,6 +452,9 @@ unpack_data <- function(data, last.date) {
     ))
 }
 
+
+
+
 #' @title Fitting Data to Model
 #'
 #' @param data List. Output of function build_data()
@@ -639,6 +642,84 @@ fit_recent <- function(data,
     return(res)
 }
 
+# Thu Dec 30 08:49:08 2021 ------------------------------
+
+find_timedep_prms <- function(prm, t.or.v) {
+    # t.or.v = 't'
+    idx = which(grepl(paste0('\\.',t.or.v,'$'), names(prm)))
+    # Ignore the ones with NULL values:
+    ii = which(prm[idx] != 'NULL')
+    idx = idx[ii]
+    return(idx)
+}
+
+rebase_time_prms <- function(prm, t.pivot) {
+
+    # Identify the time-depedent parameters:    
+    idx.t = find_timedep_prms(prm, 't')
+    prmt = prm[idx.t]
+    
+    # Compare all times to the pivot time:
+    chk = sapply(prmt, FUN = function(x){x>t.pivot})
+    # Is at least one greater than pivot time:
+    chk2 = sapply(chk, any)        
+    
+    y = list()
+    
+    for(i in seq_along(chk2)){
+        
+        # For those that have no time definition after pivot, 
+        # simply convert to a constant set at the last value
+        if(!chk2[i]){
+            name.t = names(prmt)[i]
+            name.v = str_replace(name.t, 't$','v') # find the associated values
+            tmp = prm[[name.v]]
+            y[[name.t]] <- 0   # reset time at 0
+            y[[name.v]] <- tmp[length(tmp)]
+        }
+        
+        # For those that have a time definition after the 
+        # pivot time, translate time and values:
+        if(chk2[i]){
+            tmp <- prmt[[i]] - t.pivot
+            tmpt = tmp[tmp>0]
+            name.t = names(prmt)[i]
+            name.v = str_replace(name.t, 't$','v') # find the associated values
+            tmpv = prm[[name.v]]
+            # Keep only the values associated 
+            # with the times beyond pivot time:
+            nt = length(tmpt)
+            nv = length(tmpv)
+            tmpv = tmpv[c( (nv-nt+1):nv )]
+            y[[name.t]] <- tmpt
+            y[[name.v]] <- tmpv
+        }
+    }
+    # overwrite the rebased elements
+    res = prm
+    res[names(y)] <- y
+    return(res)
+}
+
+rebase_at_pivot <- function(data, date.pivot, prm) {
+    
+    obs      = filter(data[['obs']],      date >= date.pivot)
+    obs.long = filter(data[['obs.long']], date >= date.pivot)
+
+    date.origin = min(data[['obs']]$date)    
+    t.pivot = as.numeric(date.pivot - date.origin)
+    
+    prm.rebased = rebase_time_prms(prm, t.pivot)
+    
+    return( list(
+        obs      = obs,
+        obs.long = obs.long,
+        prm      = prm.rebased,
+        hosp.var = data[['hosp.var']],  # NEED TO DO THAT??
+        case.var = data[['case.var']]   # NEED TO DO THAT??
+    ))
+}
+
 
 #' @title Fitting model to recent data only, using existing fit on past data. 
 #' @return A list containing the fitted object and additional information.
@@ -647,22 +728,34 @@ fit_recent <- function(data,
 fit_recent_NEW <- function(
     data,
     prm.abc,
-    fitobj.past,
+    fitobj.past, # NEED THIS FOR FINAL STATES
     df.priors,
     prm,
     n.cores,
-    last.date = NULL, 
+    date.pivot,
     save.rdata = FALSE) {
     
-    d = unpack_data(data, last.date)
-    obs        = d[['obs']]
-    obs.long   = d[['obs.long']]
-    hosp.var   = d[['hosp.var']]
-    case.var   = d[['case.var']]
-    last.date  = d[['last.date']]
+    # retrieve new initial values 
+    # that start at the `pivot.date`:
+    initvar = fitobj.past$fit$finalstates
     
+    x = rebase_at_pivot(data, date.pivot, prm)
+    
+    # d = unpack_data(data, last.date) # DELETE WHEN SURE
+    obs        = x[['obs']]
+    obs.long   = x[['obs.long']]
+    hosp.var   = x[['hosp.var']]
+    case.var   = x[['case.var']]
+    prm.rebased = x[['prm']]
+        
     # --- Draw priors
     
+    # Thu Dec 30 09:45:53 2021 ------------------------------
+    # STOPPED HERE
+    # `prm.rebased` should be used with initvar 
+    # in the standard `fit()` (??)
+    
+# ---- MAYBE USELESS NOW....
     # Retrieve samples from posteriors 
     # fitted on past data:
     post.past = fitobj.past$post.abc
@@ -672,6 +765,8 @@ fit_recent_NEW <- function(
     # is multiple of past posteriors
     q = round(prm.abc$n / n.post.past)
     prm.abc$n <- n.post.past * q
+# -----------  (useless?)
+    
     
     # Sample variables fitted to recent data
     priors.recent = sample_priors(prior = df.priors, 
@@ -694,7 +789,6 @@ fit_recent_NEW <- function(
     
     
     # Wed Dec 29 15:34:47 2021 ------------------------------
-    # STOPPED HERE
     #
     # problem to solve: 
     # must rebase time 0 to `last.date`
