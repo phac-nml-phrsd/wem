@@ -243,6 +243,8 @@ err_fct <- function(x,y) {
 #' @param obs Datafrmae. Paired clinical-ww data created by \code{build_data()}
 #' @param hosp.var String. Type of hospitalization data. Output of function \code{build_data()}.   
 #' @param case.var String. Type of date which cases are reported. Output of function \code{build_data()}.   
+#' @param initvar Datafroma defining the initial values for model variables. 
+#' If \code{initvar=NULL}, epidemic starts from a completely naive population.
 #'
 #' @return
 #'
@@ -252,7 +254,8 @@ fit_abc_unit <- function(i,
                          lhs, 
                          obs,
                          hosp.var,
-                         case.var) {
+                         case.var,
+                         initvar) {
     
     # Update parameter values and simulate:
     np = ncol(lhs)
@@ -265,8 +268,15 @@ fit_abc_unit <- function(i,
         prm[[ names(lhs)[k] ]] = lhs[i,k]
     }
     
+    # Variables initialization
+    iv = initvar
+    if(!is.null(initvar)){
+        iv = initvar[sample(1:nrow(initvar), size = 1),] %>% 
+            as.vector()
+    }
+    
     # Simulate with updated parameters:
-    sim.i = simul(prm)$ts 
+    sim.i = simul(prm, initvar = iv)$ts 
     
     # Normalize by max value of observations:
     mx.obs.ww = max(obs$ww.obs, na.rm = TRUE)
@@ -361,6 +371,9 @@ fit_abc_unit <- function(i,
 #' @param prm.abc List. Parameters for ABC fitting method. Output of function \code{define_abc_prms} 
 #' @param prm List. All parameters model requires. It has to be in the \code{wem-prm.csv} format.    
 #' @param n.cores Numerical. Number of cores for fitting compoutation. 
+#' @param initvar Named numeric vector defining the initial values for model variables. 
+#' If \code{initvar=NULL} (default), epidemic starts from a completely naive population.
+#'
 #'
 #' @return A list of 
 #' 1) a dataframe of variables post fitting, 
@@ -375,7 +388,8 @@ fit_abc <- function(obs,
                     case.var,
                     prm.abc, 
                     prm, 
-                    n.cores=2) {
+                    initvar = NULL,
+                    n.cores = 2) {
     
     # Sampled Priors
     lhs = priors
@@ -396,7 +410,8 @@ fit_abc <- function(obs,
                    lhs = lhs,
                    obs = obs,
                    hosp.var = hosp.var,
-                   case.var = case.var)
+                   case.var = case.var,
+                   initvar = initvar)
     sfStop()
     
     # Sort the fitting errors after retrieving them:
@@ -642,8 +657,6 @@ fit_recent <- function(data,
     return(res)
 }
 
-# Thu Dec 30 08:49:08 2021 ------------------------------
-
 find_timedep_prms <- function(prm, t.or.v) {
     # t.or.v = 't'
     idx = which(grepl(paste0('\\.',t.or.v,'$'), names(prm)))
@@ -708,6 +721,9 @@ rebase_at_pivot <- function(data, date.pivot, prm) {
 
     date.origin = min(data[['obs']]$date)    
     t.pivot = as.numeric(date.pivot - date.origin)
+
+    obs$time = obs$time - t.pivot
+    obs.long$time = obs.long$time - t.pivot
     
     prm.rebased = rebase_time_prms(prm, t.pivot)
     
@@ -720,8 +736,19 @@ rebase_at_pivot <- function(data, date.pivot, prm) {
     ))
 }
 
-
 #' @title Fitting model to recent data only, using existing fit on past data. 
+#' @param data 
+#'
+#' @param prm.abc 
+#' @param fitobj.past 
+#' @param df.priors 
+#' @param prm 
+#' @param date.pivot 
+#' @param initvar Named numeric vector defining the initial values for model variables. 
+#'
+#' @param n.cores 
+#' @param save.rdata 
+#'
 #' @return A list containing the fitted object and additional information.
 #' @export
 #'
@@ -731,83 +758,44 @@ fit_recent_NEW <- function(
     fitobj.past, # NEED THIS FOR FINAL STATES
     df.priors,
     prm,
-    n.cores,
     date.pivot,
+    n.cores,
     save.rdata = FALSE) {
     
     # retrieve new initial values 
     # that start at the `pivot.date`:
     initvar = fitobj.past$fit$finalstates
     
+    # Rebase time-dependent parameters from pivot date:
     x = rebase_at_pivot(data, date.pivot, prm)
-    
-    # d = unpack_data(data, last.date) # DELETE WHEN SURE
-    obs        = x[['obs']]
-    obs.long   = x[['obs.long']]
-    hosp.var   = x[['hosp.var']]
-    case.var   = x[['case.var']]
+    obs         = x[['obs']]
+    obs.long    = x[['obs.long']]
+    hosp.var    = x[['hosp.var']]
+    case.var    = x[['case.var']]
     prm.rebased = x[['prm']]
         
-    # --- Draw priors
-    
-    # Thu Dec 30 09:45:53 2021 ------------------------------
-    # STOPPED HERE
-    # `prm.rebased` should be used with initvar 
-    # in the standard `fit()` (??)
-    
-# ---- MAYBE USELESS NOW....
-    # Retrieve samples from posteriors 
-    # fitted on past data:
-    post.past = fitobj.past$post.abc
-    n.post.past = nrow(post.past)
-    
-    # make sure number of priors for recent 
-    # is multiple of past posteriors
-    q = round(prm.abc$n / n.post.past)
-    prm.abc$n <- n.post.past * q
-# -----------  (useless?)
-    
-    
     # Sample variables fitted to recent data
     priors.recent = sample_priors(prior = df.priors, 
-                                   prm.abc = prm.abc)
+                                  prm.abc = prm.abc)
     
-    # Stitch samples from past posteriors
-    #  and priors for recent data.
-    # Note: the past posteriors are repeated several
-    # times, but the recent priors are unique. This is 
-    # to ensure consistency between past and recent.
-    
-    # First, check that the variable names for 
+    # Check that the variable names for 
     # "recent" and "past" or not the same:
+    post.past = fitobj.past$post.abc
     if(any(names(priors.recent) %in% names(post.past))){
         stop('In `fit_recent()`, the recent variables cannot be the same as the variables used to fit past data. Correct variable name in `df.priors`. Aborting.')
     }
     
-    # Stitch
-    # samples.full = cbind(post.past, samples.recent)
-    
-    
-    # Wed Dec 29 15:34:47 2021 ------------------------------
-    #
-    # problem to solve: 
-    # must rebase time 0 to `last.date`
-    # and also make sense of the name of 
-    # the prior variable.
-    # For example  `transm.v_4` must be "translated" 
-    # into something like `transm.v_1` once time
-    # is rebased at `last.date` . 
-    # 
-    
     # --- Run ABC
     elapsed.time = system.time({
-        fit = fit_abc(obs = obs, 
-                      priors = priors.recent,
-                      hosp.var = hosp.var,
-                      case.var = case.var,
-                      prm.abc = prm.abc,
-                      prm = prm, 
-                      n.cores = n.cores)
+        fit = fit_abc(
+            obs = obs, 
+            priors = priors.recent,
+            hosp.var = hosp.var,
+            case.var = case.var,
+            prm.abc = prm.abc,
+            prm = prm, 
+            n.cores = n.cores,
+            initvar = initvar)
     })
     print(elapsed.time)
     
@@ -821,26 +809,82 @@ fit_recent_NEW <- function(
     time.completed = now_string()
     
     res = list(
-        prm = prm,
-        prm.abc = prm.abc,
-        fit = fit,
-        hosp.var = hosp.var,
-        case.var = case.var,
-        post.abc = post.abc,
-        post.ss = post.ss,
-        df.prior = df.prior,
-        obs = obs, 
-        obs.long = obs.long,
-        last.date = last.date,
+        prm        = prm,
+        prm.abc    = prm.abc,
+        fit        = fit,
+        hosp.var   = hosp.var,
+        case.var   = case.var,
+        post.abc   = post.abc,
+        post.ss    = post.ss,
+        df.prior   = df.prior,
+        obs        = obs, 
+        obs.long   = obs.long,
+        date.pivot = date.pivot,
         elapsed.time = elapsed.time,
         time.completed = time.completed
     )
     
     if(save.rdata){
         save(list = names(res), 
-             file =  paste0('fitted-recent', time.completed, '.RData'))
+             file =  paste0('fitted-recent', 
+                            time.completed, '.RData'))
     }
     
     return(res)
 }
+
+
+#' Merge fit object 
+#'
+#' @param fitobj.past 
+#' @param fitobj.recent 
+#'
+#' @return
+#' @export
+#'
+merge_fit_past_recent <- function(fitobj.past, fitobj.recent) {
+    
+    res = list()
+    
+    # --- fit object
+    
+    fit.m = list()
+    fit.p = fitobj.past$fit
+    fit.r = fitobj.recent$fit
+    
+    fit.m[['df.post']] = cbind(fit.p$df.post, fit.r$df.post)
+    fit.m[['priors']]  = cbind(fit.p$priors, fit.r$priors)
+    fit.m[['err']] = rbind(
+        mutate(fit.p$err,fit.period = 'past'),
+        mutate(fit.r$err,fit.period = 'recent'))
+    
+    res[['fit']] = fit.m
+        
+    # --- posteriors (post.abc)
+    
+    res[['post.abc']] = res[['fit']][['df.post']]
+    
+    res[['post.ss']][['df']] = rbind(fitobj.past$post.ss$df,
+                                     fitobj.recent$post.ss$df)
+    res[['obs']] = rbind(
+        fitobj.past[['obs']],
+        fitobj.recent[['obs']]) %>% 
+        mutate(time = as.numeric(date - min(date))) %>%
+        distinct()
+    
+    res[['obs.long']]  = rbind(
+        fitobj.past[['obs.long']],
+        fitobj.recent[['obs.long']]) %>% 
+        mutate(time = as.numeric(date - min(date))) %>%
+        distinct()
+    
+    # Unchanged elements:
+    res[['prm.abc']]  = fitobj.past$prm.abc
+    res[['prm']]      = fitobj.past$prm
+    res[['hops.var']] = fitobj.past$hosp.var
+    res[['case.var']] = fitobj.past$case.var
+    
+    return(res)
+}
+
 

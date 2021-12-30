@@ -4,7 +4,16 @@
 \alias{fit_abc}
 \title{Fitting ABC function (internal use)}
 \usage{
-fit_abc(obs, priors, hosp.var, case.var, prm.abc, prm, n.cores = 2)
+fit_abc(
+  obs,
+  priors,
+  hosp.var,
+  case.var,
+  prm.abc,
+  prm,
+  initvar = NULL,
+  n.cores = 2
+)
 }
 \arguments{
 \item{obs}{Dataframe. Paired clinical and ww data. Output of function \code{build_data()}.}
@@ -18,6 +27,9 @@ fit_abc(obs, priors, hosp.var, case.var, prm.abc, prm, n.cores = 2)
 \item{prm.abc}{List. Parameters for ABC fitting method. Output of function \code{define_abc_prms}}
 
 \item{prm}{List. All parameters model requires. It has to be in the \code{wem-prm.csv} format.}
+
+\item{initvar}{Named numeric vector defining the initial values for model variables. 
+If \code{initvar=NULL} (default), epidemic starts from a completely naive population.}
 
 \item{n.cores}{Numerical. Number of cores for fitting compoutation.}
 }

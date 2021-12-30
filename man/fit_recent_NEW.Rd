@@ -10,30 +10,29 @@ fit_recent_NEW(
   fitobj.past,
   df.priors,
   prm,
+  date.pivot,
   n.cores,
-  last.date = NULL,
   save.rdata = FALSE
 )
 }
 \arguments{
-\item{data}{List. Output of function build_data()}
+\item{data}{}
 
-\item{prm.abc}{List. Variables for ABC fitting. Output of function define_abc_prms()}
+\item{prm.abc}{}
 
-\item{fitobj.past}{List as returned by the function \code{fit()}. Fit object for past data.}
+\item{fitobj.past}{}
 
-\item{df.priors}{Dataframe. Parameters (\code{'name'}), their distribution (\code{'distrib'})
-and range of values (\code{'prms'}) which to be fitted to the model. Output of function define_fit_priors().}
+\item{df.priors}{}
 
-\item{prm}{List. Initial parameters for fitting plot. Output of function load_prm().}
+\item{prm}{}
 
-\item{n.cores}{Numeric. number of cores used for fitting computation.}
+\item{date.pivot}{}
 
-\item{last.date}{Date. Last date to stop fitting (e.g., ymd('2021-02-01') or NULL). NULL = latest date available.}
+\item{n.cores}{}
 
-\item{save.rdata}{Logical. Saving the fitting objects in a .rds file.}
+\item{save.rdata}{}
 
-\item{do.plot}{Logical. Plot the fitting results and initial parameters}
+\item{initvar}{Named numeric vector defining the initial values for model variables.}
 }
 \value{
 A list containing the fitted object and additional information.

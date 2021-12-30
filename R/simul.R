@@ -572,10 +572,15 @@ simul <- function(prm, initvar=NULL) {
       initvar[grepl('^cumincsymp$', names(initvar))],
       initvar[grepl('^cumHospAdm$', names(initvar))]
     ) 
-    
-    message('initial values:')
-    message(paste(names(inits.SEIR),inits.SEIR,'\n'))
+    inits.SEIR = unlist(inits.SEIR)
+    #message('initial values:')
+    #message(paste(names(inits.SEIR),inits.SEIR,'\n'))
   }
+  
+  # DEBUG
+  # message('---DEBUG---')
+  # message(class(inits.SEIR))
+  # message(str(inits.SEIR))
   
   #### Simulation (i.e., solutions of the ODEs)
   ts <- as.data.frame(

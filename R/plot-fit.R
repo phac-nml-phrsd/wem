@@ -21,21 +21,15 @@
 #'
 plot_fit_result <- function(fitobj, ci=0.95) {
     
-    
     # Plot statistical errors:
-    error = plot_abc_err(fit = fitobj$fit, prm.abc = fitobj$prm.abc)
-    
-    
+    error = plot_abc_err(fit = fitobj$fit, 
+                         prm.abc = fitobj$prm.abc)
     
     # Plot statistical summary of the posterior
     statistic.summary = fitobj$post.ss$plot
     
-    
-    
     # Plot posterior distributions:
     posterior.dist = plot_post_distrib_abc(fitobj$post.abc, fitobj$df.prior)
-    
-    
     
     # Check the fit against the data
     fitted.observation = plot_fit_abc_vs_obs(
@@ -70,6 +64,10 @@ plot_abc_err <- function(fit, prm.abc) {
     if(nremain > 1000){
         idx = round(seq(npost+1, nrow(dferr), length.out = 500))
         dferr = dferr[c(1:npost, idx),]
+    }
+    
+    if('fit.period' %in% names(dferr)){
+      dferr = select(dferr, -fit.period)
     }
     
     g = dferr %>%
@@ -206,7 +204,6 @@ plot_fit_abc_vs_obs <- function(prm,
         mutate(clin.case = report.episode)
     }
     
-    
     if(!is.null(hosp.var)){
       #---- Summary stats of posterior simulations:
       # Determine hospital type (new admissions or occupancy)
@@ -272,7 +269,7 @@ plot_fit_abc_vs_obs <- function(prm,
         facet_wrap(~type, scales = 'free_y', ncol=1) +
         theme(panel.grid.minor = element_blank())+
         scale_x_date(date_breaks = '2 months', date_labels = '%b \'%y')+
-        guides(fill=FALSE, color=FALSE)+
+        guides(fill='none', color='none')+
         ggtitle(paste('Check fit')) + 
         xlab('') + ylab('')
     

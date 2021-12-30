@@ -4,7 +4,7 @@
 \alias{fit_abc_unit}
 \title{Perform fitting for one iteration}
 \usage{
-fit_abc_unit(i, prm.abc, prm, lhs, obs, hosp.var, case.var)
+fit_abc_unit(i, prm.abc, prm, lhs, obs, hosp.var, case.var, initvar)
 }
 \arguments{
 \item{i}{Numerical. The number of iterated simulation for fitting.}
@@ -20,6 +20,9 @@ fit_abc_unit(i, prm.abc, prm, lhs, obs, hosp.var, case.var)
 \item{hosp.var}{String. Type of hospitalization data. Output of function \code{build_data()}.}
 
 \item{case.var}{String. Type of date which cases are reported. Output of function \code{build_data()}.}
+
+\item{initvar}{Datafroma defining the initial values for model variables. 
+If \code{initvar=NULL}, epidemic starts from a completely naive population.}
 }
 \value{
 
