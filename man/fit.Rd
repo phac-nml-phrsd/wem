@@ -11,6 +11,7 @@ fit(
   prm,
   n.cores,
   last.date = NULL,
+  adj.horizon = FALSE,
   save.rdata = FALSE
 )
 }

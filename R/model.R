@@ -74,6 +74,12 @@ seir <- function(t, x, parms)
     cumincsymp = x[n_E_Z+7]
     cumHospAdm = x[n_E_Z+8]
     
+    # If any of the demographic variables has a 
+    # negative value following the update at the previous step, 
+    # then force it back to 0. 
+    # Demographic variables CANNOT be negative!
+    x[x<0] <- 0
+    
     # Run a few checks to catch obvious user entry errors
     docheck = TRUE
     if(docheck & (t < 1)){
@@ -133,7 +139,7 @@ seir <- function(t, x, parms)
     ## susceptible
     dS = tau.immu*(R+V) - rt*S - infrate
     
-    ## vaccinated but not immuned
+    ## vaccinated but not immune
     dVw = rt*S - d * Vw
     
     ## vaccinated with full protection 

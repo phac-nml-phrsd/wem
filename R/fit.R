@@ -403,15 +403,15 @@ fit_abc <- function(obs,
         sfLibrary(dplyr)
     })
     
-    tmp = sfLapply(x   = 1:prm.abc$n,
-                   fun = fit_abc_unit,
-                   prm.abc = prm.abc,
-                   prm = prm,
-                   lhs = lhs,
-                   obs = obs,
+    tmp = sfLapply(x        = 1:prm.abc$n,
+                   fun      = fit_abc_unit,
+                   prm.abc  = prm.abc,
+                   prm      = prm,
+                   lhs      = lhs,
+                   obs      = obs,
                    hosp.var = hosp.var,
                    case.var = case.var,
-                   initvar = initvar)
+                   initvar  = initvar)
     sfStop()
     
     # Sort the fitting errors after retrieving them:
@@ -432,6 +432,18 @@ fit_abc <- function(obs,
         filter(time == max(time)) %>%
         mutate(i = 1:prm.abc$n) %>%
         filter(i %in% idx.keep)
+    
+    # DEBUG
+    # i = 2
+    # plot(fs[[i]]$S[1:781], 
+    #      log = 'y', 
+    #      typ='b')
+    #- - - -
+    
+    fs[fs<0] <- 0
+    
+    # print('\n---- DEBUG FINAL STATES ----')
+    # print(fs)
 
     return(list(df.post = df.post, 
                 priors  = lhs,
@@ -491,6 +503,7 @@ fit <- function(data,
                 prm,
                 n.cores,
                 last.date = NULL, 
+                adj.horizon = FALSE,
                 save.rdata = FALSE) {
     
     d = unpack_data(data, last.date)
@@ -502,6 +515,17 @@ fit <- function(data,
    
     # --- Draw priors
     samp.priors = sample_priors(df.priors,prm.abc)
+    
+    # Adjust horizon to match `last.date`. 
+    # This is typically used when this fit
+    # will 
+    if(adj.horizon){
+        old.horiz = prm$horizon
+        prm$horizon <- as.numeric(max(obs$date) - min(obs$date))
+        message(paste0('wem::fit() => Simulation horizon has been adjusted to ',
+                       prm$horizon, ' days (from ',
+                       old.horiz,' days)'))
+    }
     
     # --- Run ABC
     elapsed.time = system.time({
@@ -736,6 +760,69 @@ rebase_at_pivot <- function(data, date.pivot, prm) {
     ))
 }
 
+
+#' Rebase priors names 
+#'
+#' @param df.priors 
+#' @param fitobj.past 
+#'
+#' @return A dataframe with rebased names. 
+#' 
+rebase_prior_names <- function(df.priors, fitobj.past) {
+  # Retrieve names of the priors for the PAST period:
+  name.prmfit.past = fitobj.past$post.ss$df$name
+  
+  # Retrieve names of the priors for the RECENT period:
+  name.prmfit.recent = df.priors$name
+  
+  # Extract the time dependent parameters in PAST:
+  idx = grepl('\\w+_\\d+', name.prmfit.past)
+  nmp = unique(str_extract(name.prmfit.past[idx], '^\\w+\\.[vt]'))
+  
+  # retrieve the last element defined in PAST:
+  last.elem = numeric(length(nmp))
+  for(i in seq_along(nmp)){
+    tmp = str_extract(name.prmfit.past, paste0('^', nmp[i],'.+\\d+$' ))
+    tmp2 = as.numeric(str_extract(tmp, '\\d+$'))
+    last.elem[i] = max(tmp2, na.rm = TRUE)
+  }
+  
+  # Check consistency of priors inputs (PAST vs RECENT)
+  # and overwrite RECENT prior names according to the `date.pivot`:
+  a = name.prmfit.recent
+  for(i in seq_along(nmp)){
+    idx = grepl(nmp[i], a)
+    tmp = a[idx]
+    elem.recent = as.numeric(str_extract(tmp, '\\d+$'))
+    tmp2 = min(elem.recent)
+    # make sure PAST and RECENT 
+    # are continuous (i.e., no gaps):
+    if(last.elem[i] != tmp2 - 1){
+      msg = paste0(
+        'Priors definitions between PAST and RECENT periods has a gap!\n',
+        'Last past parameter to be fitted: ', nmp[i],'_',last.elem[i],'\n',
+        'First recent parameter to be fitted: ', nmp[i],'_',tmp2,
+        ' (should be ',nmp[i],'_',last.elem[i]+1,')\n'
+      )
+      stop(msg)
+    }
+    elem.recent.new = elem.recent - tmp2 + 1
+    b = paste(nmp[i], elem.recent.new, sep='_')
+    a[idx] = b
+  }
+  
+  # Rebasing names:
+  df.priors.rebased = df.priors
+  
+  # WARNING: THIS MAY NOT WORK IF THERE ARE 
+  # PRIORS THAT ARE _NOT_ TIME DEPENDENT
+  # TODO: FIX THIS!
+  
+  df.priors.rebased$name <- a
+  return(df.priors.rebased)
+}
+
+
 #' @title Fitting model to recent data only, using existing fit on past data. 
 #' @param data 
 #'
@@ -766,6 +853,7 @@ fit_recent_NEW <- function(
     # that start at the `pivot.date`:
     initvar = fitobj.past$fit$finalstates
     
+   
     # Rebase time-dependent parameters from pivot date:
     x = rebase_at_pivot(data, date.pivot, prm)
     obs         = x[['obs']]
@@ -773,15 +861,33 @@ fit_recent_NEW <- function(
     hosp.var    = x[['hosp.var']]
     case.var    = x[['case.var']]
     prm.rebased = x[['prm']]
-        
+      
+    # Adjust the name (ie element number) of the time-dependent priors.
+    #
+    # For example, if we have a time-dependent parameter X
+    # that is defined at 10 time points and have defined 
+    # the priors for the "past" until a `date.pivot` that 
+    # contains only the first 8, ie only the priors for 
+    # X_1, X_2, ..., X_8 were defined as parameters. 
+    # But "naturally", we define the "recent" priors as 
+    # X_9 and X_10 in the main script. This would trigger 
+    # a problem because the code expects a vector with 
+    # 10 elements when it reads "X_10", but the rebased 
+    # parameters `prm.rebased` is now only 2 elements.
+    # So X_9 and X_10 must be renamed, locally, into X_1 
+    # and X_2 (because they are the only 2 time points
+    # after `date.pivot`)
+    # 
+    df.priors.rebased = rebase_prior_names(df.priors, fitobj.past)
+      
     # Sample variables fitted to recent data
-    priors.recent = sample_priors(prior = df.priors, 
+    priors.recent = sample_priors(prior = df.priors.rebased, 
                                   prm.abc = prm.abc)
     
     # Check that the variable names for 
     # "recent" and "past" or not the same:
-    post.past = fitobj.past$post.abc
-    if(any(names(priors.recent) %in% names(post.past))){
+    name.post.past = names(fitobj.past$post.abc)
+    if(any(names(priors.recent) %in% name.post.past )){
         stop('In `fit_recent()`, the recent variables cannot be the same as the variables used to fit past data. Correct variable name in `df.priors`. Aborting.')
     }
     
@@ -793,7 +899,7 @@ fit_recent_NEW <- function(
             hosp.var = hosp.var,
             case.var = case.var,
             prm.abc = prm.abc,
-            prm = prm, 
+            prm = prm.rebased, 
             n.cores = n.cores,
             initvar = initvar)
     })
