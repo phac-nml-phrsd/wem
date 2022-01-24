@@ -160,8 +160,9 @@ seir <- function(t, x, parms)
         h_t = hosp.prop
     }else{
         # Time-dependent hospital proportion
-        mmult = step_line(x=t, b = hosp.prop.t, v = hosp.prop.v)
-        h_t = hosp.prop * mmult
+        h_t = broken_line(x=t,
+                          b = hosp.prop.t,
+                          v = hosp.prop.v)
     }
     
     if(!is.numeric(asymp.prop.v)){
