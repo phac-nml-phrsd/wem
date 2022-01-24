@@ -143,8 +143,8 @@ model_prm_example <- function() {
         asymp.prop = 0.316,    # asymptomatic proportion
         death.prop = 0.19,  # proportion of death from hospitalized (CIHI report https://www.cihi.ca/en/covid-19-hospitalization-and-emergency-department-statistics)
         hospital.prop = 0.02,  #proportion of hospitalized cases from symptomatic cases
-        hosp.rate.t = NULL,    # break times for change in hospitalization rate 
-        hosp.rate.v = NULL,  # break values for change in hospitalization rate (multiplier for hospital.prop)
+        hospital.prop.t = NULL,  # break times for change in hospital proportion out of symptomatic infection
+        hospital.prop.v = NULL,  # break values for change in hospital proportion out of symptomatic infection
         asymp.prop.t = NULL,  # break times for change in asymptomatic proportion 
         asymp.prop.v = NULL,  # break values for change in asymptomatic proportion (multiplier for asymp.prop)
         rel.inf.asymp = 0.8,  # relative infectiousness of asymptomatic compared to symptomatic states

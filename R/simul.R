@@ -165,7 +165,7 @@ simul <- function(prm){
     mult.shed.t      <- prm[["mult.shed.t"]]
     mult.shed.v      <- prm[["mult.shed.v"]]
     alpha            <- prm[["asymp.prop"]]
-    h                <- prm[["hospital.prop"]]
+    hosp.prop        <- prm[["hospital.prop"]]
     delta            <- prm[["death.prop"]]
     shedNotInf       <- prm[["dur.shed.recov"]]
     hosp.stay        <- prm[["hosp.length.mean"]]
@@ -179,8 +179,8 @@ simul <- function(prm){
     transm.v         <- prm[["transm.v"]]
     vacc.rate.t      <- prm[["vacc.rate.t"]]
     vacc.rate.v      <- prm[["vacc.rate.v"]]
-    hosp.rate.t      <- prm[["hosp.rate.t"]]
-    hosp.rate.v      <- prm[["hosp.rate.v"]]
+    hosp.prop.t      <- prm[["hospital.prop.t"]]
+    hosp.prop.v      <- prm[["hospital.prop.v"]]
     asymp.prop.t     <- prm[["asymp.prop.t"]]
     asymp.prop.v     <- prm[["asymp.prop.v"]]
     
@@ -295,8 +295,8 @@ simul <- function(prm){
     adj.J  = sum(inf.I[1:nIH]) / sum(inf.I)
     
     sA  =  alpha / theta * rel.inf.a
-    sI  =  (1-h) * (1 - alpha) / tau
-    sJ  =      h * (1 - alpha) / mu
+    sI  =  (1-hosp.prop) * (1 - alpha) / tau
+    sJ  =      hosp.prop * (1 - alpha) / mu
     s.S   = (sA + sI + sJ * adj.J)*S0/popSize  
     
     # Vaccinated part 
@@ -310,7 +310,7 @@ simul <- function(prm){
     beta = R0 / s
     
     params.SEIR <- list(  
-        h = h,
+        hosp.prop = hosp.prop,
         alpha = alpha,
         h.vac = h.vac,
         alpha.vac = alpha.vac,
@@ -330,8 +330,8 @@ simul <- function(prm){
         transm.v = transm.v,
         vacc.rate.t = vacc.rate.t, 
         vacc.rate.v = vacc.rate.v,
-        hosp.rate.t = hosp.rate.t, 
-        hosp.rate.v = hosp.rate.v,
+        hosp.prop.t = hosp.prop.t, 
+        hosp.prop.v = hosp.prop.v,
         asymp.prop.t = asymp.prop.t, 
         asymp.prop.v = asymp.prop.v,
         hosp.rate.vacc.t = hosp.rate.vacc.t, 
@@ -602,3 +602,4 @@ generate_obs_noise <- function(df, prms = list(cv = 0.1, cv.ww = 0.1)) {
                                     mu = df$hosp.admission, size = a.ha)
     return(df)
 }
+

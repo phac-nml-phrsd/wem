@@ -16,7 +16,7 @@ seir <- function(t, x, parms)
     nIH = parms$nIH
     nH = parms$nH
     nZ = parms$nZ
-    h = parms$h
+    hosp.prop = parms$hosp.prop
     alpha = parms$alpha
     h.vac = parms$h.vac
     alpha.vac = parms$alpha.vac
@@ -34,8 +34,8 @@ seir <- function(t, x, parms)
     transm.v = parms$transm.v
     vacc.rate.t = parms$vacc.rate.t 
     vacc.rate.v = parms$vacc.rate.v
-    hosp.rate.t = parms$hosp.rate.t 
-    hosp.rate.v = parms$hosp.rate.v
+    hosp.prop.t = parms$hosp.prop.t 
+    hosp.prop.v = parms$hosp.prop.v
     asymp.prop.t = parms$asymp.prop.t 
     asymp.prop.v = parms$asymp.prop.v
     hosp.rate.vacc.t = parms$hosp.rate.vacc.t 
@@ -156,12 +156,12 @@ seir <- function(t, x, parms)
         dEv[1] = dEv[1] + vac.infrate
     }
     
-    if(!is.numeric(hosp.rate.v)){
-        h_t = h
+    if(!is.numeric(hosp.prop.v)){
+        h_t = hosp.prop
     }else{
-        # Time-dependent hospital rate
-        mmult = step_line(x=t, b = hosp.rate.t, v = hosp.rate.v)
-        h_t = h * mmult
+        # Time-dependent hospital proportion
+        mmult = step_line(x=t, b = hosp.prop.t, v = hosp.prop.v)
+        h_t = hosp.prop * mmult
     }
     
     if(!is.numeric(asymp.prop.v)){
