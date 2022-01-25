@@ -24,6 +24,10 @@ seir <- function(t, x, parms)
     beta = parms$beta
     nepsilon = parms$nepsilon
     nepsilon.vac = parms$nepsilon.vac
+    nepsilon.t = parms$nepsilon.t
+    nepsilon.v = parms$nepsilon.v
+    nepsilon.vac.t = parms$nepsilon.vac.t
+    nepsilon.vac.v = parms$nepsilon.vac.v
     ntau = parms$ntau
     nmu = parms$nmu
     ntheta = parms$ntheta
@@ -127,6 +131,21 @@ seir <- function(t, x, parms)
         rt = broken_line(x=t, b=vacc.rate.t, v=vacc.rate.v)
     }
     
+    if(!is.numeric(nepsilon.v)){
+        nepsilon_t = nepsilon 
+    }else{
+        nepsilon_t = broken_line(x=t,
+                                 b=nepsilon.t,
+                                 v=nepsilon.v)
+    }
+    if(!is.numeric(nepsilon.vac.v)){
+        nepsilon.vac_t = nepsilon.vac 
+    }else{
+        nepsilon.vac_t = broken_line(x=t,
+                                 b=nepsilon.vac.t,
+                                 v=nepsilon.vac.v)
+    }
+    
     # calculate incidence
     infrate  = beta_t * S * (rel.inf.a  *sum.A + sum.I + sum.IH) / popSize
     
@@ -141,18 +160,18 @@ seir <- function(t, x, parms)
     dV = d*Vw - vac.infrate - tau.immu*V
     
     ## Exposed
-    if(nE == 1) dE = infrate - nepsilon * E
+    if(nE == 1) dE = infrate - nepsilon_t * E
     
     if(nE > 1){
-        dE = nepsilon * ( c(0, E[1:(nE-1)]) - E )
+        dE = nepsilon_t * ( c(0, E[1:(nE-1)]) - E )
         dE[1] = dE[1] + infrate
     }
     
     ## Vaccinated and exposed 
-    if(nEv == 1) dEv = vac.infrate - nepsilon.vac * Ev
+    if(nEv == 1) dEv = vac.infrate - nepsilon.vac_t * Ev
     
     if(nEv > 1){
-        dEv = nepsilon.vac * ( c(0, Ev[1:(nEv-1)]) - Ev )
+        dEv = nepsilon.vac_t * ( c(0, Ev[1:(nEv-1)]) - Ev )
         dEv[1] = dEv[1] + vac.infrate
     }
     
@@ -195,21 +214,21 @@ seir <- function(t, x, parms)
     # print(paste('DEBUG alpha.t =', alpha.t, 't =',t))
     
     ## infectious (symp + sympHosp + asymp)
-    if(nI == 1) dI = (1-h_t)*(1-alpha.t) * nepsilon * E[nE] + (1-h.vac_t)*(1-alpha.vac.t) * nepsilon.vac * Ev[nEv]- ntau * I
-    if(nIH == 1) dIH = h_t*(1-alpha.t) * nepsilon * E[nE] + h.vac_t*(1-alpha.vac.t) * nepsilon.vac * Ev[nEv]- nmu * IH
-    if(nA == 1) dA = alpha.t * nepsilon * E[nE] + alpha.vac.t * nepsilon.vac * Ev[nEv] - ntheta * A
+    if(nI == 1) dI = (1-h_t)*(1-alpha.t) * nepsilon_t * E[nE] + (1-h.vac_t)*(1-alpha.vac.t) * nepsilon.vac_t * Ev[nEv]- ntau * I
+    if(nIH == 1) dIH = h_t*(1-alpha.t) * nepsilon_t * E[nE] + h.vac_t*(1-alpha.vac.t) * nepsilon.vac_t * Ev[nEv]- nmu * IH
+    if(nA == 1) dA = alpha.t * nepsilon_t * E[nE] + alpha.vac.t * nepsilon.vac_t * Ev[nEv] - ntheta * A
     
     if(nI > 1) {
         dI = ntau * (c(0, I[1:(nI-1)]) - I)
-        dI[1] = dI[1] + (1-h_t)*(1-alpha.t) * nepsilon * E[nE] + (1-h.vac_t)*(1-alpha.vac.t) * nepsilon.vac * Ev[nEv]
+        dI[1] = dI[1] + (1-h_t)*(1-alpha.t) * nepsilon_t * E[nE] + (1-h.vac_t)*(1-alpha.vac.t) * nepsilon.vac_t * Ev[nEv]
     }
     if(nIH > 1) {
         dIH = nmu * (c(0, IH[1:(nIH-1)]) - IH)
-        dIH[1] = dIH[1] + h_t*(1-alpha.t) * nepsilon * E[nE] + h.vac_t*(1-alpha.vac.t) * nepsilon.vac * Ev[nEv]
+        dIH[1] = dIH[1] + h_t*(1-alpha.t) * nepsilon_t * E[nE] + h.vac_t*(1-alpha.vac.t) * nepsilon.vac_t * Ev[nEv]
     }
     if(nA > 1){
         dA = ntheta * (c(0, A[1:(nA-1)]) - A)   
-        dA[1] = dA[1] + alpha.t * nepsilon * E[nE] + alpha.vac.t * nepsilon.vac * Ev[nEv]
+        dA[1] = dA[1] + alpha.t * nepsilon_t * E[nE] + alpha.vac.t * nepsilon.vac_t * Ev[nEv]
     } 
     
     
