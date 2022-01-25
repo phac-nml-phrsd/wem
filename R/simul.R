@@ -143,7 +143,8 @@ simul <- function(prm){
     inf_symp_mean    <- prm[["dur.inf.symp.mean"]]
     inf_sympH_mean   <- prm[["dur.inf.sympHosp.mean"]]
     inf_asymp_mean   <- prm[["dur.inf.asymp.mean"]]
-    immunity         <- prm[["dur.immunity"]]
+    immunity.R       <- prm[["dur.immunity.R"]]
+    immunity.V       <- prm[["dur.immunity.V"]]
     vac.rate         <- prm[["vacc.rate"]] 
     dur.build.immun  <- prm[["dur.build.immun"]]
     eff.inf          <- prm[["vacc.eff.infection"]]
@@ -183,7 +184,10 @@ simul <- function(prm){
     hosp.rate.v      <- prm[["hosp.rate.v"]]
     asymp.prop.t     <- prm[["asymp.prop.t"]]
     asymp.prop.v     <- prm[["asymp.prop.v"]]
-    
+    immunity.R.t     <- prm[["dur.immunity.R.t"]]
+    immunity.R.v     <- prm[["dur.immunity.R.v"]]
+    immunity.V.t     <- prm[["dur.immunity.V.t"]]
+    immunity.V.v     <- prm[["dur.immunity.V.v"]]
     # the  time vector `eff.t` (below) applies to 
     # all other time dependent parameters
     # associated with vaccine effectiveness:
@@ -227,7 +231,24 @@ simul <- function(prm){
     nepsilon.vac <- epsilon * nEv
     tau      <- 1 / inf_symp_mean
     ntau     <- tau * nI
-    tau.immu <- 1 / immunity
+    tau.immu.R <- 1 / immunity.R
+    tau.immu.V <- 1 / immunity.V
+    #-- time-dependent immunity
+    if(!is.numeric(immunity.R.v)){
+      tau.immu.R.t <- immunity.R.t
+      tau.immu.R.v <- immunity.R.v
+    }else{
+      tau.immu.R.t <- immunity.R.t
+      tau.immu.R.v <- 1 / immunity.R.v
+    }
+    if(!is.numeric(immunity.V.v)){
+      tau.immu.V.t <- immunity.V.t
+      tau.immu.V.v <- immunity.V.v
+    }else{
+      tau.immu.V.t <- immunity.V.t
+      tau.immu.V.v <- 1 / immunity.V.v
+    }
+    #----
     mu       <- 1 / inf_sympH_mean
     nmu      <- mu * nIH
     theta    <- 1/inf_asymp_mean
@@ -343,7 +364,12 @@ simul <- function(prm){
         inf.IH = inf.IH,
         rel.inf.a = rel.inf.a,
         eff.inf = eff.inf,
-        r=r, d=d, tau.immu=tau.immu)
+        r=r, d=d, tau.immu.R=tau.immu.R,
+        tau.immu.V=tau.immu.V,
+        tau.immu.R.t = tau.immu.R.t,
+        tau.immu.V.t = tau.immu.V.t,
+        tau.immu.R.v = tau.immu.R.v,
+        tau.immu.V.v = tau.immu.V.v)
     
     ### Initial conditions
     ###
