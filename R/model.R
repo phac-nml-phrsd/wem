@@ -49,7 +49,12 @@ seir <- function(t, x, parms)
     eff.inf = parms$eff.inf
     r = parms$r 
     d = parms$d 
-    tau.immu = parms$tau.immu
+    tau.immu.R = parms$tau.immu.R
+    tau.immu.V = parms$tau.immu.V
+    tau.immu.R.t = parms$tau.immu.R.t
+    tau.immu.V.t = parms$tau.immu.V.t
+    tau.immu.R.v = parms$tau.immu.R.v
+    tau.immu.V.v = parms$tau.immu.V.v
     
     # define compartment parameters in vector x
     
@@ -127,18 +132,35 @@ seir <- function(t, x, parms)
         rt = broken_line(x=t, b=vacc.rate.t, v=vacc.rate.v)
     }
     
+    #--- time-dependent immunity
+    if(!is.numeric(tau.immu.R.v)){
+        tau.immu.R_t = tau.immu.R
+    }else{
+        tau.immu.R_t = broken_line(x=t,
+                                   b=tau.immu.R.t,
+                                   v=tau.immu.R.v)
+    }
+    if(!is.numeric(tau.immu.V.v)){
+        tau.immu.V_t = tau.immu.V
+    }else{
+        tau.immu.V_t = broken_line(x=t,
+                                   b=tau.immu.V.t,
+                                   v=tau.immu.V.v)
+    }
+    #---
+    
     # calculate incidence
     infrate  = beta_t * S * (rel.inf.a  *sum.A + sum.I + sum.IH) / popSize
     
     ## susceptible
-    dS = tau.immu*(R+V) - rt*S - infrate
+    dS = tau.immu.R_t*R + tau.immu.V_t*V - rt*S - infrate
     
     ## vaccinated but not immuned
     dVw = rt*S - d * Vw
     
     ## vaccinated with full protection 
     vac.infrate = (1-eff.inf) * beta_t * V * (rel.inf.a  *sum.A + sum.I + sum.IH) / popSize
-    dV = d*Vw - vac.infrate - tau.immu*V
+    dV = d*Vw - vac.infrate - tau.immu.V_t*V
     
     ## Exposed
     if(nE == 1) dE = infrate - nepsilon * E
@@ -236,7 +258,7 @@ seir <- function(t, x, parms)
     }
     
     ## recovered
-    dR = neta * Z[nZ] + (1-delta) *  nell * H[nH] - tau.immu*R
+    dR = neta * Z[nZ] + (1-delta) *  nell * H[nH] - tau.immu.R_t*R
     
     ## death
     dD = delta * nell * H[nH]
