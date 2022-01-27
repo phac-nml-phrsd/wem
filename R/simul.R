@@ -185,10 +185,6 @@ simul <- function(prm){
     transm.v         <- prm[["transm.v"]]
     vacc.rate.t      <- prm[["vacc.rate.t"]]
     vacc.rate.v      <- prm[["vacc.rate.v"]]
-    hosp.prop.t      <- prm[["hospital.prop.t"]]
-    hosp.prop.v      <- prm[["hospital.prop.v"]]
-    asymp.prop.t     <- prm[["asymp.prop.t"]]
-    asymp.prop.v     <- prm[["asymp.prop.v"]]
     immunity.R.t     <- prm[["dur.immunity.R.t"]]
     immunity.R.v     <- prm[["dur.immunity.R.v"]]
     immunity.V.t     <- prm[["dur.immunity.V.t"]]
@@ -338,7 +334,7 @@ simul <- function(prm){
       S.eff.symp.inf  = 1 - (1-S.eff.symp)/(1-S.eff.inf)
       S.eff.hosp.symp = 1 - (1-S.eff.hosp)/(1-S.eff.symp)
       asymp.prop     = S.eff.symp.inf
-      hosp.prop      = 1 - S.eff.hosp.symp 
+      hosp.prop      = 1 - S.eff.hosp.symp
       
       asymp.prop.v = NULL
       hosp.prop.v  = NULL
@@ -355,6 +351,7 @@ simul <- function(prm){
       # we still use const. asymp.prop and hosp.prop for R0 and beta 
       S.eff.symp.inf  = 1 - (1 - S.eff.symp.v[1])/(1 - S.eff.inf.v[1])
       S.eff.hosp.symp = 1 - (1 - S.eff.hosp.v[1])/(1 - S.eff.symp.v[1])
+      S.eff.inf = S.eff.inf.v[1]
       asymp.prop     = S.eff.symp.inf
       hosp.prop      = 1 - S.eff.hosp.symp 
       
