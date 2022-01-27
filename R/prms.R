@@ -118,6 +118,8 @@ model_prm_example <- function() {
     
     x = list(
         dur.latent.mean = 2,  # Latent mean duration in days
+        dur.latent.mean.t = NULL,  # Break time for latent mean duration in days
+        dur.latent.mean.v = NULL,  # Break values for latent mean duration in days
         dur.inf.symp.mean = 12,  #Infectiousness duration for symptomatic individual in days
         dur.inf.sympHosp.mean = 8,  # Infectiousness duration for symptomatic individual before admission to hospital in days
         dur.inf.asymp.mean = 10,  # Infectiousness duration for asymptomatic individual in days

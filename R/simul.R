@@ -139,7 +139,9 @@ simul <- function(prm){
     nZ               <- prm[["nZ"]]
     nH               <- prm[["nH"]]
     rel.inf.a        <- prm[["rel.inf.asymp"]]
-    latent_mean      <- prm[["dur.latent.mean"]]
+    latent.mean      <- prm[["dur.latent.mean"]]
+    latent.mean.t    <- prm[["dur.latent.mean.t"]]
+    latent.mean.v    <- prm[["dur.latent.mean.v"]]
     inf_symp_mean    <- prm[["dur.inf.symp.mean"]]
     inf_sympH_mean   <- prm[["dur.inf.sympHosp.mean"]]
     inf_asymp_mean   <- prm[["dur.inf.asymp.mean"]]
@@ -226,9 +228,24 @@ simul <- function(prm){
     # Define simulation parameters
     n.time.steps <- horizon * sim.steps
     dt       <- seq(0, horizon, length.out = n.time.steps+1)
-    epsilon  <- 1 / latent_mean
+    epsilon  <- 1 / latent.mean
     nepsilon <- epsilon * nE
     nepsilon.vac <- epsilon * nEv
+    #-- time-dependent latent period
+    if(!is.numeric(latent.mean.v)){
+      epsilon.v       <- latent.mean.v
+      nepsilon.t      <- latent.mean.t
+      nepsilon.vac.t  <- latent.mean.t
+      nepsilon.v      <- epsilon.v 
+      nepsilon.vac.v  <- epsilon.v
+    }else{
+      epsilon.v      <- 1 / latent.mean.v
+      nepsilon.t     <- latent.mean.t
+      nepsilon.vac.t <- latent.mean.t
+      nepsilon.v     <- epsilon.v * nE
+      nepsilon.vac.v <- epsilon.v * nEv
+    }
+    #------------------
     tau      <- 1 / inf_symp_mean
     ntau     <- tau * nI
     tau.immu.R <- 1 / immunity.R
@@ -339,6 +356,10 @@ simul <- function(prm){
         beta = beta,
         nepsilon = nepsilon,
         nepsilon.vac = nepsilon.vac,
+        nepsilon.t = nepsilon.t,
+        nepsilon.v = nepsilon.v,
+        nepsilon.vac.t = nepsilon.vac.t,
+        nepsilon.vac.v = nepsilon.vac.v,
         ntau = ntau,
         nmu = nmu,
         ntheta = ntheta,
