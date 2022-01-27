@@ -17,7 +17,7 @@ seir <- function(t, x, parms)
     nH = parms$nH
     nZ = parms$nZ
     hosp.prop = parms$hosp.prop
-    alpha = parms$alpha
+    asymp.prop = parms$asymp.prop
     h.vac = parms$h.vac
     alpha.vac = parms$alpha.vac
     delta = parms$delta
@@ -166,13 +166,12 @@ seir <- function(t, x, parms)
     }
     
     if(!is.numeric(asymp.prop.v)){
-        alpha.t = alpha 
+        alpha.t = asymp.prop 
     }else{
         # Time dependent asymptomatic proportion
-        mult.alpha = broken_line(x=t, 
+        alpha.t = broken_line(x=t, 
                                  b = asymp.prop.t, 
                                  v = asymp.prop.v)
-        alpha.t    = min(1.0, mult.alpha * alpha)
     }
     
     if(is.null(hosp.rate.vacc.v)){

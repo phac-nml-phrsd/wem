@@ -164,8 +164,8 @@ simul <- function(prm){
     vload_Z          <- prm[["shed.Z"]] 
     mult.shed.t      <- prm[["mult.shed.t"]]
     mult.shed.v      <- prm[["mult.shed.v"]]
-    alpha            <- prm[["asymp.prop"]]
     hosp.prop        <- prm[["hospital.prop"]]
+    asymp.prop       <- prm[["asymp.prop"]]
     delta            <- prm[["death.prop"]]
     shedNotInf       <- prm[["dur.shed.recov"]]
     hosp.stay        <- prm[["hosp.length.mean"]]
@@ -294,9 +294,9 @@ simul <- function(prm){
     # Unvaccinated part
     adj.J  = sum(inf.I[1:nIH]) / sum(inf.I)
     
-    sA  =  alpha / theta * rel.inf.a
-    sI  =  (1-hosp.prop) * (1 - alpha) / tau
-    sJ  =      hosp.prop * (1 - alpha) / mu
+    sA  =  asymp.prop / theta * rel.inf.a
+    sI  =  (1-hosp.prop) * (1 - asymp.prop) / tau
+    sJ  =      hosp.prop * (1 - asymp.prop) / mu
     s.S   = (sA + sI + sJ * adj.J)*S0/popSize  
     
     # Vaccinated part 
@@ -311,7 +311,7 @@ simul <- function(prm){
     
     params.SEIR <- list(  
         hosp.prop = hosp.prop,
-        alpha = alpha,
+        asymp.prop = asymp.prop,
         h.vac = h.vac,
         alpha.vac = alpha.vac,
         delta = delta,
