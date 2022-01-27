@@ -152,6 +152,9 @@ simul <- function(prm){
     eff.inf          <- prm[["vacc.eff.infection"]]
     eff.symp         <- prm[["vacc.eff.symptomatic"]]
     eff.hosp         <- prm[["vacc.eff.hospitalization"]]
+    S.eff.inf        <- prm[["susc.prot.infection"]]
+    S.eff.symp       <- prm[["susc.prot.symptomatic"]]
+    S.eff.hosp       <- prm[["susc.prot.hospitalization"]]
     popSize          <- prm[["pop.size"]] 
     R0               <- prm[["R0"]]
     I.init           <- prm[["init.I1"]] 
@@ -201,6 +204,13 @@ simul <- function(prm){
     
     transit.time.mean <- prm[['transit.time.mean']] 
     transit.time.cv   <- prm[['transit.time.cv']] 
+    
+    # time-dependent protection of susceptible(re-infection effectiveness)
+    S.eff.t            <- prm[["susc.prot.t"]]    
+    
+    S.eff.inf.v        <- prm[["susc.prot.inf.v"]]
+    S.eff.symp.v       <- prm[["susc.prot.symp.v"]]
+    S.eff.hosp.v       <- prm[["susc.prot.hosp.v"]]
     
     # --- Checks for inputs
     
@@ -285,7 +295,7 @@ simul <- function(prm){
     is.time.dep.vacc.eff = length(eff.t)>1
     
     if(!is.time.dep.vacc.eff){
-      #message('Vacine effectiveness parameters are constant.')
+      #message('Vaccine effectiveness parameters are constant.')
       
       eff.symp.inf  = 1 - (1-eff.symp)/(1-eff.inf)
       eff.hosp.symp = 1 - (1-eff.hosp)/(1-eff.symp)
@@ -307,6 +317,7 @@ simul <- function(prm){
       # we still use const. alpha.vac and h.vac for R0 and beta 
       eff.symp.inf  = 1 - (1 - eff.symp.v[1])/(1 - eff.inf.v[1])
       eff.hosp.symp = 1 - (1 - eff.hosp.v[1])/(1 - eff.symp.v[1])
+      eff.inf = eff.inf.v[1]
       alpha.vac     = eff.symp.inf
       h.vac         = 1 - eff.hosp.symp 
       
@@ -316,6 +327,44 @@ simul <- function(prm){
       asymp.prop.vacc.t = eff.t
       hosp.rate.vacc.t  = eff.t
     }
+    
+    
+    #---- Check if the susceptible effectiveness are time-dependent
+    is.time.dep.susc.eff = length(S.eff.t)>1
+    
+    if(!is.time.dep.susc.eff){
+      #message('effectiveness parameters are constant.')
+      
+      S.eff.symp.inf  = 1 - (1-S.eff.symp)/(1-S.eff.inf)
+      S.eff.hosp.symp = 1 - (1-S.eff.hosp)/(1-S.eff.symp)
+      asymp.prop     = S.eff.symp.inf
+      hosp.prop      = 1 - S.eff.hosp.symp 
+      
+      asymp.prop.v = NULL
+      hosp.prop.v  = NULL
+      asymp.prop.t = NULL
+      hosp.prop.t  = NULL
+    }
+    
+    if(is.time.dep.susc.eff){
+      
+      message('Susceptible effectiveness parameters are time-dependent.')
+      
+      # constant Susc. variables
+      # even in case of using time-dependent effectiveness, 
+      # we still use const. asymp.prop and hosp.prop for R0 and beta 
+      S.eff.symp.inf  = 1 - (1 - S.eff.symp.v[1])/(1 - S.eff.inf.v[1])
+      S.eff.hosp.symp = 1 - (1 - S.eff.hosp.v[1])/(1 - S.eff.symp.v[1])
+      asymp.prop     = S.eff.symp.inf
+      hosp.prop      = 1 - S.eff.hosp.symp 
+      
+      # time-dependent susc. variables
+      asymp.prop.v = 1 - (1-S.eff.symp.v)/(1-S.eff.inf.v)
+      hosp.prop.v  = 1 - (1-S.eff.hosp.v)/(1-S.eff.symp.v) 
+      asymp.prop.t = S.eff.t
+      hosp.prop.t  = S.eff.t
+    }
+    
     
     #--- RNA copies concentration
     lambda_E  <- vload_E 
@@ -335,7 +384,7 @@ simul <- function(prm){
     sA  =  asymp.prop / theta * rel.inf.a
     sI  =  (1-hosp.prop) * (1 - asymp.prop) / tau
     sJ  =      hosp.prop * (1 - asymp.prop) / mu
-    s.S   = (sA + sI + sJ * adj.J)*S0/popSize  
+    s.S   = (sA + sI + sJ * adj.J)*(1 - S.eff.inf)*S0/popSize  
     
     # Vaccinated part 
     sA.V  =  alpha.vac / theta * rel.inf.a
@@ -385,6 +434,11 @@ simul <- function(prm){
         inf.IH = inf.IH,
         rel.inf.a = rel.inf.a,
         eff.inf = eff.inf,
+        eff.t   = eff.t,
+        eff.inf.v = eff.inf.v,
+        S.eff.inf = S.eff.inf,
+        S.eff.t   = S.eff.t,
+        S.eff.inf.v = S.eff.inf.v,
         r=r, d=d, tau.immu.R=tau.immu.R,
         tau.immu.V=tau.immu.V,
         tau.immu.R.t = tau.immu.R.t,
