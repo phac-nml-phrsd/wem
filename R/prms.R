@@ -145,7 +145,7 @@ model_prm_example <- function() {
         vacc.eff.hosp.v = NULL, # break values for change in vacc. effectiveness in hospitalization given exposure 
         susc.prot.infection = 0.0, # susceptible protection against infection given exposure 
         susc.prot.symptomatic = 0.316, # susceptible protection against symptomatic disease given exposure
-        susc.prot.hospitalization = 0.98632, # susceptible protection against hospitalization given exposure
+        susc.prot.hospitalization = 0.67032, # susceptible protection against hospitalization given exposure
         susc.prot.t      = NULL, # break times for change in susceptible protection values
         susc.prot.inf.v  = NULL, # break values for change in susceptible protection in infection given exposure 
         susc.prot.symp.v = NULL, # break values for change in susceptible protection in symptomatic given exposure 
