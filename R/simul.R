@@ -175,6 +175,8 @@ simul <- function(prm){
     delta            <- prm[["death.prop"]]
     shedNotInf       <- prm[["dur.shed.recov"]]
     hosp.stay        <- prm[["hosp.length.mean"]]
+    hosp.stay.t      <- prm[["hosp.length.mean.t"]]
+    hosp.stay.v      <- prm[["hosp.length.mean.v"]]
     kappa            <- prm[["decay.rate"]]
     report.prop      <- prm[["report.prop"]]
     report.lag       <- prm[["report.lag"]]
@@ -278,6 +280,16 @@ simul <- function(prm){
     ntheta   <- theta * nA
     ell      <- 1/ hosp.stay
     nell     <- ell * nH
+    #-- time dependent length of hospital
+    if(!is.numeric(hosp.stay.v)){
+      nell.t <- hosp.stay.t
+      nell.v <- hosp.stay.v
+    }else{
+      ell.v  <- 1 / hosp.stay.v
+      nell.t <- hosp.stay.t
+      nell.v <- ell.v * nH
+    }
+    #----
     eta      <- 1/shedNotInf
     neta     <- eta * nZ
     
@@ -411,6 +423,8 @@ simul <- function(prm){
         ntheta = ntheta,
         neta = neta,
         nell = nell,
+        nell.t = nell.t,
+        nell.v = nell.v,
         nE=nE, nEv=nEv, nI=nI, nIH=nIH, 
         nA=nA, nH=nH, nZ=nZ,
         popSize = popSize,

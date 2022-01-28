@@ -124,11 +124,13 @@ model_prm_example <- function() {
         dur.inf.sympHosp.mean = 8,  # Infectiousness duration for symptomatic individual before admission to hospital in days
         dur.inf.asymp.mean = 10,  # Infectiousness duration for asymptomatic individual in days
         dur.shed.recov = 24,  # fecal shedding duration after infectious period in days
-        hosp.length.mean = 11,  # Length of hospital stay for AB (obtained from DAD by Health Canada)
-        dur.immunity.R = 365, # duration of full immunity for Recovered in days
+        hosp.length.mean = 11,  # Length of hospital stay (obtained from DAD by Health Canada)
+        hosp.length.mean.t = NULL,  # Break time for length of hospital stay
+        hosp.length.mean.v = NULL,  # Break values for length of hospital stay
+        dur.immunity.R = 550, # duration of full immunity for Recovered in days
         dur.immunity.R.t = NULL, # break times for time-dependent duration of full immunity for Recovered in days
         dur.immunity.R.v = NULL, # break values for time-dependent duration of full immunity for Recovered in days
-        dur.immunity.V = 365, # duration of full immunity in days
+        dur.immunity.V = 550, # duration of full immunity in days
         dur.immunity.V.t = NULL, # break times for time-dependent duration duration of full immunity for Vaccinated in days
         dur.immunity.V.v = NULL, # break values for time-dependent duration duration of full immunity for Vaccinated in days
         vacc.rate = 0.00001, # proportional rate of individuals get vaccinated every day (number/population)

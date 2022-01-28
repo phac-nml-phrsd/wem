@@ -33,6 +33,8 @@ seir <- function(t, x, parms)
     ntheta = parms$ntheta
     neta = parms$neta
     nell = parms$nell
+    nell.t = parms$nell.t
+    nell.v = parms$nell.v
     popSize = parms$popSize
     transm.t = parms$transm.t 
     transm.v = parms$transm.v
@@ -276,14 +278,23 @@ seir <- function(t, x, parms)
     } 
     
     
-    ## Hospital admission and occupancy
+    ### Hospital admission and occupancy
+    # time dependent hosp. stay
+    if(!is.numeric(nell.v)){
+        nell_t = nell
+    }else{
+        # Time-dependent hospital proportion
+        nell_t = broken_line(x=t,
+                             b = nell.t,
+                             v = nell.v)
+    }
     
     hospadm =  nmu * IH[nIH]
     
-    if(nH == 1) dH = hospadm - nell * H
+    if(nH == 1) dH = hospadm - nell_t * H
     
     if(nH > 1){
-        dH = nell * ( c(0, H[1:(nH-1)]) - H )
+        dH = nell_t * ( c(0, H[1:(nH-1)]) - H )
         dH[1] = dH[1] + hospadm
     }
     
@@ -299,10 +310,10 @@ seir <- function(t, x, parms)
     }
     
     ## recovered
-    dR = neta * Z[nZ] + (1-delta) *  nell * H[nH] - tau.immu.R_t*R
+    dR = neta * Z[nZ] + (1-delta) *  nell_t * H[nH] - tau.immu.R_t*R
     
     ## death
-    dD = delta * nell * H[nH]
+    dD = delta * nell_t * H[nH]
     
     ## Cumulative infection (symp+sympHosp+asymp) incidence
     dcuminc     = infrate + vac.infrate
