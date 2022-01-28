@@ -178,7 +178,7 @@ plot_epidemic <- function(df) {
   
   g = df.long %>%
     filter(name %in% c('S','inc', 'V','hosp.admission', 
-                       'report', 'concen')) %>%
+                       'report', 'R')) %>%
     ggplot(aes(x=time, y=value)) +
     geom_line(size=1) +
     # theme(text=element_text(size=textsize)) + 
