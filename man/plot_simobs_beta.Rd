@@ -10,7 +10,8 @@ plot_simobs_beta(
   include.cases = TRUE,
   include.ww = TRUE,
   include.hosp = FALSE,
-  log.scale = FALSE
+  log.scale = FALSE,
+  time.range = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ plot_simobs_beta(
 \item{include.hosp}{Logical. display hospital observations?}
 
 \item{log.scale}{Logical. Use log scale?}
+
+\item{time.range}{Numerical vector. Minimum and maximum values for the x axis.}
 }
 \value{
 A \code{ggplot2} object.
@@ -49,7 +52,7 @@ dat = build_data(cases = cases,
                  hosp.type = 'hosp.adm', 
                  case.date.type = 'report')
 
-# Load example of mdoel parameters
+# Load example of model parameters
 prm = model_prm_example()
 
 # Plot data, simulation and 
@@ -59,7 +62,8 @@ g = plot_simobs_beta(data          = dat,
                      include.cases = TRUE,
                      include.ww    = TRUE,
                      include.hosp  = FALSE,
-                     log.scale     = FALSE)
+                     log.scale     = FALSE,
+                     time.range    = NULL)
 plot(g)
 
 }

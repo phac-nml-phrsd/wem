@@ -292,6 +292,7 @@ plot_fcst <- function(var, fcst.obj, dat,
 #' @param include.ww  Logical. Display observed viral concentration in wastewater? 
 #' @param include.hosp Logical. display hospital observations?
 #' @param log.scale Logical. Use log scale?
+#' @param time.range Numerical vector. Minimum and maximum values for the x axis.
 #'
 #' @return A \code{ggplot2} object.
 #' 
@@ -310,7 +311,7 @@ plot_fcst <- function(var, fcst.obj, dat,
 #'                  hosp.type = 'hosp.adm', 
 #'                  case.date.type = 'report')
 #'
-#' # Load example of mdoel parameters
+#' # Load example of model parameters
 #' prm = model_prm_example()
 #' 
 #' # Plot data, simulation and 
@@ -320,7 +321,8 @@ plot_fcst <- function(var, fcst.obj, dat,
 #'                      include.cases = TRUE,
 #'                      include.ww    = TRUE,
 #'                      include.hosp  = FALSE,
-#'                      log.scale     = FALSE)
+#'                      log.scale     = FALSE,
+#'                      time.range    = NULL)
 #' plot(g)
 #'
 plot_simobs_beta <- function(data,
@@ -328,7 +330,8 @@ plot_simobs_beta <- function(data,
                              include.cases = TRUE,
                              include.ww    = TRUE,
                              include.hosp  = FALSE,
-                             log.scale     = FALSE){
+                             log.scale     = FALSE,
+                             time.range    = NULL){
   
   # rename/separate data
   obs      = data[['obs']]
@@ -336,23 +339,24 @@ plot_simobs_beta <- function(data,
   hosp.var = data[['hosp.var']]
   case.var = data[['case.var']]
   
-  
   # time range
   xrng = range(prm[['transm.t']], obs.long$time)
-  xaxis = scale_x_continuous(limits = xrng)
+  xaxis = coord_cartesian(xlim = time.range)  #scale_x_continuous(limits = time.range)
+  if(is.null(time.range)) xaxis = scale_x_continuous(limits = xrng)
   
   # Plot transmission rate (beta) 
   d0 = min(obs$date)
   g.beta.init = plot_multvec(prm, 
                              xname = 'transm.t',
                              yname = 'transm.v',
-                             d0=d0) + 
+                             d0=d0, xmax = NULL) + 
     xaxis + 
     xlab('time') + 
     theme(panel.grid.minor.y = element_blank())
   
-  
   # -- Single inital simulation 
+  
+  prm$horizon <- max(obs$time)
   sim.init = simul(prm)
   df.init  = sim.init$ts
   
@@ -373,7 +377,6 @@ plot_simobs_beta <- function(data,
   
   return(g.final)
 }
-
 
 
 #' @title Plot Observational and Simulated Data
