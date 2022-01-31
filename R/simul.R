@@ -168,7 +168,6 @@ simul <- function(prm){
     mult.shed.t      <- prm[["mult.shed.t"]]
     mult.shed.v      <- prm[["mult.shed.v"]]
     hosp.prop        <- prm[["hospital.prop"]]
-    hosp.prop.vacc   <- prm[["hospital.prop.vacc"]]
     asymp.prop       <- prm[["asymp.prop"]]
     delta            <- prm[["death.prop"]]
     shedNotInf       <- prm[["dur.shed.recov"]]
@@ -306,8 +305,8 @@ simul <- function(prm){
       h.vac         = 1 - eff.hosp.symp 
       
       asymp.prop.vacc.v = NULL
-      asymp.prop.vacc.t = NULL
       hosp.rate.vacc.v  = NULL
+      asymp.prop.vacc.t = NULL
       hosp.rate.vacc.t  = NULL
     }
     
@@ -362,7 +361,6 @@ simul <- function(prm){
     
     params.SEIR <- list(  
         hosp.prop = hosp.prop,
-        hosp.prop.vacc = hosp.prop.vacc,
         asymp.prop = asymp.prop,
         h.vac = h.vac,
         alpha.vac = alpha.vac,

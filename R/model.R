@@ -17,9 +17,8 @@ seir <- function(t, x, parms)
     nH = parms$nH
     nZ = parms$nZ
     hosp.prop = parms$hosp.prop
-    hosp.prop.vacc = parms$hosp.prop.vacc
     asymp.prop = parms$asymp.prop
-    # h.vac = parms$h.vac  # HOSPFIX
+    h.vac = parms$h.vac
     alpha.vac = parms$alpha.vac
     delta = parms$delta
     beta = parms$beta
@@ -210,11 +209,6 @@ seir <- function(t, x, parms)
                           v = hosp.prop.v)
     }
     
-    
-    # DEBUG
-    # message(paste('DEBUG h =',h_t))
-    # - - - 
-    
     if(!is.numeric(asymp.prop.v)){
         alpha.t = asymp.prop 
     }else{
@@ -225,7 +219,7 @@ seir <- function(t, x, parms)
     }
     
     if(is.null(hosp.rate.vacc.v)){
-        h.vac_t = hosp.prop.vacc  #HOSPFIX
+        h.vac_t = h.vac
     }else{
         # Vaccinated Time-dependent hospital rate
         h.vac_t = broken_line(x = t, 
@@ -254,22 +248,8 @@ seir <- function(t, x, parms)
         dI[1] = dI[1] + (1-h_t)*(1-alpha.t) * nepsilon_t * E[nE] + (1-h.vac_t)*(1-alpha.vac.t) * nepsilon.vac_t * Ev[nEv]
     }
     if(nIH > 1) {
-        
-        # DEBUG VAX PROBLEM
-        message(paste('DEBUG h_t =',h_t))
-        message(paste('DEBUG IH =',IH[1]))
-        
-        tmp1 = h_t*(1-alpha.t) * nepsilon_t * E[nE]
-        tmp2 = h.vac_t*(1-alpha.vac.t) * nepsilon.vac_t * Ev[nEv]
-        
-        message(paste('\nDEBUG tmp2 =',tmp2))
-        message(paste('DEBUG h.vac_t =',h.vac_t))
-        message(paste('DEBUG alpha.vac.t =',alpha.vac.t))
-        message(paste('DEBUG nepsilon.vac_t =',nepsilon.vac_t))
-        message(paste('DEBUG Ev[nEv] =',Ev[nEv]))
-        
         dIH = nmu * (c(0, IH[1:(nIH-1)]) - IH)
-        dIH[1] = dIH[1] + tmp1 + tmp2
+        dIH[1] = dIH[1] + h_t*(1-alpha.t) * nepsilon_t * E[nE] + h.vac_t*(1-alpha.vac.t) * nepsilon.vac_t * Ev[nEv]
     }
     if(nA > 1){
         dA = ntheta * (c(0, A[1:(nA-1)]) - A)   
