@@ -323,8 +323,11 @@ simul <- function(prm){
       h.vac         = 1 - eff.hosp.symp 
       
       # time-dependent vacc. variables
-      asymp.prop.vacc.v = 1 - (1-eff.symp.v)/(1-eff.inf.v)
-      hosp.rate.vacc.v  = 1 - (1-eff.hosp.v)/(1-eff.symp.v) 
+      asymp.tmp.v = 1 - (1-eff.symp.v)/(1-eff.inf.v)
+      hosp.tmp.v  = 1 - (1-eff.hosp.v)/(1-eff.symp.v) 
+      asymp.prop.vacc.v = asymp.tmp.v 
+      hosp.rate.vacc.v  = 1 - hosp.tmp.v  
+      
       asymp.prop.vacc.t = eff.t
       hosp.rate.vacc.t  = eff.t
     }
