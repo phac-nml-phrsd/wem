@@ -521,7 +521,7 @@ plot_multvec <- function(prm, xname, yname, d0, xmax = NULL) {
 #'
 .plottype <- function(d) {
   res = d %>%  
-    mutate(plottype = ifelse(name %in% c('hosp','Hall','hosp.obs'), 'Hospitalization',
+    mutate(plottype = ifelse(name %in% c('hosp','Hall','hosp.obs','hosp.admission'), 'Hospitalization',
                              ifelse(grepl('[wW][wW]',name), 'WW', 
                                     'Clinical')))
   return(res)
