@@ -21,6 +21,8 @@ seir <- function(t, x, parms)
     h.vac = parms$h.vac
     alpha.vac = parms$alpha.vac
     delta = parms$delta
+    delta.t = parms$delta.t
+    delta.v = parms$delta.v
     beta = parms$beta
     nepsilon = parms$nepsilon
     nepsilon.vac = parms$nepsilon.vac
@@ -288,11 +290,21 @@ seir <- function(t, x, parms)
         dZ[1] = dZ[1] + ntau*I[nI] + ntheta*A[nA]
     }
     
+    
+    # time dependent in-hosp death rate
+    if(!is.numeric(delta.v)){
+        delta_t = delta
+    }else{
+        # Time-dependent 
+        delta_t = broken_line(x=t,
+                              b = delta.t,
+                              v = delta.v)
+    }
     ## recovered
-    dR = neta * Z[nZ] + (1-delta) *  nell_t * H[nH] - tau.immu.R_t*R
+    dR = neta * Z[nZ] + (1-delta_t) *  nell_t * H[nH] - tau.immu.R_t*R
     
     ## death
-    dD = delta * nell_t * H[nH]
+    dD = delta_t * nell_t * H[nH]
     
     ## Cumulative infection (symp+sympHosp+asymp) incidence
     dcuminc     = infrate + vac.infrate

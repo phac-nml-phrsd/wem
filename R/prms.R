@@ -150,7 +150,9 @@ model_prm_example <- function() {
         init.I1 = 20,  # initial number of symptomatic infections introduced in the population
         init.V = 0, #initial number of vaccinated introduced in the population
         asymp.prop = 0.316,    # asymptomatic proportion
-        death.prop = 0.19,  # proportion of death from hospitalized (CIHI report https://www.cihi.ca/en/covid-19-hospitalization-and-emergency-department-statistics)
+        death.prop = 0.19,  # in-hospital death rate(CIHI report https://www.cihi.ca/en/covid-19-hospitalization-and-emergency-department-statistics)
+        death.prop.t = NULL,  # break time for in-hospital death rate
+        death.prop.v = NULL,  # break value for in-hospital death rate
         hospital.prop = 0.02,  #proportion of hospitalized cases from symptomatic cases
         hospital.prop.t = NULL,  # break times for change in hospital proportion out of symptomatic infection
         hospital.prop.v = NULL,  # break values for change in hospital proportion out of symptomatic infection

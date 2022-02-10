@@ -170,6 +170,8 @@ simul <- function(prm){
     hosp.prop        <- prm[["hospital.prop"]]
     asymp.prop       <- prm[["asymp.prop"]]
     delta            <- prm[["death.prop"]]
+    delta.t          <- prm[["death.prop.t"]]
+    delta.v          <- prm[["death.prop.v"]]
     shedNotInf       <- prm[["dur.shed.recov"]]
     hosp.stay        <- prm[["hosp.length.mean"]]
     hosp.stay.t      <- prm[["hosp.length.mean.t"]]
@@ -368,6 +370,8 @@ simul <- function(prm){
         h.vac = h.vac,
         alpha.vac = alpha.vac,
         delta = delta,
+        delta.t = delta.t,
+        delta.v = delta.v,
         beta = beta,
         nepsilon = nepsilon,
         nepsilon.vac = nepsilon.vac,
