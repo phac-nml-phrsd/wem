@@ -55,6 +55,8 @@ seir <- function(t, x, parms)
     inf.IH = parms$inf.IH
     rel.inf.a = parms$rel.inf.a
     eff.inf = parms$eff.inf
+    eff.t = parms$eff.t
+    eff.inf.v = parms$eff.inf.v
     r = parms$r 
     d = parms$d 
     tau.immu.R = parms$tau.immu.R
@@ -172,7 +174,13 @@ seir <- function(t, x, parms)
                                  v=nepsilon.vac.v)
     }
 
-    
+    if(!is.numeric(eff.inf.v)){
+        eff.inf_t = eff.inf
+    }else{
+        eff.inf_t = broken_line(x=t,
+                                b=eff.t,
+                                v=eff.inf.v)
+    }
     # calculate incidence
     infrate  = beta_t * S * (rel.inf.a  *sum.A + sum.I + sum.IH) / popSize
     
@@ -183,7 +191,7 @@ seir <- function(t, x, parms)
     dVw = rt*S - d * Vw
     
     ## vaccinated with full protection 
-    vac.infrate = (1-eff.inf) * beta_t * V * (rel.inf.a  *sum.A + sum.I + sum.IH) / popSize
+    vac.infrate = (1-eff.inf_t) * beta_t * V * (rel.inf.a  *sum.A + sum.I + sum.IH) / popSize
     dV = d*Vw - vac.infrate - tau.immu.V_t*V
     
     ## Exposed

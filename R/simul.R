@@ -321,15 +321,16 @@ simul <- function(prm){
       # we still use const. alpha.vac and h.vac for R0 and beta 
       eff.symp.inf  = 1 - (1 - eff.symp.v[1])/(1 - eff.inf.v[1])
       eff.hosp.symp = 1 - (1 - eff.hosp.v[1])/(1 - eff.symp.v[1])
+      eff.inf       = eff.inf.v[1]
       alpha.vac     = eff.symp.inf
       h.vac         = 1 - eff.hosp.symp 
       
       # time-dependent vacc. variables
       asymp.tmp.v = 1 - (1-eff.symp.v)/(1-eff.inf.v)
       hosp.tmp.v  = 1 - (1-eff.hosp.v)/(1-eff.symp.v) 
+      
       asymp.prop.vacc.v = asymp.tmp.v 
       hosp.rate.vacc.v  = 1 - hosp.tmp.v  
-      
       asymp.prop.vacc.t = eff.t
       hosp.rate.vacc.t  = eff.t
     }
@@ -406,6 +407,8 @@ simul <- function(prm){
         inf.IH = inf.IH,
         rel.inf.a = rel.inf.a,
         eff.inf = eff.inf,
+        eff.t = eff.t,
+        eff.inf.v = eff.inf.v,
         r=r, d=d, tau.immu.R=tau.immu.R,
         tau.immu.V=tau.immu.V,
         tau.immu.R.t = tau.immu.R.t,
