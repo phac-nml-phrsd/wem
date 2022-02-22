@@ -314,7 +314,7 @@ simul <- function(prm){
     
     if(is.time.dep.vacc.eff){
       
-      message('Vacine effectiveness parameters are time-dependent.')
+      # message('Vacine effectiveness parameters are time-dependent.')
       
       # constant vacc. variables
       # even in case of using time-dependent h.vac and alpha.vac, 
