@@ -225,8 +225,10 @@ simul <- function(prm){
     if(length(eff.t)!=length(eff.symp.v)){
       stop('Inputs inconsistent: Length for `vacc.eff.t` must be the same as `vacc.eff.symp.v`. Aborting.')
     }
-    if(length(eff.t)==1 & eff.t!='NULL'){
-      stop('ERROR: Length for `eff.t` must be of size 2 or more. For a constant values for vaccine effectiveness, use those parameters instead: `vacc.eff.infection`, `vacc.eff.symptomatic`, `vacc.eff.hospitalization` . Aborting.')
+    if(length(eff.t)==1){
+        if(eff.t!='NULL') {
+            stop('ERROR: Length for `eff.t` must be of size 2 or more. For a constant values for vaccine effectiveness, use those parameters instead: `vacc.eff.infection`, `vacc.eff.symptomatic`, `vacc.eff.hospitalization` . Aborting.')
+        } 
     }
     
     # Define simulation parameters
