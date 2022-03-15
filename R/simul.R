@@ -527,6 +527,12 @@ simul_post_unit <- function(i, post.abc, prm) {
 #' @param case.var String. Type of date for clinical cases; \code{'report'} and \code{'episode'}
 #' @param ci Numeric. Credible interval level. Default = 0.95.
 #' @param n.cores Integer. Number of cores used for parallel computing.
+#' @param post.slice EXPERIMENTAL. Default = \code{NULL}.
+#' List with elements specifying the type of posterior
+#' distribution that must be returned.For example, \code{post.slice = list(
+#' t.slice = seq(700, 760, by=10),
+#' vars.slice = c('WWreport', 'inc','clin.case'))}
+#' 
 #' 
 #' @return Dataframe of summary statistics time series.
 #' 
@@ -534,24 +540,25 @@ simul_post_unit <- function(i, post.abc, prm) {
 #' 
 simul_from_post <- function(post.abc, prm, 
                             hosp.var, case.var, 
-                            ci = 0.95, n.cores = 4) {
+                            ci = 0.95, n.cores = 4,
+                            post.slice = NULL) {
   
   n.abc.post = nrow(post.abc)
   message(paste('Starting simulation using',n.abc.post,'posterior values...'))
   
-  sfInit(parallel = n.cores > 1, cpus = n.cores)
-  sfExportAll()
-  suppressMessages({
-    sfLibrary(deSolve)
-    sfLibrary(stringr)
-    sfLibrary(dplyr)
-  })
-  tmp = sfLapply(x   = 1:n.abc.post, 
-                 fun = simul_post_unit, 
-                 post.abc = post.abc, prm = prm)
-  sfStop()
-  
-  simp = do.call('rbind', tmp)
+    sfInit(parallel = n.cores > 1, cpus = n.cores)
+    sfExportAll()
+    suppressMessages({
+      sfLibrary(deSolve)
+      sfLibrary(stringr)
+      sfLibrary(dplyr)
+    })
+    tmp = sfLapply(x   = 1:n.abc.post, 
+                   fun = simul_post_unit, 
+                   post.abc = post.abc, prm = prm)
+    sfStop()
+    
+    simp = do.call('rbind', tmp)
   
   # Determine type of date for clinical cases (reported date or episode date)
   if(case.var=='report'){
@@ -620,7 +627,34 @@ simul_from_post <- function(post.abc, prm,
                 hosp.hi = hospital.hi)
   }
   
-  return(ss)
+  res = ss  
+  
+  # --- Posterior distribution slice
+  
+  if(0){  # DEBUG
+    post.slice = list(
+      t.slice = seq(700, 760, by=10),
+      vars.slice = c('WWreport', 'inc','clin.case')
+    )
+  }
+  
+  if(!is.null(post.slice)){
+    t.slice    = post.slice$t.slice
+    vars.slice = post.slice$vars.slice
+    
+    distrib.post.slice = simp %>% 
+      filter(time %in% t.slice) %>%
+      select(all_of(c('time',vars.slice)))
+    
+    res = list(ss = ss, 
+               distrib.post.slice = distrib.post.slice)
+  }
+  
+  # foo %>% ggplot(aes(x=clin.case, fill=factor(time))) + 
+  #   geom_density(alpha=.4)+
+  #   facet_wrap(~time, ncol=1, scales = 'free_y')
+  
+  return(res)
 }
 
 

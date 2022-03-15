@@ -4,7 +4,7 @@
 \alias{fcst}
 \title{Forecast from a fit object.}
 \usage{
-fcst(fitobj, horizon.fcst, dat, ci = 0.95, n.cores = 1)
+fcst(fitobj, horizon.fcst, dat, ci = 0.95, n.cores = 1, post.slice = NULL)
 }
 \arguments{
 \item{fitobj}{}
@@ -16,6 +16,8 @@ fcst(fitobj, horizon.fcst, dat, ci = 0.95, n.cores = 1)
 \item{ci}{}
 
 \item{n.cores}{}
+
+\item{post.slice}{EXPERIMENTAL. List.}
 }
 \value{
 

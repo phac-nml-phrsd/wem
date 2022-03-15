@@ -4,7 +4,15 @@
 \alias{simul_from_post}
 \title{Simulate epidemic from posterior distributions.}
 \usage{
-simul_from_post(post.abc, prm, hosp.var, case.var, ci = 0.95, n.cores = 4)
+simul_from_post(
+  post.abc,
+  prm,
+  hosp.var,
+  case.var,
+  ci = 0.95,
+  n.cores = 4,
+  post.slice = NULL
+)
 }
 \arguments{
 \item{post.abc}{Dataframe of posterior values.}
@@ -18,6 +26,12 @@ simul_from_post(post.abc, prm, hosp.var, case.var, ci = 0.95, n.cores = 4)
 \item{ci}{Numeric. Credible interval level. Default = 0.95.}
 
 \item{n.cores}{Integer. Number of cores used for parallel computing.}
+
+\item{post.slice}{EXPERIMENTAL. Default = \code{NULL}.
+List with elements specifying the type of posterior
+distribution that must be returned.For example, \code{post.slice = list(
+t.slice = seq(700, 760, by=10),
+vars.slice = c('WWreport', 'inc','clin.case'))}}
 }
 \value{
 Dataframe of summary statistics time series.

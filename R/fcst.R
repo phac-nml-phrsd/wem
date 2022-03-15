@@ -42,6 +42,7 @@ remove.fut.inference <- function(idx.t,
 #' @param dat 
 #' @param ci 
 #' @param n.cores 
+#' @param post.slice EXPERIMENTAL. List.
 #'
 #' @return
 #' @export
@@ -50,7 +51,8 @@ fcst <- function(fitobj,
                  horizon.fcst,
                  dat, 
                  ci = 0.95, 
-                 n.cores = 1) {
+                 n.cores = 1, 
+                 post.slice = NULL) {
     
     last.date = fitobj$last.date
     
@@ -100,13 +102,21 @@ fcst <- function(fitobj,
                          hosp.var = hosp.var,
                          case.var = case.var,
                          ci       = ci, 
-                         n.cores  = n.cores)
+                         n.cores  = n.cores, 
+                         post.slice = post.slice)
     
-    ss = ss %>% 
-        mutate(date = d0 + time)
+    
+    if(is.null(post.slice))  ss2 = ss
+    dps = NULL
+    if(!is.null(post.slice)) {
+        ss2 = ss[['ss']]
+        dps = ss[['distrib.post.slice']]
+    }
+    
+    ss2 = mutate(ss2, date = d0 + time)
     
     res = list(
-        sim.post = ss, 
+        sim.post = ss2, 
         post.abc = post.abc,
         prm = prm, 
         prm.abc = fitobj$prm.abc,
@@ -114,7 +124,8 @@ fcst <- function(fitobj,
         case.var = case.var,
         ci = ci,
         date.first.obs = d0,
-        date.last.obs  = last.date)
+        date.last.obs  = last.date,
+        distrib.post.slice = dps)
     
     return(res)
 }
