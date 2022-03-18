@@ -1,6 +1,10 @@
-
-
-#' helper function
+#' @title Add '.obs' suffix to strings.
+#' 
+#' @description Function appends strings with '.obs'.
+#' 
+#' @param x String. 
+#' 
+#' @return String object with '.obs' suffix.
 add_obs_string <- function(x) {
     paste0(x,'.obs')
 }
@@ -10,8 +14,10 @@ add_obs_string <- function(x) {
 
 #' @title Create a data object from dataframes.
 #'
-#' @description User provides dataframes that records the number of cases, (optionally) hospital admissions and viral concentration in wastewater for a specific location.
-#' The various data source do \emph{not} have to have matching date.
+#' @description User provides dataframes that records the number of cases,
+#'  (optionally) hospital admissions and viral concentration in wastewater for a
+#'  specific location. The various data source do \emph{not} have to have
+#'  matching date.
 #' 
 #' @param cases Dataframe with two columns named \code{date} and \code{value} 
 #' that records the number of cases with respect to time.
@@ -22,9 +28,19 @@ add_obs_string <- function(x) {
 #' @param hosp Dataframe with two columns named \code{date} and \code{value} 
 #' that records the number of hospitalizations with respect to time.
 #' 
-#' @param hosp.type String. Type of hospitalization provided in \code{path.hosp}: \code{NULL}, \code{'hosp.adm'} for hospital admissions, \code{'hosp.occ'} for hospital occupancy.
+#' @param hosp.type String. Type of hospitalization provided in \code{path.hosp}:
+#'  \itemize{
+#'   \item \code{NULL},
+#'   \item \code{'hosp.adm'} for hospital admissions,
+#'   \item \code{'hosp.occ'} for hospital occupancy.
+#'  } 
 #'
-#' @param case.date.type String. Type of date which cases are based on: \code{'report'} for reported date and \code{'episode'} for episode date (date of symptoms onset). 
+#' @param case.date.type String. Type of date which cases are based on:
+#'  \itemize{
+#'   \item \code{'report'} for reported date 
+#'   \item \code{'episode'} for episode date (date of symptoms onset). 
+#'  }
+#'  
 #' 
 #' @return A list of dataframes.
 #' @export
@@ -137,21 +153,35 @@ build_data <- function(cases, hosp, ww, hosp.type, case.date.type){
 
 #' @title Create a data object from CSV files.
 #'
-#' @description User provides CSV files that records the number of cases, (optionally) hospital admissions and viral concentration in wastewater for a specific location.
-#' The various data source do \emph{not} have to have matching date.
+#' @description User provides CSV files that records the number of cases,
+#'  (optionally) hospital admissions and viral concentration in wastewater for a
+#'  specific location. The various data source do \emph{not} have to have
+#'  matching date.
 #' 
-#' @param path.cases String. Path to the CSV file with two columns named \code{date} and \code{value} 
-#' that records the number of cases with respect to time.
+#' @param path.cases String. Path to the CSV file with two columns named
+#'  \code{date} and \code{value} that records the number of cases with respect
+#'  to time.
 #' 
-#' @param path.hosp String. Path to the CSV file with two columns named \code{date} and \code{value} 
-#' that records the number of hospitalizations with respect to time.
+#' @param path.hosp String. Path to the CSV file with two columns named
+#'  \code{date} and \code{value} that records the number of hospitalizations
+#'  with respect to time.
 #' 
-#' @param path.ww String. Path to the CSV file with two columns named \code{date} and \code{value} 
-#' that records the viral concentration in wastewater with respect to time.
+#' @param path.ww String. Path to the CSV file with two columns named
+#'  \code{date} and \code{value} that records the viral concentration in
+#'  wastewater with respect to time.
 #' 
-#' @param hosp.type String. Type of hospitalization provided in \code{path.hosp}: \code{NULL}, \code{'hosp.adm'} for hospital admissions, \code{'hosp.occ'} for hospital occupancy.
-#'
-#' @param case.date.type String. Type of date which cases are based on: \code{'report'} for reported date and \code{'episode'} for episode date (date of symptoms onset).
+#' @param hosp.type String. Type of hospitalization provided in \code{path.hosp}:
+#'  \itemify{
+#'   \item \code{NULL}
+#'   \item \code{'hosp.adm'} for hospital admissions
+#'   \item \code{'hosp.occ'} for hospital occupancy.
+#'  }
+#'   
+#' @param case.date.type String. Type of date which cases are based on:
+#'  \itemify{
+#'   \item \code{'report'} for reported date
+#'   \item \code{'episode'} for episode date (date of symptoms onset).
+#'  }
 #' 
 #' @return A list of dataframes.
 #' @export
