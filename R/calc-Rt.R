@@ -2,18 +2,21 @@
 #------ Calculate Rt 
 #' @title Estimate Effective Reproduction Number.
 #'
-#' @description Calculate the effective reproduction number from a model 
-#' fitted on observations. The fitted parameters are sampled from 
-#' their posterior distribution to simulate epidemic curves. 
-#' The effective reproduction number, Rt, is estimated from those simulations. 
+#' @description This function calculates the effective reproduction number from
+#'  a model fitted on observations. The fitted parameters are sampled from 
+#'  their posterior distribution to simulate epidemic curves. 
+#' 
+#'  The effective reproduction number, Rt, is estimated from those simulations. 
 #' 
 #'
-#' @param fitobj List. Results of the fitted model. Output of function \code{fit()}. 
+#' @param fitobj List. Results of the fitted model. Output of function
+#'  \code{fit()}. 
 #' @param ci Numerical. Confidence interval (default = 0.95).
 #' @param n.cores Numerical. Number of computer CPU cores used for computation.
 #' (default = 1)
 #'
-#' @return A dataframe of estimates for the mean Rt and its confidence interval bounds. 
+#' @return A dataframe of estimates for the mean Rt and its confidence interval
+#'  bounds. 
 #' @export
 #'
 estimate_Rt <- function(fitobj, ci = 0.95, n.cores = 1){
@@ -27,9 +30,10 @@ estimate_Rt <- function(fitobj, ci = 0.95, n.cores = 1){
 }
 
 
-#' @title Estimate Effective Reproduction Number 
+#' @title Estimate Effective Reproduction Number
 #'
-#' @param fitobj List. Results of the fitted model. Output of function \code{fit()}. 
+#' @param fitobj List. Results of the fitted model. Output of function
+#'  \code{fit()}. 
 #' @param ci Numerical. Confidence Interval.
 #' @param n.cores Numerical. Number of computer CPU cores used for computation.
 #'
@@ -60,9 +64,13 @@ calc_R_from_model <- function(fitobj,ci,n.cores){
   return(df.R)
 }
 
-#' @title Run Simulation from Porsterios
+#' @title Run Simulation from Posteriors
+#' 
+#' @description This function runs a simulation based on the fitted model to
+#'  generate posterior estimates.
 #'
-#' @param fitobj List. Results of the fitted model. Output of function \code{fit()}. 
+#' @param fitobj List. Results of the fitted model. Output of function
+#'  \code{fit()}. 
 #' @param ci Numerical. Confidence Interval.
 #' @param time.horizon Numerical. Maximum time for simulation.
 #' @param n.cores Numerical. Number of computer CPU cores used for computation.
@@ -108,10 +116,14 @@ run_from_posteriors <- function(fitobj,
 }
 
 #' @title Calculate Rt from Posteriors 
+#' 
+#' @description This function uses the output of \code{run_from_posteriors()} to
+#'  calculate effective reproductive number.
 #'
-#' @param runpost Output of function \code{run_from_posteriors}
+#' @param runpost Output of function \code{run_from_posteriors()}
 #' @param breaks.time Numerical. Time when transmission rate changes.
-#' @param breaks.val Numerical. Value for the change of transmission rate at \code{breaks.time}
+#' @param breaks.val Numerical. Value for the change of transmission rate at
+#'  \code{breaks.time}
 #'
 #' @return
 #' @export
