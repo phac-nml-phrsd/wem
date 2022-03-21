@@ -1,24 +1,23 @@
-
-
-
-#' @title Define parameters for Appoximate Bayesian Computation (ABC) fitting method. 
+#' @title Define parameters for Appoximate Bayesian Computation (ABC) fitting
+#'  method. 
 #' 
-#' @description Determine the required parameters (iteration, acceptance and weight)
-#' for the ABC fitting process. 
-#' The weights specify the importance of different data sources utilized simultaneously 
-#'  in the fitting process.  There are three data sources 
-#' for simultaneous fitting: reported cases, viral concentration in wastewater 
-#' and hospitalization (admission or occupancy).  
+#' @description Determine the required parameters (iteration, acceptance and
+#'  weight) for the ABC fitting process. 
+#'  The weights specify the importance of different data sources utilized
+#'  simultaneously in the fitting process.
+#'  There are three data sources for simultaneous fitting: reported cases, viral
+#'  concentration in wastewater and hospitalization (admission or occupancy).  
 #'
 #' @param iter Numeric. Number of prior iterations for ABC fitting. 
 #' @param accept Numeric. Acceptance ratio (so the number of posterior 
 #' samples is \code{iter * accept}). 
 #' @param case.weight Numeric, float. Relative weight for clinical cases 
-#' @param ww.weight Numeric, float. Relative weigth for viral concentration in wastewater. 
+#' @param ww.weight Numeric, float. Relative weigth for viral concentration in
+#'  wastewater. 
 #' @param hosp.weight Numeric, float. Relative weight for hospitalization.
 #' @param hosp.type String. Type of hospitalization data: 
-#' \code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital occupancy and
-#' \code{NULL} for no hospital data.
+#' \code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital
+#'  occupancy and \code{NULL} for no hospital data.
 #'
 #' @return Nested list of ABC parameters.
 #' @export
@@ -46,7 +45,8 @@ define_abc_prms <- function(iter,
     
     if(!is.null(hosp.type)){
         if(!hosp.type %in% c('hosp.adm','hosp.occ')){
-            stop(paste0('Hospital type `hosp.type=',hosp.type,'` unknown in function call `define_abc_prms()`. Aborting.'))
+            stop(paste0('Hospital type `hosp.type=',hosp.type,'` unknown in
+                        function call `define_abc_prms()`. Aborting.'))
         }
         
         if(hosp.type == 'hosp.adm'){
@@ -64,7 +64,8 @@ define_abc_prms <- function(iter,
     if(is.null(hosp.type)){
         # hosp.type is NULL and hosp.weight must be zero
         if(hosp.weight != 0){
-            msg = 'hosp.type is NULL. For fitting process, hosp.weight must be 0.0'
+            msg = 'hosp.type is NULL. For fitting process, hosp.weight must be
+            0.0'
             stop(msg)
         }
         w = c(cl = case.weight,
@@ -86,13 +87,19 @@ define_abc_prms <- function(iter,
 
 #' @title Randomly sample from priors for fitting process 
 #' 
-#' @description  This function uses the dataframe output of \code{define_priors()} that defines the prior distributions for all parameter that must be fitted.
+#' @description  This function uses the dataframe output of
+#'  \code{define_priors()} that defines the prior distributions for all
+#'  parameters that must be fitted.
 #'
-#' @param prior Dataframe. Priors' parameters and distributions. Output of \code{define_fit_priors()}.
-#' @param prm.abc List. Varibales required for ABC fitting method created by function define_abc_prms(). 
-#' @param all.positive Logical. Default is \code{TRUE}, which means sampled values for priors will be truncated to be positive.
+#' @param prior Dataframe. Priors' parameters and distributions. Output of
+#'  \code{define_fit_priors()}.
+#' @param prm.abc List. Varibales required for ABC fitting method created by
+#'  function define_abc_prms(). 
+#' @param all.positive Logical. Default is \code{TRUE}, which means sampled
+#'  values for priors will be truncated to be positive.
 #'
-#' @return Long dataframe. All the prior sampled values for the parameters to be fitted.
+#' @return Long dataframe. All the prior sampled values for the parameters to be
+#'  fitted.
 
 #' @export
 #'
@@ -129,9 +136,15 @@ sample_priors <- function(prior, prm.abc, all.positive = TRUE) {
 #' \itemize{
 #' \item column \code{name}: the variable name must match the name of the 
 #' model parameters that will be fitted. 
-#' For example, the basic reproduction number is \code{R0} (and not, say, \code{Rzero}).
-#' \item column \code{distrib}: the name of the distribution type for the prior variable. Use the standard nomenclature for probability distribution in R (e.g., \code{rnorm()}, \code{rexp()}, ...)
-#' \item column \code{prms}: the parameters for the distribution type for the prior variable. Use the standard nomenclature for probability distribution in R (e.g., \code{mean} and \code{sd} for \code{rnorm()}, etc.) separated by a semi-colon \code{;}. 
+#' For example, the basic reproduction number is \code{R0} (and not, say,
+#'  \code{Rzero}).
+#' \item column \code{distrib}: the name of the distribution type for the prior
+#'  variable. Use the standard nomenclature for probability distribution in R
+#'  (e.g., \code{rnorm()}, \code{rexp()}, ...)
+#' \item column \code{prms}: the parameters for the distribution type for the
+#'  prior variable. Use the standard nomenclature for probability distribution
+#'  in R (e.g., \code{mean} and \code{sd} for \code{rnorm()}, etc.) separated by
+#'  a semi-colon \code{;}. 
 #' }
 #' 
 #' @return Dataframe with three columns: name, distrib,prms.  
@@ -241,8 +254,10 @@ err_fct <- function(x,y) {
 #' @param prm List. All parameters required for model (\code{wem-prm.csv})
 #' @param lhs Dataframe. Sampled for priors.
 #' @param obs Datafrmae. Paired clinical-ww data created by \code{build_data()}
-#' @param hosp.var String. Type of hospitalization data. Output of function \code{build_data()}.   
-#' @param case.var String. Type of date which cases are reported. Output of function \code{build_data()}.   
+#' @param hosp.var String. Type of hospitalization data. Output of function
+#'  \code{build_data()}.   
+#' @param case.var String. Type of date which cases are reported. Output of
+#'  function \code{build_data()}.   
 #'
 #' @return
 #'
@@ -349,15 +364,20 @@ fit_abc_unit <- function(i,
 
 #' Fitting ABC function (internal use)
 #'
-#' @param obs Dataframe. Paired clinical and ww data. Output of function \code{build_data()}.
-#' @param priors Dataframe. Sampled priors for fitting. Output of function \code{sample_priors()}
+#' @param obs Dataframe. Paired clinical and ww data. Output of function
+#'  \code{build_data()}.
+#' @param priors Dataframe. Sampled priors for fitting. Output of function
+#'  \code{sample_priors()}
 #' @param hosp.var String. Output of function \code{build_data()}.
 #' @param case.var String. Output of function \code{build_data()}.
-#' @param prm.abc List. Parameters for ABC fitting method. Output of function \code{define_abc_prms} 
-#' @param prm List. All parameters model requires. It has to be in the \code{wem-prm.csv} format.    
+#' @param prm.abc List. Parameters for ABC fitting method. Output of function
+#'  \code{define_abc_prms} 
+#' @param prm List. All parameters model requires. It has to be in the
+#'  \code{wem-prm.csv} format.    
 #' @param n.cores Numerical. Number of cores for fitting compoutation. 
 #'
-#' @return A list of 1-post fitting variables in a dataframe, 2-priors used for fitting, 3-error of fitting.
+#' @return A list of 1-post fitting variables in a dataframe, 2-priors used for
+#'  fitting, 3-error of fitting.
 #'
 #' 
 fit_abc <- function(obs,
@@ -435,12 +455,16 @@ unpack_data <- function(data, last.date) {
 #' @title Fitting Data to Model
 #'
 #' @param data List. Output of function build_data()
-#' @param prm.abc List. Variables for ABC fitting. Output of function define_abc_prms()
-#' @param df.priors Dataframe. Parameters (\code{'name'}), their distribution (\code{'distrib'})
-#' and range of values (\code{'prms'}) which to be fitted to the model. Output of function define_fit_priors(). 
-#' @param prm List. Initial parameters for fitting plot. Output of function load_prm().
+#' @param prm.abc List. Variables for ABC fitting. Output of function
+#'  \code{define_abc_prms()}
+#' @param df.priors Dataframe. Parameters (\code{'name'}), their distribution
+#'  (\code{'distrib'}) and range of values (\code{'prms'}) which to be fitted to
+#'  the model. Output of function \code{define_fit_priors()}. 
+#' @param prm List. Initial parameters for fitting plot. Output of function
+#'  \code{load_prm()}.
 #' @param n.cores Numeric. number of cores used for fitting computation.
-#' @param last.date Date. Last date to stop fitting (e.g., ymd('2021-02-01') or NULL). NULL = latest date available.
+#' @param last.date Date. Last date to stop fitting (e.g., ymd('2021-02-01') or
+#'  NULL). NULL = latest date available.
 #' @param do.plot Logical. Plot the fitting results and initial parameters  
 #' @param save.rdata Logical. Saving the fitting objects in a .rds file.
 #'
@@ -513,13 +537,18 @@ fit <- function(data,
 #' @title Fitting model to recent data only, using existing fit on past data. 
 #'
 #' @param data List. Output of function build_data()
-#' @param prm.abc List. Variables for ABC fitting. Output of function define_abc_prms()
-#' @param fitobj.past List as returned by the function \code{fit()}. Fit object for past data. 
-#' @param df.priors Dataframe. Parameters (\code{'name'}), their distribution (\code{'distrib'})
-#' and range of values (\code{'prms'}) which to be fitted to the model. Output of function define_fit_priors(). 
-#' @param prm List. Initial parameters for fitting plot. Output of function load_prm().
+#' @param prm.abc List. Variables for ABC fitting. Output of function
+#'  \code{define_abc_prms()}.
+#' @param fitobj.past List as returned by the function \code{fit()}. Fit object
+#'  for past data. 
+#' @param df.priors Dataframe. Parameters (\code{'name'}), their distribution
+#'  (\code{'distrib'}) and range of values (\code{'prms'}) which to be fitted to
+#'  the model. Output of function \code{define_fit_priors()}. 
+#' @param prm List. Initial parameters for fitting plot. Output of function
+#'  \code{load_prm()}.
 #' @param n.cores Numeric. number of cores used for fitting computation.
-#' @param last.date Date. Last date to stop fitting (e.g., ymd('2021-02-01') or NULL). NULL = latest date available.
+#' @param last.date Date. Last date to stop fitting (e.g., ymd('2021-02-01') or
+#'  NULL). NULL = latest date available.
 #' @param do.plot Logical. Plot the fitting results and initial parameters  
 #' @param save.rdata Logical. Saving the fitting objects in a .rds file.
 #'
@@ -567,7 +596,9 @@ fit_recent <- function(data,
     # First, check that the variable names for 
     # "recent" and "past" or not the same:
     if(any(names(samples.recent) %in% names(post.past))){
-        stop('In `fit_recent()`, the recent variables cannot be the same as the variables used to fit past data. Correct variable name in `df.priors`. Aborting.')
+        stop('In `fit_recent()`, the recent variables cannot be the same as the
+             variables used to fit past data. Correct variable name in
+             `df.priors`. Aborting.')
     }
     
     # Stitch
