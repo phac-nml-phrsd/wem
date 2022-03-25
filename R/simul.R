@@ -451,8 +451,8 @@ simul <- function(prm){
         func   = seir,
         parms  = params.SEIR,
         mf     = 10,
-        rtol   = 1e-2,
-        atol   = 1e-2)
+        rtol   = 1e-3,
+        atol   = 1e-3)
     )
     
     ts$Eall   = calc.all(ts,"E")  # <- all exposed indiv.
