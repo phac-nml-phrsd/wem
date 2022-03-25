@@ -1,8 +1,9 @@
-
-
-#' SEIR compartmental model with `nI` I, `nIH` IH, `nA` A, `nH` H and `nZ` Z compartments.
+#' @title SEIR compartmental model
+#' @description SEIR compartmental model with `nI` I, `nIH` IH, `nA` A, `nH` H 
+#'  and `nZ` Z compartments.
 #' @param t Numerical. Simulation time. 
-#' @param x List. Initial epidemiological states.   x = (S, Vw, V, Ev1, Ev2, ... nEv,
+#' @param x List. Initial epidemiological states. 
+#'  x = (S, Vw, V, Ev1, Ev2, ... nEv)
 #' @param parms List. Model parameters.
 #' 
 seir <- function(t, x, parms)

@@ -136,7 +136,7 @@ plot_post_distrib_abc <- function(post.abc,
         ggplot(aes(x = value)) + 
         geom_histogram(data=df.prior, fill='lightgrey', aes(y=..density..),
                        bins = 30) +
-        geom_histogram(bins = 20, aes(y=..density..), fill=col.post, alpha=0.3) + 
+        geom_histogram(bins = 20, aes(y=..density..), fill=col.post, alpha=0.3)+ 
         geom_density(size=0.7, col=col.post) +
         geom_vline(data= post.abc.ss, aes(xintercept = m), col=col.post) + 
         facet_wrap(~name, scales = 'free')+
@@ -154,13 +154,15 @@ plot_post_distrib_abc <- function(post.abc,
 }
 
 
-#' @title Visualize fitting performance versus obsrvational data
+#' @title Visualize fitting performance versus observational data
 #'
 #' @param prm List. All parameters for model found in \code{wem-prm.csv}.
 #' @param post.abc List. Contains posterior results. Output of function fit()
 #' @param obs.long Dataframe. Observational data
-#' @param hosp.var String. Type of hospital (e.g., \code{NULL}, \code{'hosp.adm'}, \code{'hosp.occ'})
-#' @param case.var String. Type of date for clinical cases (e.g., \code{'report'} and \code{'episode'})
+#' @param hosp.var String. Type of hospital (e.g., \code{NULL},
+#'  \code{'hosp.adm'}, \code{'hosp.occ'})
+#' @param case.var String. Type of date for clinical cases (e.g.,
+#'  \code{'report'} and \code{'episode'})
 #' @param ci Numerical. Percentage of confidence interval.
 #'
 #' @return
