@@ -2,7 +2,7 @@ Package: wem
 Type: Package
 Title: Wastewater Epidemic Model
 Description: Epidemic model that includes both pathogen transmission at the population level and pathogen concentration in wastewater caused by fecal and urinary pathogen shedding.
-Version: 0.5.2
+Version: 0.5.3
 License: MIT
 Authors@R: c(person("David", "Champredon", 
 		role = c("aut", "cre"),
