@@ -139,11 +139,14 @@ simul <- function(prm){
     nZ               <- prm[["nZ"]]
     nH               <- prm[["nH"]]
     rel.inf.a        <- prm[["rel.inf.asymp"]]
-    latent_mean      <- prm[["dur.latent.mean"]]
+    latent.mean      <- prm[["dur.latent.mean"]]
+    latent.mean.t    <- prm[["dur.latent.mean.t"]]
+    latent.mean.v    <- prm[["dur.latent.mean.v"]]
     inf_symp_mean    <- prm[["dur.inf.symp.mean"]]
     inf_sympH_mean   <- prm[["dur.inf.sympHosp.mean"]]
     inf_asymp_mean   <- prm[["dur.inf.asymp.mean"]]
-    immunity         <- prm[["dur.immunity"]]
+    immunity.R       <- prm[["dur.immunity.R"]]
+    immunity.V       <- prm[["dur.immunity.V"]]
     vac.rate         <- prm[["vacc.rate"]] 
     dur.build.immun  <- prm[["dur.build.immun"]]
     eff.inf          <- prm[["vacc.eff.infection"]]
@@ -164,11 +167,15 @@ simul <- function(prm){
     vload_Z          <- prm[["shed.Z"]] 
     mult.shed.t      <- prm[["mult.shed.t"]]
     mult.shed.v      <- prm[["mult.shed.v"]]
-    alpha            <- prm[["asymp.prop"]]
-    h                <- prm[["hospital.prop"]]
+    hosp.prop        <- prm[["hospital.prop"]]
+    asymp.prop       <- prm[["asymp.prop"]]
     delta            <- prm[["death.prop"]]
+    delta.t          <- prm[["death.prop.t"]]
+    delta.v          <- prm[["death.prop.v"]]
     shedNotInf       <- prm[["dur.shed.recov"]]
     hosp.stay        <- prm[["hosp.length.mean"]]
+    hosp.stay.t      <- prm[["hosp.length.mean.t"]]
+    hosp.stay.v      <- prm[["hosp.length.mean.v"]]
     kappa            <- prm[["decay.rate"]]
     report.prop      <- prm[["report.prop"]]
     report.lag       <- prm[["report.lag"]]
@@ -179,11 +186,14 @@ simul <- function(prm){
     transm.v         <- prm[["transm.v"]]
     vacc.rate.t      <- prm[["vacc.rate.t"]]
     vacc.rate.v      <- prm[["vacc.rate.v"]]
-    hosp.rate.t      <- prm[["hosp.rate.t"]]
-    hosp.rate.v      <- prm[["hosp.rate.v"]]
+    hosp.prop.t      <- prm[["hospital.prop.t"]]
+    hosp.prop.v      <- prm[["hospital.prop.v"]]
     asymp.prop.t     <- prm[["asymp.prop.t"]]
     asymp.prop.v     <- prm[["asymp.prop.v"]]
-    
+    immunity.R.t     <- prm[["dur.immunity.R.t"]]
+    immunity.R.v     <- prm[["dur.immunity.R.v"]]
+    immunity.V.t     <- prm[["dur.immunity.V.t"]]
+    immunity.V.v     <- prm[["dur.immunity.V.v"]]
     # the  time vector `eff.t` (below) applies to 
     # all other time dependent parameters
     # associated with vaccine effectiveness:
@@ -224,18 +234,60 @@ simul <- function(prm){
     # Define simulation parameters
     n.time.steps <- horizon * sim.steps
     dt       <- seq(0, horizon, length.out = n.time.steps+1)
-    epsilon  <- 1 / latent_mean
+    epsilon  <- 1 / latent.mean
     nepsilon <- epsilon * nE
     nepsilon.vac <- epsilon * nEv
+    #-- time-dependent latent period
+    if(!is.numeric(latent.mean.v)){
+      epsilon.v       <- latent.mean.v
+      nepsilon.t      <- latent.mean.t
+      nepsilon.vac.t  <- latent.mean.t
+      nepsilon.v      <- epsilon.v 
+      nepsilon.vac.v  <- epsilon.v
+    }else{
+      epsilon.v      <- 1 / latent.mean.v
+      nepsilon.t     <- latent.mean.t
+      nepsilon.vac.t <- latent.mean.t
+      nepsilon.v     <- epsilon.v * nE
+      nepsilon.vac.v <- epsilon.v * nEv
+    }
+    #------------------
     tau      <- 1 / inf_symp_mean
     ntau     <- tau * nI
-    tau.immu <- 1 / immunity
+    tau.immu.R <- 1 / immunity.R
+    tau.immu.V <- 1 / immunity.V
+    #-- time-dependent immunity
+    if(!is.numeric(immunity.R.v)){
+      tau.immu.R.t <- immunity.R.t
+      tau.immu.R.v <- immunity.R.v
+    }else{
+      tau.immu.R.t <- immunity.R.t
+      tau.immu.R.v <- 1 / immunity.R.v
+    }
+    if(!is.numeric(immunity.V.v)){
+      tau.immu.V.t <- immunity.V.t
+      tau.immu.V.v <- immunity.V.v
+    }else{
+      tau.immu.V.t <- immunity.V.t
+      tau.immu.V.v <- 1 / immunity.V.v
+    }
+    #----
     mu       <- 1 / inf_sympH_mean
     nmu      <- mu * nIH
     theta    <- 1/inf_asymp_mean
     ntheta   <- theta * nA
     ell      <- 1/ hosp.stay
     nell     <- ell * nH
+    #-- time dependent length of hospital
+    if(!is.numeric(hosp.stay.v)){
+      nell.t <- hosp.stay.t
+      nell.v <- hosp.stay.v
+    }else{
+      ell.v  <- 1 / hosp.stay.v
+      nell.t <- hosp.stay.t
+      nell.v <- ell.v * nH
+    }
+    #----
     eta      <- 1/shedNotInf
     neta     <- eta * nZ
     
@@ -264,19 +316,23 @@ simul <- function(prm){
     
     if(is.time.dep.vacc.eff){
       
-      message('Vacine effectiveness parameters are time-dependent.')
+      # message('Vacine effectiveness parameters are time-dependent.')
       
       # constant vacc. variables
       # even in case of using time-dependent h.vac and alpha.vac, 
       # we still use const. alpha.vac and h.vac for R0 and beta 
       eff.symp.inf  = 1 - (1 - eff.symp.v[1])/(1 - eff.inf.v[1])
       eff.hosp.symp = 1 - (1 - eff.hosp.v[1])/(1 - eff.symp.v[1])
+      eff.inf       = eff.inf.v[1]
       alpha.vac     = eff.symp.inf
       h.vac         = 1 - eff.hosp.symp 
       
       # time-dependent vacc. variables
-      asymp.prop.vacc.v = 1 - (1-eff.symp.v)/(1-eff.inf.v)
-      hosp.rate.vacc.v  = 1 - (1-eff.hosp.v)/(1-eff.symp.v) 
+      asymp.tmp.v = 1 - (1-eff.symp.v)/(1-eff.inf.v)
+      hosp.tmp.v  = 1 - (1-eff.hosp.v)/(1-eff.symp.v) 
+      
+      asymp.prop.vacc.v = asymp.tmp.v 
+      hosp.rate.vacc.v  = 1 - hosp.tmp.v  
       asymp.prop.vacc.t = eff.t
       hosp.rate.vacc.t  = eff.t
     }
@@ -296,9 +352,9 @@ simul <- function(prm){
     # Unvaccinated part
     adj.J  = sum(inf.I[1:nIH]) / sum(inf.I)
     
-    sA  =  alpha / theta * rel.inf.a
-    sI  =  (1-h) * (1 - alpha) / tau
-    sJ  =      h * (1 - alpha) / mu
+    sA  =  asymp.prop / theta * rel.inf.a
+    sI  =  (1-hosp.prop) * (1 - asymp.prop) / tau
+    sJ  =      hosp.prop * (1 - asymp.prop) / mu
     s.S   = (sA + sI + sJ * adj.J)*S0/popSize  
     
     # Vaccinated part 
@@ -312,19 +368,27 @@ simul <- function(prm){
     beta = R0 / s
     
     params.SEIR <- list(  
-        h = h,
-        alpha = alpha,
+        hosp.prop = hosp.prop,
+        asymp.prop = asymp.prop,
         h.vac = h.vac,
         alpha.vac = alpha.vac,
         delta = delta,
+        delta.t = delta.t,
+        delta.v = delta.v,
         beta = beta,
         nepsilon = nepsilon,
         nepsilon.vac = nepsilon.vac,
+        nepsilon.t = nepsilon.t,
+        nepsilon.v = nepsilon.v,
+        nepsilon.vac.t = nepsilon.vac.t,
+        nepsilon.vac.v = nepsilon.vac.v,
         ntau = ntau,
         nmu = nmu,
         ntheta = ntheta,
         neta = neta,
         nell = nell,
+        nell.t = nell.t,
+        nell.v = nell.v,
         nE=nE, nEv=nEv, nI=nI, nIH=nIH, 
         nA=nA, nH=nH, nZ=nZ,
         popSize = popSize,
@@ -332,8 +396,8 @@ simul <- function(prm){
         transm.v = transm.v,
         vacc.rate.t = vacc.rate.t, 
         vacc.rate.v = vacc.rate.v,
-        hosp.rate.t = hosp.rate.t, 
-        hosp.rate.v = hosp.rate.v,
+        hosp.prop.t = hosp.prop.t, 
+        hosp.prop.v = hosp.prop.v,
         asymp.prop.t = asymp.prop.t, 
         asymp.prop.v = asymp.prop.v,
         hosp.rate.vacc.t = hosp.rate.vacc.t, 
@@ -345,7 +409,14 @@ simul <- function(prm){
         inf.IH = inf.IH,
         rel.inf.a = rel.inf.a,
         eff.inf = eff.inf,
-        r=r, d=d, tau.immu=tau.immu)
+        eff.t = eff.t,
+        eff.inf.v = eff.inf.v,
+        r=r, d=d, tau.immu.R=tau.immu.R,
+        tau.immu.V=tau.immu.V,
+        tau.immu.R.t = tau.immu.R.t,
+        tau.immu.V.t = tau.immu.V.t,
+        tau.immu.R.v = tau.immu.R.v,
+        tau.immu.V.v = tau.immu.V.v)
     
     ### Initial conditions
     ###
@@ -380,8 +451,8 @@ simul <- function(prm){
         func   = seir,
         parms  = params.SEIR,
         mf     = 10,
-        rtol   = 1e-2,
-        atol   = 1e-2)
+        rtol   = 1e-3,
+        atol   = 1e-3)
     )
     
     ts$Eall   = calc.all(ts,"E")  # <- all exposed indiv.
@@ -604,3 +675,4 @@ generate_obs_noise <- function(df, prms = list(cv = 0.1, cv.ww = 0.1)) {
                                     mu = df$hosp.admission, size = a.ha)
     return(df)
 }
+

@@ -99,11 +99,11 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
     ggtitle('Multiplier on transmission')
 
   # --- Time-dependent hospitalization rate
-  tmp = .mkdf(prm, '^hosp.rate.[tv]') %>%
-    mutate(v = stringr::str_extract(var, '^hosp.rate.[tv]$'),
+  tmp = .mkdf(prm, '^hospital.prop.[tv]') %>%
+    mutate(v = stringr::str_extract(var, '^hospital.prop.[tv]$'),
            x = as.numeric(stringr::str_extract(var, '\\d*$')))
-  b = filter(tmp, v=='hosp.rate.t')
-  v = filter(tmp, v=='hosp.rate.v')
+  b = filter(tmp, v=='hospital.prop.t')
+  v = filter(tmp, v=='hospital.prop.v')
   dj = left_join(b,v,by='x')
 
   g.hosp = dj %>%
@@ -111,7 +111,7 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
     geom_step(color='green3',size=2)+geom_point(color='green3')+
     xlab('time') + ylab('') +
       theme(text = element_text(size = textsize)) +
-    ggtitle('Multiplier on hosp. rate')
+    ggtitle('Multiplier on hospitalizations')
 
   # --- Time-dependent asymptomatic fraction
   tmp = .mkdf(prm, '^asymp.prop.[tv]$') %>%
@@ -178,7 +178,7 @@ plot_epidemic <- function(df) {
   
   g = df.long %>%
     filter(name %in% c('S','inc', 'V','hosp.admission', 
-                       'report', 'concen')) %>%
+                       'report', 'R')) %>%
     ggplot(aes(x=time, y=value)) +
     geom_line(size=1) +
     # theme(text=element_text(size=textsize)) + 
@@ -292,6 +292,7 @@ plot_fcst <- function(var, fcst.obj, dat,
 #' @param include.ww  Logical. Display observed viral concentration in wastewater? 
 #' @param include.hosp Logical. display hospital observations?
 #' @param log.scale Logical. Use log scale?
+#' @param time.range Numerical vector. Minimum and maximum values for the x axis.
 #'
 #' @return A \code{ggplot2} object.
 #' 
@@ -310,7 +311,7 @@ plot_fcst <- function(var, fcst.obj, dat,
 #'                  hosp.type = 'hosp.adm', 
 #'                  case.date.type = 'report')
 #'
-#' # Load example of mdoel parameters
+#' # Load example of model parameters
 #' prm = model_prm_example()
 #' 
 #' # Plot data, simulation and 
@@ -320,7 +321,8 @@ plot_fcst <- function(var, fcst.obj, dat,
 #'                      include.cases = TRUE,
 #'                      include.ww    = TRUE,
 #'                      include.hosp  = FALSE,
-#'                      log.scale     = FALSE)
+#'                      log.scale     = FALSE,
+#'                      time.range    = NULL)
 #' plot(g)
 #'
 plot_simobs_beta <- function(data,
@@ -328,7 +330,8 @@ plot_simobs_beta <- function(data,
                              include.cases = TRUE,
                              include.ww    = TRUE,
                              include.hosp  = FALSE,
-                             log.scale     = FALSE){
+                             log.scale     = FALSE,
+                             time.range    = NULL){
   
   # rename/separate data
   obs      = data[['obs']]
@@ -336,23 +339,24 @@ plot_simobs_beta <- function(data,
   hosp.var = data[['hosp.var']]
   case.var = data[['case.var']]
   
-  
   # time range
   xrng = range(prm[['transm.t']], obs.long$time)
-  xaxis = scale_x_continuous(limits = xrng)
+  xaxis = coord_cartesian(xlim = time.range)  #scale_x_continuous(limits = time.range)
+  if(is.null(time.range)) xaxis = scale_x_continuous(limits = xrng)
   
   # Plot transmission rate (beta) 
   d0 = min(obs$date)
   g.beta.init = plot_multvec(prm, 
                              xname = 'transm.t',
                              yname = 'transm.v',
-                             d0=d0) + 
+                             d0=d0, xmax = NULL) + 
     xaxis + 
     xlab('time') + 
     theme(panel.grid.minor.y = element_blank())
   
-  
   # -- Single inital simulation 
+  
+  prm$horizon <- max(obs$time)
   sim.init = simul(prm)
   df.init  = sim.init$ts
   
@@ -373,7 +377,6 @@ plot_simobs_beta <- function(data,
   
   return(g.final)
 }
-
 
 
 #' @title Plot Observational and Simulated Data
@@ -518,7 +521,7 @@ plot_multvec <- function(prm, xname, yname, d0, xmax = NULL) {
 #'
 .plottype <- function(d) {
   res = d %>%  
-    mutate(plottype = ifelse(name %in% c('hosp','Hall','hosp.obs'), 'Hospitalization',
+    mutate(plottype = ifelse(name %in% c('hosp','Hall','hosp.obs','hosp.admission'), 'Hospitalization',
                              ifelse(grepl('[wW][wW]',name), 'WW', 
                                     'Clinical')))
   return(res)

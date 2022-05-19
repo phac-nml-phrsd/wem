@@ -108,7 +108,7 @@ build_data <- function(cases, hosp, ww, hosp.type, case.date.type){
         mutate(time = as.numeric(as.Date(date) - d0))
     
     # Join clinical reports and wastewater
-    obs.cl.ww = left_join(dat.cl, dat.ww, by='time') 
+    obs.cl.ww = full_join(dat.cl, dat.ww, by='time') 
     
     # Join hospital (optional):
     if(is.null(hosp))   obs.tmp = obs.cl.ww
@@ -194,7 +194,11 @@ build_data_csv <- function(path.cases,
     
     # load csv data files 
     cases = read.csv(path.cases)
-    if(!is.null(path.hosp)) hosp = read.csv(path.hosp)
+    if(!is.null(path.hosp)){
+        hosp = read.csv(path.hosp)  
+    }else{
+        hosp = NULL
+    } 
     ww = read.csv(path.ww)
     
     res = build_data(cases = cases, 

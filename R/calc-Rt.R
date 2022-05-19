@@ -139,7 +139,7 @@ calc_Reff_from_post <- function(runpost,
   d0       = runpost$date.first.obs
   ci       = runpost$ci
   
-  # Stats on the transmission multiplicative factor: 
+  # Stats on all posterior parameters: 
   m  = apply(post.abc, MARGIN=2, FUN=mean)
   lo = apply(post.abc, MARGIN=2, FUN=quantile, probs = 0.5 - ci/2)
   hi = apply(post.abc, MARGIN=2, FUN=quantile, probs = 0.5 + ci/2)
@@ -147,13 +147,17 @@ calc_Reff_from_post <- function(runpost,
   tmax = max(sim.post$time)
   tvec = 0:tmax
   
-  v.m  = m[grepl('^v_', names(m))]
-  v.lo = lo[grepl('^v_', names(lo))]
-  v.hi = hi[grepl('^v_', names(hi))]
-  idx  = as.integer(stringr::str_extract( names(v.m), '\\d+'))
+  # ---- Time-dependent transmission rates
   
   bv.m = bv.lo = bv.hi = breaks.val
   
+  # Identify the transmission rates that were fitted:
+  v.m  = m[grepl('^transm.v_', names(m))]
+  v.lo = lo[grepl('^transm.v_', names(lo))]
+  v.hi = hi[grepl('^transm.v_', names(hi))]
+  idx  = as.integer(stringr::str_extract( names(v.m), '\\d+'))
+  
+  # overwrite with fitted values
   bv.m[idx]  <- v.m
   bv.lo[idx] <- v.lo
   bv.hi[idx] <- v.hi
@@ -162,12 +166,21 @@ calc_Reff_from_post <- function(runpost,
   y.lo = sapply(X=tvec, FUN = broken_line, b = breaks.time, v = bv.lo)
   y.hi = sapply(X=tvec, FUN = broken_line, b = breaks.time, v = bv.hi)
   
-  # Retrieve R0:
-  R0.m  = m['R0']
-  R0.lo = lo['R0']
-  R0.hi = hi['R0']
+  # ----  R0
   
-  # Calculate effective reproduction number::
+  is.R0.fitted = 'R0' %in% names(m)
+  
+  if(!is.R0.fitted){
+    R0.m <- R0.lo <- R0.hi <- runpost[['prm']][['R0']]
+  }  
+  
+  if(is.R0.fitted){
+    R0.m  = m['R0']
+    R0.lo = lo['R0']
+    R0.hi = hi['R0']
+  }
+    
+  # Calculate effective reproduction number:
   res = data.frame(
     time    = sim.post$time,
     date    = d0 + sim.post$time,
