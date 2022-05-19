@@ -99,11 +99,11 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
     ggtitle('Multiplier on transmission')
 
   # --- Time-dependent hospitalization rate
-  tmp = .mkdf(prm, '^hosp.rate.[tv]') %>%
-    mutate(v = stringr::str_extract(var, '^hosp.rate.[tv]$'),
+  tmp = .mkdf(prm, '^hospital.prop.[tv]') %>%
+    mutate(v = stringr::str_extract(var, '^hospital.prop.[tv]$'),
            x = as.numeric(stringr::str_extract(var, '\\d*$')))
-  b = filter(tmp, v=='hosp.rate.t')
-  v = filter(tmp, v=='hosp.rate.v')
+  b = filter(tmp, v=='hospital.prop.t')
+  v = filter(tmp, v=='hospital.prop.v')
   dj = left_join(b,v,by='x')
 
   g.hosp = dj %>%
@@ -111,7 +111,7 @@ plot_dashboard_prm <- function(prm, nrow = 3, textsize = 10) {
     geom_step(color='green3',size=2)+geom_point(color='green3')+
     xlab('time') + ylab('') +
       theme(text = element_text(size = textsize)) +
-    ggtitle('Multiplier on hosp. rate')
+    ggtitle('Multiplier on hospitalizations')
 
   # --- Time-dependent asymptomatic fraction
   tmp = .mkdf(prm, '^asymp.prop.[tv]$') %>%
