@@ -7,6 +7,12 @@ License: MIT
 Authors@R: c(person("David", "Champredon", 
 		role = c("aut", "cre"),
 		email = "david.champredon@canada.ca"),
+	      person("Warsame", "Yusuf", 
+		role =  "ctb",
+		email = "devan.becker@phac-aspc.gc.ca"),
+	      person("Devan", "Becker", 
+		role =  "ctb",
+		email = "warsame.yusuf@phac-aspc.gc.ca"),
               person("Shokoofeh", "Nourbakhsh", 
 		role =  "aut",
 		email = "shokoofeh.nourbakhsh@canada.ca"))
