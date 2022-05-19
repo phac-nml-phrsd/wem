@@ -227,7 +227,7 @@ simul <- function(prm){
     }
     if(length(eff.t)==1){
         if(eff.t!='NULL') {
-            stop('ERROR: Length for `eff.t` must be of size 2 or more. For a constant values for vaccine effectiveness, use those parameters instead: `vacc.eff.infection`, `vacc.eff.symptomatic`, `vacc.eff.hospitalization` . Aborting.')
+      stop('ERROR: Length for `eff.t` must be of size 2 or more. For a constant values for vaccine effectiveness, use those parameters instead: `vacc.eff.infection`, `vacc.eff.symptomatic`, `vacc.eff.hospitalization` . Aborting.')
         } 
     }
     

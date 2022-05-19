@@ -1,5 +1,4 @@
-# 
-#' @title Remove future reference im parameters.
+#' @title Remove future inference in parameters.
 #'
 #' @description Remove elements beyond last date of observed data 
 #' in the vector of time-dependent prms ('variable.t' and 'variable.v') or
