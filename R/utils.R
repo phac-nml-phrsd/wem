@@ -284,19 +284,16 @@ fcst_from_post <- function(path.fitted.object,
 #' 
 #' @param x Wastewater dataframe.
 #' @param pop Population dataframe. Df format should be city, location, pop.
+#' @param merge Column to merge two dataframes.
 #' @param measure Gene target of interest for aggregation.
 #' 
 #' @return Wastewater dataframe aggregated on city level
 #' @export
 #' 
-aggregate_city <- function(x, pop, measure){
-    pop.city = pop %>% 
-        rename(siteid = "location")
-    
+aggregate_city <- function(x, pop, measure, merge){
     a = x %>%
-        rename(date = "collectiondatetime") %>%
         filter(measureid == measure) %>%
-        left_join(pop.city, by = "siteid") %>%
+        left_join(pop, by = merge) %>%
         group_by(city, date) %>% 
         summarise(wavg = sum((value * pop)/sum(pop), na.rm=TRUE),
                   n = n(),
