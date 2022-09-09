@@ -2,12 +2,13 @@
 % Please edit documentation in R/calc-Rt.R
 \name{run_from_posteriors}
 \alias{run_from_posteriors}
-\title{Run Simulation from Porsterios}
+\title{Run Simulation from Posteriors}
 \usage{
 run_from_posteriors(fitobj, ci = 0.95, time.horizon = NULL, n.cores = 4)
 }
 \arguments{
-\item{fitobj}{List. Results of the fitted model. Output of function \code{fit()}.}
+\item{fitobj}{List. Results of the fitted model. Output of function
+\code{fit()}.}
 
 \item{ci}{Numerical. Confidence Interval.}
 
@@ -19,5 +20,6 @@ run_from_posteriors(fitobj, ci = 0.95, time.horizon = NULL, n.cores = 4)
 
 }
 \description{
-Run Simulation from Porsterios
+This function runs a simulation based on the fitted model to
+ generate posterior estimates.
 }

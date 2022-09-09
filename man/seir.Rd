@@ -2,17 +2,19 @@
 % Please edit documentation in R/model.R
 \name{seir}
 \alias{seir}
-\title{SEIR compartmental model with `nI` I, `nIH` IH, `nA` A, `nH` H and `nZ` Z compartments.}
+\title{SEIR compartmental model}
 \usage{
 seir(t, x, parms)
 }
 \arguments{
 \item{t}{Numerical. Simulation time.}
 
-\item{x}{List. Initial epidemiological states.   x = (S, Vw, V, Ev1, Ev2, ... nEv,}
+\item{x}{List. Initial epidemiological states. 
+x = (S, Vw, V, Ev1, Ev2, ... nEv)}
 
 \item{parms}{List. Model parameters.}
 }
 \description{
-SEIR compartmental model with `nI` I, `nIH` IH, `nA` A, `nH` H and `nZ` Z compartments.
+SEIR compartmental model with `nI` I, `nIH` IH, `nA` A, `nH` H 
+ and `nZ` Z compartments.
 }

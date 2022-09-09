@@ -12,9 +12,15 @@ The CSV file must have a specific format:
 \itemize{
 \item column \code{name}: the variable name must match the name of the 
 model parameters that will be fitted. 
-For example, the basic reproduction number is \code{R0} (and not, say, \code{Rzero}).
-\item column \code{distrib}: the name of the distribution type for the prior variable. Use the standard nomenclature for probability distribution in R (e.g., \code{rnorm()}, \code{rexp()}, ...)
-\item column \code{prms}: the parameters for the distribution type for the prior variable. Use the standard nomenclature for probability distribution in R (e.g., \code{mean} and \code{sd} for \code{rnorm()}, etc.) separated by a semi-colon \code{;}. 
+For example, the basic reproduction number is \code{R0} (and not, say,
+ \code{Rzero}).
+\item column \code{distrib}: the name of the distribution type for the prior
+ variable. Use the standard nomenclature for probability distribution in R
+ (e.g., \code{rnorm()}, \code{rexp()}, ...)
+\item column \code{prms}: the parameters for the distribution type for the
+ prior variable. Use the standard nomenclature for probability distribution
+ in R (e.g., \code{mean} and \code{sd} for \code{rnorm()}, etc.) separated by
+ a semi-colon \code{;}. 
 }}
 }
 \value{

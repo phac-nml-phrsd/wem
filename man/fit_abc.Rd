@@ -7,22 +7,27 @@
 fit_abc(obs, priors, hosp.var, case.var, prm.abc, prm, n.cores = 2)
 }
 \arguments{
-\item{obs}{Dataframe. Paired clinical and ww data. Output of function \code{build_data()}.}
+\item{obs}{Dataframe. Paired clinical and ww data. Output of function
+\code{build_data()}.}
 
-\item{priors}{Dataframe. Sampled priors for fitting. Output of function \code{sample_priors()}}
+\item{priors}{Dataframe. Sampled priors for fitting. Output of function
+\code{sample_priors()}}
 
 \item{hosp.var}{String. Output of function \code{build_data()}.}
 
 \item{case.var}{String. Output of function \code{build_data()}.}
 
-\item{prm.abc}{List. Parameters for ABC fitting method. Output of function \code{define_abc_prms}}
+\item{prm.abc}{List. Parameters for ABC fitting method. Output of function
+\code{define_abc_prms}}
 
-\item{prm}{List. All parameters model requires. It has to be in the \code{wem-prm.csv} format.}
+\item{prm}{List. All parameters model requires. It has to be in the
+\code{wem-prm.csv} format.}
 
 \item{n.cores}{Numerical. Number of cores for fitting compoutation.}
 }
 \value{
-A list of 1-post fitting variables in a dataframe, 2-priors used for fitting, 3-error of fitting.
+A list of 1-post fitting variables in a dataframe, 2-priors used for
+ fitting, 3-error of fitting.
 }
 \description{
 Fitting ABC function (internal use)

@@ -7,23 +7,37 @@
 build_data_csv(path.cases, path.hosp, path.ww, hosp.type, case.date.type)
 }
 \arguments{
-\item{path.cases}{String. Path to the CSV file with two columns named \code{date} and \code{value} 
-that records the number of cases with respect to time.}
+\item{path.cases}{String. Path to the CSV file with two columns named
+\code{date} and \code{value} that records the number of cases with respect
+to time.}
 
-\item{path.hosp}{String. Path to the CSV file with two columns named \code{date} and \code{value} 
-that records the number of hospitalizations with respect to time.}
+\item{path.hosp}{String. Path to the CSV file with two columns named
+\code{date} and \code{value} that records the number of hospitalizations
+with respect to time.}
 
-\item{path.ww}{String. Path to the CSV file with two columns named \code{date} and \code{value} 
-that records the viral concentration in wastewater with respect to time.}
+\item{path.ww}{String. Path to the CSV file with two columns named
+\code{date} and \code{value} that records the viral concentration in
+wastewater with respect to time.}
 
-\item{hosp.type}{String. Type of hospitalization provided in \code{path.hosp}: \code{NULL}, \code{'hosp.adm'} for hospital admissions, \code{'hosp.occ'} for hospital occupancy.}
+\item{hosp.type}{String. Type of hospitalization provided in \code{path.hosp}:
+\itemify{
+ \item \code{NULL}
+ \item \code{'hosp.adm'} for hospital admissions
+ \item \code{'hosp.occ'} for hospital occupancy.
+}}
 
-\item{case.date.type}{String. Type of date which cases are based on: \code{'report'} for reported date and \code{'episode'} for episode date (date of symptoms onset).}
+\item{case.date.type}{String. Type of date which cases are based on:
+\itemify{
+ \item \code{'report'} for reported date
+ \item \code{'episode'} for episode date (date of symptoms onset).
+}}
 }
 \value{
 A list of dataframes.
 }
 \description{
-User provides CSV files that records the number of cases, (optionally) hospital admissions and viral concentration in wastewater for a specific location.
-The various data source do \emph{not} have to have matching date.
+User provides CSV files that records the number of cases,
+ (optionally) hospital admissions and viral concentration in wastewater for a
+ specific location. The various data source do \emph{not} have to have
+ matching date.
 }

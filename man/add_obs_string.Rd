@@ -2,10 +2,16 @@
 % Please edit documentation in R/data-fcts.R
 \name{add_obs_string}
 \alias{add_obs_string}
-\title{helper function}
+\title{Add '.obs' suffix to strings.}
 \usage{
 add_obs_string(x)
 }
+\arguments{
+\item{x}{String.}
+}
+\value{
+String object with '.obs' suffix.
+}
 \description{
-helper function
+Function appends strings with '.obs'.
 }

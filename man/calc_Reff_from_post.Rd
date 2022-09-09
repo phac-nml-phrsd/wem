@@ -7,15 +7,17 @@
 calc_Reff_from_post(runpost, breaks.time, breaks.val)
 }
 \arguments{
-\item{runpost}{Output of function \code{run_from_posteriors}}
+\item{runpost}{Output of function \code{run_from_posteriors()}}
 
 \item{breaks.time}{Numerical. Time when transmission rate changes.}
 
-\item{breaks.val}{Numerical. Value for the change of transmission rate at \code{breaks.time}}
+\item{breaks.val}{Numerical. Value for the change of transmission rate at
+\code{breaks.time}}
 }
 \value{
 
 }
 \description{
-Calculate Rt from Posteriors
+This function uses the output of \code{run_from_posteriors()} to
+ calculate effective reproductive number.
 }

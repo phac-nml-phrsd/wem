@@ -7,7 +7,8 @@
 estimate_Rt(fitobj, ci = 0.95, n.cores = 1)
 }
 \arguments{
-\item{fitobj}{List. Results of the fitted model. Output of function \code{fit()}.}
+\item{fitobj}{List. Results of the fitted model. Output of function
+\code{fit()}.}
 
 \item{ci}{Numerical. Confidence interval (default = 0.95).}
 
@@ -15,11 +16,13 @@ estimate_Rt(fitobj, ci = 0.95, n.cores = 1)
 (default = 1)}
 }
 \value{
-A dataframe of estimates for the mean Rt and its confidence interval bounds.
+A dataframe of estimates for the mean Rt and its confidence interval
+ bounds.
 }
 \description{
-Calculate the effective reproduction number from a model 
-fitted on observations. The fitted parameters are sampled from 
-their posterior distribution to simulate epidemic curves. 
-The effective reproduction number, Rt, is estimated from those simulations.
+This function calculates the effective reproduction number from
+ a model fitted on observations. The fitted parameters are sampled from 
+ their posterior distribution to simulate epidemic curves. 
+
+ The effective reproduction number, Rt, is estimated from those simulations.
 }

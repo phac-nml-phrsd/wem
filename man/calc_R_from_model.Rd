@@ -7,7 +7,8 @@
 calc_R_from_model(fitobj, ci, n.cores)
 }
 \arguments{
-\item{fitobj}{List. Results of the fitted model. Output of function \code{fit()}.}
+\item{fitobj}{List. Results of the fitted model. Output of function
+\code{fit()}.}
 
 \item{ci}{Numerical. Confidence Interval.}
 

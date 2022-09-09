@@ -7,15 +7,21 @@
 sample_priors(prior, prm.abc, all.positive = TRUE)
 }
 \arguments{
-\item{prior}{Dataframe. Priors' parameters and distributions. Output of \code{define_fit_priors()}.}
+\item{prior}{Dataframe. Priors' parameters and distributions. Output of
+\code{define_fit_priors()}.}
 
-\item{prm.abc}{List. Varibales required for ABC fitting method created by function define_abc_prms().}
+\item{prm.abc}{List. Varibales required for ABC fitting method created by
+function define_abc_prms().}
 
-\item{all.positive}{Logical. Default is \code{TRUE}, which means sampled values for priors will be truncated to be positive.}
+\item{all.positive}{Logical. Default is \code{TRUE}, which means sampled
+values for priors will be truncated to be positive.}
 }
 \value{
-Long dataframe. All the prior sampled values for the parameters to be fitted.
+Long dataframe. All the prior sampled values for the parameters to be
+ fitted.
 }
 \description{
-This function uses the dataframe output of \code{define_priors()} that defines the prior distributions for all parameter that must be fitted.
+This function uses the dataframe output of
+ \code{define_priors()} that defines the prior distributions for all
+ parameters that must be fitted.
 }

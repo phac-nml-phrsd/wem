@@ -2,7 +2,8 @@
 % Please edit documentation in R/fit.R
 \name{define_abc_prms}
 \alias{define_abc_prms}
-\title{Define parameters for Appoximate Bayesian Computation (ABC) fitting method.}
+\title{Define parameters for Appoximate Bayesian Computation (ABC) fitting
+ method.}
 \usage{
 define_abc_prms(iter, accept, case.weight, ww.weight, hosp.weight, hosp.type)
 }
@@ -14,24 +15,25 @@ samples is \code{iter * accept}).}
 
 \item{case.weight}{Numeric, float. Relative weight for clinical cases}
 
-\item{ww.weight}{Numeric, float. Relative weigth for viral concentration in wastewater.}
+\item{ww.weight}{Numeric, float. Relative weigth for viral concentration in
+wastewater.}
 
 \item{hosp.weight}{Numeric, float. Relative weight for hospitalization.}
 
 \item{hosp.type}{String. Type of hospitalization data: 
-\code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital occupancy and
-\code{NULL} for no hospital data.}
+\code{"hosp.adm"} for hospital admissions, \code{"hosp.occ"} for hospital
+ occupancy and \code{NULL} for no hospital data.}
 }
 \value{
 Nested list of ABC parameters.
 }
 \description{
-Determine the required parameters (iteration, acceptance and weight)
-for the ABC fitting process. 
-The weights specify the importance of different data sources utilized simultaneously 
- in the fitting process.  There are three data sources 
-for simultaneous fitting: reported cases, viral concentration in wastewater 
-and hospitalization (admission or occupancy).
+Determine the required parameters (iteration, acceptance and
+ weight) for the ABC fitting process. 
+ The weights specify the importance of different data sources utilized
+ simultaneously in the fitting process.
+ There are three data sources for simultaneous fitting: reported cases, viral
+ concentration in wastewater and hospitalization (admission or occupancy).
 }
 \examples{
 
