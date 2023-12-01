@@ -62,7 +62,7 @@ plot_fit_result <- function(fitobj, ci=0.95) {
 plot_abc_err <- function(fit, prm.abc) {
     dferr = fit$err
     
-    npost = prm.abc$n * prm.abc$accept
+    npost = round(prm.abc$n * prm.abc$accept)
     
     # Thin beyond threshold for lighter plot
     nremain = nrow(dferr) - npost
