@@ -273,7 +273,7 @@ plot_fit_abc_vs_obs <- function(prm,
         facet_wrap(~type, scales = 'free_y', ncol=1) +
         theme(panel.grid.minor = element_blank())+
         scale_x_date(date_breaks = '2 months', date_labels = '%b \'%y')+
-        guides(fill=FALSE, color=FALSE)+
+        guides(fill="none", color="none")+
         ggtitle(paste('Check fit')) + 
         xlab('') + ylab('')
     
