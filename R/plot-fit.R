@@ -134,7 +134,7 @@ plot_post_distrib_abc <- function(post.abc,
     
     g = df %>%
         ggplot(aes(x = value)) + 
-        geom_histogram(data=df.prior, fill='lightgrey', aes(y=after_stat(density),
+        geom_histogram(data=df.prior, fill='lightgrey', aes(y=after_stat(density)),
                        bins = 30) +
         geom_histogram(bins = 20, aes(y=after_stat(density)), fill=col.post, alpha=0.3)+ 
         geom_density(linewidth=0.7, col=col.post) +
