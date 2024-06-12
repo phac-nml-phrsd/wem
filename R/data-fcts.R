@@ -1,14 +1,20 @@
-#' @title Add '.obs' suffix to strings.
-#' 
-#' @description Function appends strings with '.obs'.
-#' 
-#' @param x String. 
-#' 
-#' @return String object with '.obs' suffix.
-add_obs_string <- function(x) {
-  paste0(x,'.obs')
+check_prm_type <- function(hosp.type, case.date.type) {
+  
+  hosp.types      = c('hosp.adm', 'hosp.occ')
+  case.date.types = c('report', 'episode')
+  
+  if(!is.null(hosp.type)) 
+    check.h = hosp.type %in% hosp.types
+  
+  if(!check.h) stop(paste('parameter `host.type` must be NULL (:ignored) or',
+                          'take these values:',
+                          paste(hosp.types, collapse=', ')))
+  
+  check.c = case.date.type %in% case.date.types
+  
+  if(!check.c) stop(paste('parameter `case.date.type` must take these values:',
+                          paste(case.date.types, collapse=', ')))
 }
-
 
 
 
@@ -64,23 +70,7 @@ add_obs_string <- function(x) {
 #'
 build_data <- function(cases, hosp, ww, hosp.type, case.date.type){
   
-  # --- Checks
-  
-  hosp.types      = c('hosp.adm', 'hosp.occ')
-  case.date.types = c('report', 'episode')
-  
-  if(!is.null(hosp.type)) 
-    check.h = hosp.type %in% hosp.types
-  
-  if(!check.h) stop(paste('parameter `host.type` must be NULL (:ignored) or',
-                          'take these values:',
-                          paste(hosp.types, collapse=', ')))
-  
-  check.c = case.date.type %in% case.date.types
-  
-  if(!check.c) stop(paste('parameter `case.date.type` must take these values:',
-                          paste(case.date.types, collapse=', ')))
-  
+  check_prm_type(hosp.type, case.date.type) 
   
   # Make sure dates are in the `Date` format
   cases$date = as.Date(cases$date)
@@ -170,14 +160,14 @@ build_data <- function(cases, hosp, ww, hosp.type, case.date.type){
 #'  wastewater with respect to time.
 #' 
 #' @param hosp.type String. Type of hospitalization provided in \code{path.hosp}:
-#'  \itemify{
+#'  \itemize{
 #'   \item \code{NULL}
 #'   \item \code{'hosp.adm'} for hospital admissions
 #'   \item \code{'hosp.occ'} for hospital occupancy.
 #'  }
 #'   
 #' @param case.date.type String. Type of date which cases are based on:
-#'  \itemify{
+#'  \itemize{
 #'   \item \code{'report'} for reported date
 #'   \item \code{'episode'} for episode date (date of symptoms onset).
 #'  }
