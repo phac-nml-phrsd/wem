@@ -17,16 +17,20 @@ fit(
 \arguments{
 \item{data}{List. Output of function build_data()}
 
-\item{prm.abc}{List. Variables for ABC fitting. Output of function define_abc_prms()}
+\item{prm.abc}{List. Variables for ABC fitting. Output of function
+\code{define_abc_prms()}}
 
-\item{df.priors}{Dataframe. Parameters (\code{'name'}), their distribution (\code{'distrib'})
-and range of values (\code{'prms'}) which to be fitted to the model. Output of function define_fit_priors().}
+\item{df.priors}{Dataframe. Parameters (\code{'name'}), their distribution
+(\code{'distrib'}) and range of values (\code{'prms'}) which to be fitted to
+the model. Output of function \code{define_fit_priors()}.}
 
-\item{prm}{List. Initial parameters for fitting plot. Output of function load_prm().}
+\item{prm}{List. Initial parameters for fitting plot. Output of function
+\code{load_prm()}.}
 
 \item{n.cores}{Numeric. number of cores used for fitting computation.}
 
-\item{last.date}{Date. Last date to stop fitting (e.g., ymd('2021-02-01') or NULL). NULL = latest date available.}
+\item{last.date}{Date. Last date to stop fitting (e.g., ymd('2021-02-01') or
+NULL). NULL = latest date available.}
 
 \item{save.rdata}{Logical. Saving the fitting objects in a .rds file.}
 

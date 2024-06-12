@@ -13,9 +13,6 @@ plot_post_distrib_abc(post.abc, df.prior, df.true = NULL)
 
 \item{df.true}{}
 }
-\value{
-
-}
 \description{
 Visualize posterior distribution
 }

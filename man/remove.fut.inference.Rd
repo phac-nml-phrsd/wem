@@ -2,7 +2,7 @@
 % Please edit documentation in R/fcst.R
 \name{remove.fut.inference}
 \alias{remove.fut.inference}
-\title{Remove future reference im parameters.}
+\title{Remove future inference in parameters.}
 \usage{
 remove.fut.inference(idx.t, idx.future, prm, post.abc)
 }
@@ -14,9 +14,6 @@ remove.fut.inference(idx.t, idx.future, prm, post.abc)
 \item{prm}{}
 
 \item{post.abc}{}
-}
-\value{
-
 }
 \description{
 Remove elements beyond last date of observed data 

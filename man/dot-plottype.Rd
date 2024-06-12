@@ -9,9 +9,6 @@
 \arguments{
 \item{d}{}
 }
-\value{
-
-}
 \description{
 Type of Datasource for plotting
 }

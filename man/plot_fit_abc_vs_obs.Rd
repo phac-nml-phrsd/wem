@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-fit.R
 \name{plot_fit_abc_vs_obs}
 \alias{plot_fit_abc_vs_obs}
-\title{Visualize fitting performance versus obsrvational data}
+\title{Visualize fitting performance versus observational data}
 \usage{
 plot_fit_abc_vs_obs(prm, post.abc, obs.long, hosp.var, case.var, ci = 0.95)
 }
@@ -13,15 +13,14 @@ plot_fit_abc_vs_obs(prm, post.abc, obs.long, hosp.var, case.var, ci = 0.95)
 
 \item{obs.long}{Dataframe. Observational data}
 
-\item{hosp.var}{String. Type of hospital (e.g., \code{NULL}, \code{'hosp.adm'}, \code{'hosp.occ'})}
+\item{hosp.var}{String. Type of hospital (e.g., \code{NULL},
+\code{'hosp.adm'}, \code{'hosp.occ'})}
 
-\item{case.var}{String. Type of date for clinical cases (e.g., \code{'report'} and \code{'episode'})}
+\item{case.var}{String. Type of date for clinical cases (e.g.,
+\code{'report'} and \code{'episode'})}
 
 \item{ci}{Numerical. Percentage of confidence interval.}
 }
-\value{
-
-}
 \description{
-Visualize fitting performance versus obsrvational data
+Visualize fitting performance versus observational data
 }

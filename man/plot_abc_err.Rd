@@ -11,9 +11,6 @@ plot_abc_err(fit, prm.abc)
 
 \item{prm.abc}{List. Required variables for abc fitting.}
 }
-\value{
-
-}
 \description{
 Visualize Fitting Errors
 }

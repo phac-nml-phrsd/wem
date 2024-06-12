@@ -17,9 +17,6 @@ plot_multvec(prm, xname, yname, d0, xmax = NULL)
 
 \item{xmax}{}
 }
-\value{
-
-}
 \description{
 Plot Transmission Rate (Beta)
 }

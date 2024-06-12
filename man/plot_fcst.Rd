@@ -13,9 +13,6 @@ plot_fcst(var, fcst.obj, dat, date_breaks = "1 month", show.fit = TRUE)
 
 \item{dat}{}
 }
-\value{
-
-}
 \description{
 Plot forecasts
 }

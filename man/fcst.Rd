@@ -17,9 +17,6 @@ fcst(fitobj, horizon.fcst, dat, ci = 0.95, n.cores = 1)
 
 \item{n.cores}{}
 }
-\value{
-
-}
 \description{
 Forecast from a fit object.
 }

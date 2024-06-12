@@ -26,9 +26,6 @@ fcst_from_post(
 
 \item{n.cores}{}
 }
-\value{
-
-}
 \description{
 Forecast based on a fitted object.
 }

@@ -15,9 +15,6 @@ post_ss_abc(post.abc, ci.tight = 0.5, ci.broad = 0.95, df.true = NULL)
 
 \item{df.true}{}
 }
-\value{
-
-}
 \description{
 Estimate statistical values after fiiting
 }

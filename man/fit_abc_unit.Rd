@@ -17,12 +17,11 @@ fit_abc_unit(i, prm.abc, prm, lhs, obs, hosp.var, case.var)
 
 \item{obs}{Datafrmae. Paired clinical-ww data created by \code{build_data()}}
 
-\item{hosp.var}{String. Type of hospitalization data. Output of function \code{build_data()}.}
+\item{hosp.var}{String. Type of hospitalization data. Output of function
+\code{build_data()}.}
 
-\item{case.var}{String. Type of date which cases are reported. Output of function \code{build_data()}.}
-}
-\value{
-
+\item{case.var}{String. Type of date which cases are reported. Output of
+function \code{build_data()}.}
 }
 \description{
 Perform fitting for one iteration
