@@ -394,7 +394,7 @@ fit_abc <- function(obs,
     # Run simulation for every parameter combination
     sfInit(parallel = n.cores>1, cpus = n.cores)
     sfExportAll()
-    suppressMessages({
+    suppressPackageStartupMessages({
         sfLibrary(deSolve)
         sfLibrary(stringr)
         sfLibrary(dplyr)
@@ -416,8 +416,8 @@ fit_abc <- function(obs,
     
     # Keep only the smallest errors:
     n.accept = round(prm.abc$accept * prm.abc$n)
-    idx.keep = df.err[1:n.accept,1]
-    df.post = lhs[idx.keep,]
+    idx.keep = df.err[1:n.accept, 1]
+    df.post  = lhs[idx.keep,]
     
     return(list(df.post = df.post, 
                 priors  = lhs,
@@ -487,17 +487,17 @@ fit <- function(data,
     last.date  = d[['last.date']]
    
     # --- Draw priors
-    samp.priors = sample_priors(df.priors,prm.abc)
+    priors = sample_priors(df.priors, prm.abc)
     
     # --- Run ABC
     elapsed.time = system.time({
-        fit = fit_abc(obs = obs, 
-                      priors = samp.priors,
+        fit = fit_abc(obs      = obs, 
+                      priors   = priors,
                       hosp.var = hosp.var,
                       case.var = case.var,
-                      prm.abc = prm.abc,
-                      prm = prm, 
-                      n.cores = n.cores)
+                      prm.abc  = prm.abc,
+                      prm      = prm, 
+                      n.cores  = n.cores)
     })
     print(elapsed.time)
     
@@ -518,6 +518,7 @@ fit <- function(data,
         case.var = case.var,
         post.abc = post.abc,
         post.ss = post.ss,
+        err.abc = fit[['err']],
         df.prior = df.prior,
         obs = obs, 
         obs.long = obs.long,
