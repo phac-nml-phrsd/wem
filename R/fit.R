@@ -392,27 +392,28 @@ fit_abc <- function(obs,
     lhs = priors
     
     # Run simulation for every parameter combination
-    sfInit(parallel = n.cores>1, cpus = n.cores)
-    sfExportAll()
+    snowfall::sfInit(parallel = n.cores>1, cpus = n.cores)
+    snowfall::sfExportAll()
     suppressPackageStartupMessages({
-        sfLibrary(deSolve)
-        sfLibrary(stringr)
-        sfLibrary(dplyr)
+      snowfall::sfLibrary(deSolve)
+      snowfall::sfLibrary(stringr)
+      snowfall::sfLibrary(dplyr)
     })
-    err.abc = sfSapply(x   = 1:prm.abc$n, 
-                       fun = fit_abc_unit, 
-                       prm.abc = prm.abc, 
-                       prm = prm,
-                       lhs = lhs, 
-                       obs = obs,
-                       hosp.var = hosp.var,
-                       case.var = case.var)
-    sfStop()
+    err.abc = snowfall::sfSapply(
+      x   = 1:prm.abc$n, 
+      fun = fit_abc_unit, 
+      prm.abc = prm.abc, 
+      prm = prm,
+      lhs = lhs, 
+      obs = obs,
+      hosp.var = hosp.var,
+      case.var = case.var)
+    snowfall::sfStop()
     
     # Sort the fitting errors
     df.err = cbind(i = 1:prm.abc$n, t(err.abc)) %>%
         as.data.frame() %>%
-        arrange(err.total)
+      dplyr::arrange(err.total)
     
     # Keep only the smallest errors:
     n.accept = round(prm.abc$accept * prm.abc$n)
